@@ -1,0 +1,307 @@
+/* HomePage.css - Custom Font Implementation: Inter + Nunito */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Nunito:wght@300;400;500;600;700;800&display=swap');
+
+/* Font Family Variables */
+:root {
+  --font-heading: 'Nunito', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+/* Base font family for the home component */
+.home {
+  font-family: var(--font-body);
+}
+
+/* === HEADING CLASSES - Use Nunito === */
+.font-heading {
+  font-family: var(--font-heading);
+}
+
+.hero-title {
+  font-family: var(--font-heading) !important;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.feature-title {
+  font-family: var(--font-heading) !important;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.section-title {
+  font-family: var(--font-heading) !important;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+/* === BODY TEXT CLASSES - Use Inter === */
+.font-body {
+  font-family: var(--font-body);
+}
+
+.hero-description {
+  font-family: var(--font-body) !important;
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+}
+
+.feature-description {
+  font-family: var(--font-body) !important;
+  font-weight: 400;
+  line-height: 1.7;
+  letter-spacing: 0.005em;
+}
+
+.section-description {
+  font-family: var(--font-body) !important;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+/* === BUTTON TEXT - Use Inter === */
+.btn-text {
+  font-family: var(--font-body);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+/* === LINK TEXT - Use Inter === */
+.link-text {
+  font-family: var(--font-body);
+  font-weight: 500;
+  letter-spacing: 0.005em;
+}
+
+/* === HIGHLIGHT TEXT - Use Nunito with special styling === */
+.highlight-text {
+  font-family: var(--font-heading) !important;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.01em;
+}
+
+/* === BUTTON STYLES WITH CUSTOM FONTS === */
+.primary-btn {
+  font-family: var(--font-body) !important;
+  font-weight: 500;
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+}
+
+.secondary-btn {
+  font-family: var(--font-body) !important;
+  font-weight: 500;
+}
+
+/* === FONT SMOOTH RENDERING === */
+.hero-title,
+.feature-title,
+.section-title,
+.hero-description,
+.feature-description,
+.section-description,
+.btn-text,
+.link-text,
+.highlight-text,
+.primary-btn,
+.secondary-btn {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* 英雄区域背景渐变 */
+.hero-section {
+  /* 匹配 Vue 中的渐变: background: linear-gradient(135deg, #4A90E2 0%, #7ED321 100%); */
+  background: linear-gradient(135deg, #4A90E2 0%, #7ED321 100%);
+  color: white;
+  padding: 5rem 0;
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+}
+
+/* 布局调整 */
+.hero-container {
+  max-width: 900px; /* 略小于 features-container */
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* 英雄区域内容布局 */
+.hero-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+/* 机器人图标的玻璃拟态效果和动画 */
+.hero-icon {
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  /* Glassmorphism 效果 */
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  position: relative;
+  overflow: hidden;
+  /* 呼吸动画 */
+  animation: breathing 8s ease-in-out infinite; 
+}
+
+/* 机器人图标闪光动画伪元素 */
+.hero-icon::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transform: rotate(45deg);
+  animation: shine 3s ease-in-out infinite;
+}
+
+@keyframes shine {
+  0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+  50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+  100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+}
+
+@keyframes breathing {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+
+/* 按钮样式 (使用 Tailwind 的类和自定义 CSS 结合实现 hover 效果) */
+.primary-btn {
+  /* Tailwind 类: bg-white text-[#4A90E2] p-3 px-8 rounded-lg font-semibold transition-all shadow-lg flex items-center gap-2 */
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+}
+
+.primary-btn:hover {
+  /* 自定义 hover 效果 */
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.3);
+}
+
+.secondary-btn {
+   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.15);
+  min-width: 240px;
+}
+
+.secondary-btn:hover {
+  /* 自定义 hover 效果 */
+  background: rgba(255, 255, 255, 0.95);
+  color: #4A90E2;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(16px);
+}
+
+
+/* 核心功能卡片 hover 效果 */
+.feature-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(74, 144, 226, 0.15);
+}
+
+/* 功能图标背景渐变 (无法用纯 Tailwind 类实现) */
+.ai-icon {
+  background: linear-gradient(135deg, #4A90E2, #9013FE);
+}
+
+.emotion-icon {
+  background: linear-gradient(135deg, #7ED321, #F5A623);
+}
+
+.knowledge-icon {
+  background: linear-gradient(135deg, #F5A623, #9013FE);
+}
+
+/* 响应式设计 (与 Vue 中的 media queries 保持一致) */
+@media (max-width: 768px) {
+  .hero-content {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    text-align: center;
+  }
+  
+  .hero-title {
+    font-size: 2rem;
+  }
+  
+  .hero-description {
+    font-size: 1rem;
+  }
+  
+  .hero-actions {
+    justify-content: center;
+  }
+  
+  .hero-icon {
+    width: 200px;
+    height: 200px;
+  }
+  
+  .hero-icon .svg-inline--fa {
+    font-size: 5rem;
+  }
+  
+  .section-title {
+    font-size: 2rem;
+  }
+  
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section {
+    padding: 3rem 0;
+  }
+  
+  .hero-title {
+    font-size: 1.75rem;
+  }
+  
+  .hero-icon {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .hero-icon .svg-inline--fa {
+    font-size: 3.5rem;
+  }
+  
+  .features-section {
+    padding: 3rem 0;
+  }
+  
+  .section-title {
+    font-size: 1.75rem;
+  }
+  
+  .feature-card {
+    padding: 1.5rem;
+  }
+}

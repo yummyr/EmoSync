@@ -1,0 +1,299 @@
+/* Import Google Fonts - Inter + Nunito */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Nunito:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 自定义基础样式 */
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply text-gray-900 bg-gray-50;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* 标题元素使用 Nunito */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 600;
+  }
+
+  h1 {
+    @apply text-4xl font-bold;
+    letter-spacing: -0.025em;
+  }
+
+  h2 {
+    @apply text-3xl font-semibold;
+    letter-spacing: -0.02em;
+  }
+
+  h3 {
+    @apply text-2xl font-semibold;
+    letter-spacing: -0.015em;
+  }
+
+  h4 {
+    @apply text-xl font-medium;
+    letter-spacing: -0.01em;
+  }
+
+  /* 段落和正文使用 Inter */
+  p, span, div {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* 按钮字体 */
+  button {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* 输入框字体 */
+  input, textarea, select {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* 链接字体 */
+  a {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+/* 自定义组件样式 */
+@layer components {
+  /* === 字体工具类 === */
+  .font-heading {
+    font-family: 'Nunito', sans-serif;
+  }
+
+  .font-body {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  .font-display {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+
+  /* 标题样式类 */
+  .text-h1 {
+    @apply text-4xl md:text-5xl font-bold font-heading;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+  }
+
+  .text-h2 {
+    @apply text-3xl md:text-4xl font-semibold font-heading;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+  }
+
+  .text-h3 {
+    @apply text-2xl md:text-3xl font-semibold font-heading;
+    letter-spacing: -0.015em;
+    line-height: 1.3;
+  }
+
+  .text-h4 {
+    @apply text-xl md:text-2xl font-medium font-heading;
+    letter-spacing: -0.01em;
+    line-height: 1.4;
+  }
+
+  /* 正文样式类 */
+  .text-body {
+    @apply font-body text-gray-600 leading-relaxed;
+  }
+
+  .text-body-lg {
+    @apply font-body text-lg text-gray-600 leading-relaxed;
+  }
+
+  .text-body-sm {
+    @apply font-body text-sm text-gray-600 leading-relaxed;
+  }
+
+  /* 按钮样式 */
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-body font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200;
+  }
+
+  .btn-primary {
+    @apply bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary-600 text-white hover:bg-secondary-700 focus:ring-secondary-500;
+  }
+
+  .btn-outline {
+    @apply border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:ring-primary-500;
+  }
+
+  /* 输入框样式 */
+  .input {
+    @apply block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+  }
+
+  /* 卡片样式 */
+  .card {
+    @apply bg-white overflow-hidden shadow rounded-lg;
+  }
+
+  .card-header {
+    @apply px-4 py-5 sm:px-6 border-b border-gray-200;
+  }
+
+  .card-body {
+    @apply px-4 py-5 sm:p-6;
+  }
+
+  /* 导航样式 */
+  .nav-link {
+    @apply flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200;
+  }
+
+  .nav-link-active {
+    @apply bg-primary-100 text-primary-700;
+  }
+
+  .nav-link-inactive {
+    @apply text-gray-600 hover:bg-gray-50 hover:text-gray-900;
+  }
+
+  /* 表格样式 */
+  .table {
+    @apply min-w-full divide-y divide-gray-200;
+  }
+
+  .table-header {
+    @apply bg-gray-50;
+  }
+
+  .table-header-cell {
+    @apply px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+  }
+
+  .table-body {
+    @apply bg-white divide-y divide-gray-200;
+  }
+
+  .table-row {
+    @apply hover:bg-gray-50;
+  }
+
+  .table-cell {
+    @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900;
+  }
+
+  /* 加载动画 */
+  .loading-spinner {
+    @apply inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin;
+  }
+
+  /* 消息提示样式 */
+  .message {
+    @apply fixed top-4 right-4 px-4 py-3 rounded-lg shadow-lg z-50 max-w-sm animate-fade-in;
+  }
+
+  .message-success {
+    @apply bg-green-500 text-white;
+  }
+
+  .message-error {
+    @apply bg-red-500 text-white;
+  }
+
+  .message-warning {
+    @apply bg-yellow-500 text-white;
+  }
+
+  .message-info {
+    @apply bg-blue-500 text-white;
+  }
+}
+
+/* 自定义工具类 */
+@layer utilities {
+  .text-ellipsis {
+    @apply truncate;
+  }
+
+  .pointer {
+    @apply cursor-pointer;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* 动画关键帧 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 兼容性样式 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* 移除列表样式 */
+ul, ol {
+  list-style: none;
+}
+
+/* 图片默认样式 */
+img {
+  max-width: 100%;
+  height: auto;
+  vertical-align: middle;
+}
+
+/* 链接默认样式 */
+a {
+  text-decoration: none;
+  color: inherit;
+}
