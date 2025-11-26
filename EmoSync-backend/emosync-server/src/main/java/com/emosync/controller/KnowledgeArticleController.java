@@ -1,24 +1,29 @@
 package com.emosync.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.emosync.Result.PageResult;
+import com.emosync.security.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.springboot.DTO.command.ArticleBatchDeleteDTO;
-import org.example.springboot.DTO.command.ArticleCreateDTO;
-import org.example.springboot.DTO.command.ArticleStatusUpdateDTO;
-import org.example.springboot.DTO.command.ArticleUpdateDTO;
-import org.example.springboot.DTO.query.ArticleListQueryDTO;
-import org.example.springboot.DTO.response.ArticleResponseDTO;
-import org.example.springboot.DTO.response.ArticleSimpleResponseDTO;
-import org.example.springboot.DTO.response.ArticleStatisticsResponseDTO;
-import org.example.springboot.common.Result;
-import org.example.springboot.service.KnowledgeArticleService;
-import org.example.springboot.util.JwtTokenUtils;
+import com.emosync.DTO.command.ArticleBatchDeleteDTO;
+import com.emosync.DTO.command.ArticleCreateDTO;
+import com.emosync.DTO.command.ArticleStatusUpdateDTO;
+import com.emosync.DTO.command.ArticleUpdateDTO;
+import com.emosync.DTO.query.ArticleListQueryDTO;
+import com.emosync.DTO.response.ArticleResponseDTO;
+import com.emosync.DTO.response.ArticleSimpleResponseDTO;
+import com.emosync.DTO.response.ArticleStatisticsResponseDTO;
+import com.emosync.Result.Result;
+import com.emosync.service.KnowledgeArticleService;
+import com.emosync.util.JwtTokenUtils;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -28,11 +33,36 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "知识文章管理")
 @RestController
 @Slf4j
+@RequiredArgsConstructor
 @RequestMapping("/knowledge/article")
 public class KnowledgeArticleController {
 
-    @Resource
-    private KnowledgeArticleService articleService;
+
+    private final KnowledgeArticleService articleService;
+
+
+    /** Get current authenticated UserDetailsImpl */
+    private UserDetailsImpl getCurrentUserInfo() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !(auth.getPrincipal() instanceof UserDetailsImpl)) {
+            return null;
+        }
+        return (UserDetailsImpl) auth.getPrincipal();
+    }
+
+    /** Check if current user has ROLE_ADMIN */
+    private boolean isAdmin() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) return false;
+
+        for (GrantedAuthority authority : auth.getAuthorities()) {
+            if ("ROLE_admin".equals(authority.getAuthority())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * 创建文章
@@ -44,7 +74,7 @@ public class KnowledgeArticleController {
             HttpServletRequest request) {
         
         // 获取当前用户ID
-        Long currentUserId = JwtTokenUtils.getCurrentUserId();
+        Long currentUserId = getCurrentUserInfo().getId();
         if (currentUserId == null) {
             return Result.error("用户未登录");
         }
@@ -75,7 +105,7 @@ public class KnowledgeArticleController {
             HttpServletRequest request) {
         
         // 获取当前用户ID
-        Long currentUserId = JwtTokenUtils.getCurrentUserId();
+        Long currentUserId = getCurrentUserInfo().getId();
         if (currentUserId == null) {
             return Result.error("用户未登录");
         }
@@ -95,7 +125,7 @@ public class KnowledgeArticleController {
             HttpServletRequest request) {
         
         // 获取当前用户ID
-        Long currentUserId = JwtTokenUtils.getCurrentUserId();
+        Long currentUserId = getCurrentUserInfo().getId();
         if (currentUserId == null) {
             return Result.error("用户未登录");
         }
@@ -115,7 +145,7 @@ public class KnowledgeArticleController {
             HttpServletRequest request) {
         
         // 获取当前用户ID（可为空，用于判断收藏状态）
-        Long currentUserId = JwtTokenUtils.getCurrentUserId();
+        Long currentUserId = getCurrentUserInfo().getId();
         
         log.info("获取知识文章详情: articleId={}, userId={}", id, currentUserId);
         ArticleResponseDTO response = articleService.getArticleById(id, currentUserId);
@@ -132,7 +162,7 @@ public class KnowledgeArticleController {
             HttpServletRequest request) {
         
         // 获取当前用户ID（可为空）
-        Long currentUserId = JwtTokenUtils.getCurrentUserId();
+        Long currentUserId = getCurrentUserInfo().getId();
         
         log.info("阅读知识文章: articleId={}, userId={}", id, currentUserId);
         ArticleResponseDTO response = articleService.readArticle(id, currentUserId);
@@ -149,7 +179,7 @@ public class KnowledgeArticleController {
             HttpServletRequest request) {
         
         // 获取当前用户ID
-        Long currentUserId = JwtTokenUtils.getCurrentUserId();
+        Long currentUserId = getCurrentUserInfo().getId();
         if (currentUserId == null) {
             return Result.error("用户未登录");
         }
@@ -169,7 +199,7 @@ public class KnowledgeArticleController {
             HttpServletRequest request) {
         
         // 获取当前用户ID
-        Long currentUserId = JwtTokenUtils.getCurrentUserId();
+        Long currentUserId = getCurrentUserInfo().getId();
         if (currentUserId == null) {
             return Result.error("用户未登录");
         }
@@ -184,7 +214,7 @@ public class KnowledgeArticleController {
      */
     @Operation(summary = "分页查询知识文章列表")
     @GetMapping("/page")
-    public Result<Page<ArticleSimpleResponseDTO>> getArticlePage(
+    public Result<PageResult<ArticleSimpleResponseDTO>> getArticlePage(
             @Parameter(description = "关键词搜索（标题+内容+标签）") @RequestParam(required = false) String keyword,
             @Parameter(description = "分类ID") @RequestParam(required = false) Long categoryId,
             @Parameter(description = "文章标题") @RequestParam(required = false) String title,
@@ -200,7 +230,7 @@ public class KnowledgeArticleController {
             HttpServletRequest request) {
 
         // 获取当前用户ID（可为空，用于判断收藏状态和权限）
-        Long currentUserId = JwtTokenUtils.getCurrentUserId();
+        Long currentUserId = getCurrentUserInfo().getId();
 
         ArticleListQueryDTO queryDTO = new ArticleListQueryDTO();
         queryDTO.setKeyword(keyword);
@@ -217,7 +247,7 @@ public class KnowledgeArticleController {
         queryDTO.setSize(size);
 
         log.info("分页查询知识文章列表: keyword={}, page={}, size={}, userId={}", keyword, currentPage, size, currentUserId);
-        Page<ArticleSimpleResponseDTO> response = articleService.getArticlePage(queryDTO, currentUserId);
+        PageResult<ArticleSimpleResponseDTO> response = articleService.getArticlePage(queryDTO, currentUserId);
         return Result.success(response);
     }
 
@@ -232,7 +262,7 @@ public class KnowledgeArticleController {
             HttpServletRequest request) {
         
         // 获取当前用户ID
-        Long currentUserId = JwtTokenUtils.getCurrentUserId();
+        Long currentUserId = getCurrentUserInfo().getId();
         if (currentUserId == null) {
             return Result.error("用户未登录");
         }
@@ -252,7 +282,7 @@ public class KnowledgeArticleController {
             HttpServletRequest request) {
         
         // 获取当前用户ID
-        Long currentUserId = JwtTokenUtils.getCurrentUserId();
+        Long currentUserId = getCurrentUserInfo().getId();
         if (currentUserId == null) {
             return Result.error("用户未登录");
         }
@@ -270,7 +300,7 @@ public class KnowledgeArticleController {
     public Result<ArticleStatisticsResponseDTO> getArticleStatistics(HttpServletRequest request) {
         
         // 获取当前用户ID（用于权限控制）
-        Long currentUserId = JwtTokenUtils.getCurrentUserId();
+        Long currentUserId =getCurrentUserInfo().getId();
         if (currentUserId == null) {
             return Result.error("用户未登录");
         }

@@ -1,19 +1,21 @@
 package com.emosync.controller;
 
+import com.emosync.security.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.springboot.DTO.BussinessFileUploadConfig;
-import org.example.springboot.DTO.FileInfoDTO;
-import org.example.springboot.DTO.FileUploadDTO;
-import org.example.springboot.DTO.SimpleFileInfoDTO;
-import org.example.springboot.common.Result;
-import org.example.springboot.service.FileService;
-import org.example.springboot.service.SimpleFileService;
-import org.example.springboot.util.JwtTokenUtils;
+import com.emosync.DTO.BussinessFileUploadConfig;
+import com.emosync.DTO.FileInfoDTO;
+import com.emosync.DTO.FileUploadDTO;
+import com.emosync.DTO.SimpleFileInfoDTO;
+import com.emosync.Result.Result;
+import com.emosync.service.FileService;
+import com.emosync.service.SimpleFileService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,13 +32,25 @@ import java.util.List;
 @RestController
 @Slf4j
 @Validated
+@AllArgsConstructor
 public class FileController {
 
-    @Resource
-    private FileService fileService;
 
-    @Resource
-    private SimpleFileService simpleFileService;
+    private final FileService fileService;
+
+
+    private final SimpleFileService simpleFileService;
+
+    /** Get current authenticated UserDetailsImpl */
+    private UserDetailsImpl getCurrentUserInfo() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !(auth.getPrincipal() instanceof UserDetailsImpl)) {
+            return null;
+        }
+        return (UserDetailsImpl) auth.getPrincipal();
+    }
+
 
     // ========== 简单文件上传接口（不保存在数据库） ==========
 
@@ -219,7 +233,7 @@ public class FileController {
             @Parameter(description = "文件ID") @PathVariable Long fileId) {
 
         try {
-            Long userId = JwtTokenUtils.getCurrentUserId();
+            Long userId = getCurrentUserInfo().getId();
             log.info("删除文件请求: 用户ID={}, 文件ID={}", userId, fileId);
 
             boolean result = fileService.deleteFile(fileId, userId);
@@ -290,7 +304,7 @@ public class FileController {
      */
     private Long getCurrentUserId() {
         try {
-            return JwtTokenUtils.getCurrentUserId();
+            return  getCurrentUserInfo().getId();
         } catch (Exception e) {
             Long defaultUserId = 1L;
             log.warn("获取用户ID失败，使用默认测试用户ID: {}", defaultUserId);

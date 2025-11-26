@@ -5,9 +5,10 @@ import com.emosync.DTO.query.UserListQueryDTO;
 import com.emosync.DTO.response.UserDetailResponseDTO;
 import com.emosync.DTO.response.UserLoginResponseDTO;
 import com.emosync.Result.PageResult;
+import org.springframework.stereotype.Service;
 
 import java.util.Map;
-
+@Service
 public interface UserService {
 
     UserLoginResponseDTO login(UserLoginCommandDTO dto);

@@ -1,76 +1,83 @@
 package com.emosync.enumClass;
 
-import cn.hutool.core.util.StrUtil;
 import lombok.Getter;
+import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
 
 /**
- * 文件类型枚举
- * 统一管理所有支持的文件类型及其扩展名
- * 
- * @author system
+ * File Type Enum
+ * Unified management of supported file types and extensions.
+ *
+ * Replaced Hutool StrUtil with Spring's StringUtils.
+ *
+ * @author
  */
 @Getter
 public enum FileTypeEnum {
-    
-    // 图片类型
-    IMG("IMG", "图片", Arrays.asList("jpg", "jpeg", "png", "gif", "bmp", "webp", "svg")),
-    
-    // 文档类型  
-    PDF("PDF", "PDF文档", List.of("pdf")),
-    DOC("DOC", "Word文档", Arrays.asList("doc", "docx")),
-    XLS("XLS", "Excel表格", Arrays.asList("xls", "xlsx")),
-    PPT("PPT", "PPT演示", Arrays.asList("ppt", "pptx")),
-    TXT("TXT", "文本文件", Arrays.asList("txt", "md", "log")),
-    
-    // 音频类型
-    AUDIO("AUDIO", "音频", Arrays.asList("mp3", "wav", "flac", "aac", "m4a", "ogg")),
-    
-    // 视频类型
-    VIDEO("VIDEO", "视频", Arrays.asList("mp4", "avi", "mov", "wmv", "flv", "mkv", "webm")),
-    
-    // 压缩文件
-    ZIP("ZIP", "压缩文件", Arrays.asList("zip", "rar", "7z", "tar", "gz")),
-    
-    // 其他类型
-    OTHER("OTHER", "其他", List.of());
+
+    // Image files
+    IMG("IMG", "Image", Arrays.asList("jpg", "jpeg", "png", "gif", "bmp", "webp", "svg")),
+
+    // Document files
+    PDF("PDF", "PDF Document", List.of("pdf")),
+    DOC("DOC", "Word Document", Arrays.asList("doc", "docx")),
+    XLS("XLS", "Excel Spreadsheet", Arrays.asList("xls", "xlsx")),
+    PPT("PPT", "PowerPoint Presentation", Arrays.asList("ppt", "pptx")),
+    TXT("TXT", "Text File", Arrays.asList("txt", "md", "log")),
+
+    // Audio files
+    AUDIO("AUDIO", "Audio File", Arrays.asList("mp3", "wav", "flac", "aac", "m4a", "ogg")),
+
+    // Video files
+    VIDEO("VIDEO", "Video File", Arrays.asList("mp4", "avi", "mov", "wmv", "flv", "mkv", "webm")),
+
+    // Compressed files
+    ZIP("ZIP", "Compressed File", Arrays.asList("zip", "rar", "7z", "tar", "gz")),
+
+    // Other files
+    OTHER("OTHER", "Other", List.of());
 
     private final String code;
-    private final String desc;
+    private final String description;
     private final List<String> extensions;
 
-    FileTypeEnum(String code, String desc, List<String> extensions) {
+    FileTypeEnum(String code, String description, List<String> extensions) {
         this.code = code;
-        this.desc = desc;
+        this.description = description;
         this.extensions = extensions;
     }
 
-
-    public static  boolean isAllowType(String fileType){
-        if(StrUtil.isBlank(fileType)){
+    /**
+     * Check if file type code is allowed.
+     */
+    public static boolean isAllowType(String fileType) {
+        if (!StringUtils.hasText(fileType)) {
             return false;
         }
-        FileTypeEnum[] values = FileTypeEnum.values();
-       List<String>  valueCodes = Arrays.stream(values).map(FileTypeEnum::getCode).toList();
-        return valueCodes.contains(fileType);
+
+        List<String> codes = Arrays.stream(values())
+                .map(FileTypeEnum::getCode)
+                .toList();
+
+        return codes.contains(fileType);
     }
 
     /**
-     * 根据文件扩展名获取文件类型
-     * 
-     * @param extension 文件扩展名（支持带点或不带点格式）
-     * @return 对应的文件类型枚举
+     * Get file type enum based on the extension.
+     *
+     * @param extension File extension (with or without dot)
+     * @return FileTypeEnum
      */
     public static FileTypeEnum getByExtension(String extension) {
-        if (StrUtil.isEmpty(extension)) {
+        if (!StringUtils.hasText(extension)) {
             return OTHER;
         }
-        
-        // 标准化扩展名：移除点号并转为小写
+
+        // Normalize extension: remove dot and lower case
         String normalizedExt = extension.toLowerCase().replace(".", "");
-        
+
         for (FileTypeEnum type : values()) {
             if (type.getExtensions().contains(normalizedExt)) {
                 return type;
@@ -80,36 +87,30 @@ public enum FileTypeEnum {
     }
 
     /**
-     * 根据原始文件名获取文件类型
-     * 
-     * @param fileName 原始文件名
-     * @return 对应的文件类型枚举
+     * Get file type enum from original file name.
      */
     public static FileTypeEnum getByFileName(String fileName) {
-        if (StrUtil.isEmpty(fileName)) {
+        if (!StringUtils.hasText(fileName)) {
             return OTHER;
         }
-        
-        // 获取文件扩展名
-        String extension = getFileExtension(fileName);
-        return getByExtension(extension);
+        return getByExtension(extractExtension(fileName));
     }
 
-
-    
     /**
-     * 从文件名中提取扩展名
+     * Extract extension from file name.
+     *
+     * @param fileName Full file name
+     * @return extension without dot (e.g., "jpg")
      */
-    private static String getFileExtension(String fileName) {
-        if (StrUtil.isEmpty(fileName)) {
+    private static String extractExtension(String fileName) {
+        if (!StringUtils.hasText(fileName)) {
             return "";
         }
-        
+
         int dotIndex = fileName.lastIndexOf('.');
         if (dotIndex > 0 && dotIndex < fileName.length() - 1) {
-            return fileName.substring(dotIndex + 1); // 不包含点号
+            return fileName.substring(dotIndex + 1);
         }
         return "";
     }
-
-} 
+}

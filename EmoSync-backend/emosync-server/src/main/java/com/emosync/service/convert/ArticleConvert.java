@@ -1,43 +1,52 @@
 package com.emosync.service.convert;
 
-import org.example.springboot.DTO.command.ArticleCreateDTO;
-import org.example.springboot.DTO.command.ArticleUpdateDTO;
-import org.example.springboot.DTO.response.ArticleResponseDTO;
-import org.example.springboot.DTO.response.ArticleSimpleResponseDTO;
-import org.example.springboot.entity.KnowledgeArticle;
-import org.example.springboot.enumClass.ArticleStatus;
+import com.emosync.DTO.command.ArticleCreateDTO;
+import com.emosync.DTO.command.ArticleUpdateDTO;
+import com.emosync.DTO.response.ArticleResponseDTO;
+import com.emosync.DTO.response.ArticleSimpleResponseDTO;
+import com.emosync.entity.KnowledgeArticle;
+import com.emosync.entity.KnowledgeCategory;
+import com.emosync.entity.User;
+import com.emosync.enumClass.ArticleStatus;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 知识文章转换类
+ * Knowledge article conversion utility class
  * @author system
  */
 public class ArticleConvert {
 
     /**
-     * 创建命令DTO转换为实体
-     * @param createDTO 创建命令DTO
-     * @param authorId 作者ID
-     * @return 文章实体
+     * Convert create command DTO to entity
+     * @param createDTO Create command DTO
+     * @param authorId Author ID
+     * @return Article entity
      */
     public static KnowledgeArticle createCommandToEntity(ArticleCreateDTO createDTO, Long authorId) {
+        KnowledgeCategory category = new KnowledgeCategory();
+        category.setId(createDTO.getCategoryId());
+
+        User author = new User();
+        author.setId(authorId);
+
         KnowledgeArticle.KnowledgeArticleBuilder builder = KnowledgeArticle.builder()
-                .categoryId(createDTO.getCategoryId())
+                .category(category)
                 .title(createDTO.getTitle())
                 .summary(createDTO.getSummary())
                 .content(createDTO.getContent())
                 .coverImage(createDTO.getCoverImage())
                 .tags(createDTO.getTags())
-                .authorId(authorId)
+                .author(author)
                 .readCount(0)
-                .status(createDTO.getStatus())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now());
+                .status(createDTO.getStatus());
+
                 
-        // 如果前端提供了ID（UUID预生成），则使用该ID
+        // If frontend provides ID (UUID pre-generated), then use that ID
         if (createDTO.getId() != null && !createDTO.getId().trim().isEmpty()) {
             builder.id(createDTO.getId());
         }
@@ -46,13 +55,21 @@ public class ArticleConvert {
     }
 
     /**
-     * 更新命令DTO转换为实体
-     * @param updateDTO 更新命令DTO
-     * @return 文章实体
+     * Convert update command DTO to entity
+     * @param updateDTO Update command DTO
+     * @return Article entity
      */
     public static KnowledgeArticle updateCommandToEntity(ArticleUpdateDTO updateDTO) {
         KnowledgeArticle article = new KnowledgeArticle();
-        article.setCategoryId(updateDTO.getCategoryId());
+
+        // Handle category_id → KnowledgeCategory
+        if (updateDTO.getCategoryId() != null) {
+            KnowledgeCategory category = new KnowledgeCategory();
+            category.setId(updateDTO.getCategoryId());
+            article.setCategory(category);
+        }
+
+
         article.setTitle(updateDTO.getTitle());
         article.setSummary(updateDTO.getSummary());
         article.setContent(updateDTO.getContent());
@@ -64,12 +81,12 @@ public class ArticleConvert {
     }
 
     /**
-     * 实体转换为响应DTO
-     * @param article 文章实体
-     * @param categoryName 分类名称
-     * @param authorName 作者名称
-     * @param isFavorited 是否收藏
-     * @return 文章响应DTO
+     * Convert entity to response DTO
+     * @param article Article entity
+     * @param categoryName Category name
+     * @param authorName Author name
+     * @param isFavorited Whether favorited
+     * @return Article response DTO
      */
     public static ArticleResponseDTO entityToResponse(KnowledgeArticle article, 
                                                      String categoryName, 
@@ -77,15 +94,14 @@ public class ArticleConvert {
                                                      Boolean isFavorited) {
         return ArticleResponseDTO.builder()
                 .id(article.getId())
-                .categoryId(article.getCategoryId())
+                .categoryId(article.getCategory() != null ? article.getCategory().getId() : null)
                 .categoryName(categoryName)
                 .title(article.getTitle())
                 .summary(article.getSummary())
                 .content(article.getContent())
                 .coverImage(article.getCoverImage())
                 .tags(article.getTags())
-                .tagArray(article.getTagArray())
-                .authorId(article.getAuthorId())
+                .authorId(article.getAuthor() != null ? article.getAuthor().getId() : null)
                 .authorName(authorName)
                 .readCount(article.getReadCount())
                 .status(article.getStatus())
@@ -97,13 +113,21 @@ public class ArticleConvert {
                 .build();
     }
 
+    private static List<String> convertTagsToList(String tags) {
+        if (tags == null || tags.isBlank()) return Collections.emptyList();
+        return Arrays.stream(tags.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isBlank())
+                .collect(Collectors.toList());
+    }
+
     /**
-     * 实体转换为简化响应DTO
-     * @param article 文章实体
-     * @param categoryName 分类名称
-     * @param authorName 作者名称
-     * @param isFavorited 是否收藏
-     * @return 文章简化响应DTO
+     * Convert entity to simple response DTO
+     * @param article Article entity
+     * @param categoryName Category name
+     * @param authorName Author name
+     * @param isFavorited Whether favorited
+     * @return Article simple response DTO
      */
     public static ArticleSimpleResponseDTO entityToSimpleResponse(KnowledgeArticle article, 
                                                                  String categoryName, 
@@ -111,10 +135,10 @@ public class ArticleConvert {
                                                                  Boolean isFavorited) {
         return ArticleSimpleResponseDTO.builder()
                 .id(article.getId())
-                .categoryId(article.getCategoryId())
+                .categoryId(article.getCategory() != null ? article.getCategory().getId() : null)
                 .categoryName(categoryName)
                 .title(article.getTitle())
-                .summary(article.getAutoSummary()) // 使用自动摘要
+                .summary(article.getSummary()) // Use auto-generated summary
                 .coverImage(article.getCoverImage())
                 .tags(article.getTags())
                 .authorName(authorName)
@@ -122,7 +146,7 @@ public class ArticleConvert {
                 .status(article.getStatus())
                 .statusText(getStatusText(article.getStatus()))
                 .isFavorited(isFavorited)
-                .favoriteCount(0) // 默认值，需要在Service层中设置实际值
+                .favoriteCount(0) // Default value, actual value needs to be set in Service layer
                 .publishedAt(article.getPublishedAt())
                 .createdAt(article.getCreatedAt())
                 .updatedAt(article.getUpdatedAt())
@@ -130,13 +154,13 @@ public class ArticleConvert {
     }
 
     /**
-     * 实体转换为简化响应DTO（带收藏数量）
-     * @param article 文章实体
-     * @param categoryName 分类名称
-     * @param authorName 作者名称
-     * @param isFavorited 是否收藏
-     * @param favoriteCount 收藏数量
-     * @return 文章简化响应DTO
+     * Convert entity to simple response DTO (with favorite count)
+     * @param article Article entity
+     * @param categoryName Category name
+     * @param authorName Author name
+     * @param isFavorited Whether favorited
+     * @param favoriteCount Favorite count
+     * @return Article simple response DTO
      */
     public static ArticleSimpleResponseDTO entityToSimpleResponseWithFavoriteCount(KnowledgeArticle article, 
                                                                                    String categoryName, 
@@ -145,10 +169,10 @@ public class ArticleConvert {
                                                                                    Integer favoriteCount) {
         return ArticleSimpleResponseDTO.builder()
                 .id(article.getId())
-                .categoryId(article.getCategoryId())
+                .categoryId(article.getCategory() != null ? article.getCategory().getId() : null)
                 .categoryName(categoryName)
                 .title(article.getTitle())
-                .summary(article.getAutoSummary()) // 使用自动摘要
+                .summary(article.getSummary()) // Use auto-generated summary
                 .coverImage(article.getCoverImage())
                 .tags(article.getTags())
                 .authorName(authorName)
@@ -164,13 +188,13 @@ public class ArticleConvert {
     }
 
     /**
-     * 实体转换为简化响应DTO（带收藏时间）
-     * @param article 文章实体
-     * @param categoryName 分类名称
-     * @param authorName 作者名称
-     * @param isFavorited 是否收藏
-     * @param favoriteTime 收藏时间
-     * @return 文章简化响应DTO
+     * Convert entity to simple response DTO (with favorite time)
+     * @param article Article entity
+     * @param categoryName Category name
+     * @param authorName Author name
+     * @param isFavorited Whether favorited
+     * @param favoriteTime Favorite time
+     * @return Article simple response DTO
      */
     public static ArticleSimpleResponseDTO entityToSimpleResponseWithFavoriteTime(KnowledgeArticle article, 
                                                                                    String categoryName, 
@@ -179,10 +203,10 @@ public class ArticleConvert {
                                                                                    LocalDateTime favoriteTime) {
         return ArticleSimpleResponseDTO.builder()
                 .id(article.getId())
-                .categoryId(article.getCategoryId())
+                .categoryId(article.getCategory() != null ? article.getCategory().getId() : null)
                 .categoryName(categoryName)
                 .title(article.getTitle())
-                .summary(article.getAutoSummary()) // 使用自动摘要
+                .summary(article.getSummary()) // Use auto-generated summary
                 .coverImage(article.getCoverImage())
                 .tags(article.getTags())
                 .authorName(authorName)
@@ -190,7 +214,7 @@ public class ArticleConvert {
                 .status(article.getStatus())
                 .statusText(getStatusText(article.getStatus()))
                 .isFavorited(isFavorited)
-                .favoriteCount(0) // 默认值，在MyFavorites页面不显示收藏数量
+                .favoriteCount(0) // Default value, favorite count not displayed on MyFavorites page
                 .favoriteTime(favoriteTime)
                 .publishedAt(article.getPublishedAt())
                 .createdAt(article.getCreatedAt())
@@ -199,9 +223,9 @@ public class ArticleConvert {
     }
 
     /**
-     * 实体列表转换为简化响应DTO列表
-     * @param articles 文章实体列表
-     * @return 文章简化响应DTO列表
+     * Convert entity list to simple response DTO list
+     * @param articles Article entity list
+     * @return Article simple response DTO list
      */
     public static List<ArticleSimpleResponseDTO> entityListToSimpleResponseList(List<KnowledgeArticle> articles) {
         return articles.stream()
@@ -210,9 +234,9 @@ public class ArticleConvert {
     }
 
     /**
-     * 发布文章时更新实体
-     * @param article 文章实体
-     * @return 更新后的文章实体
+     * Update entity when publishing article
+     * @param article Article entity
+     * @return Updated article entity
      */
     public static KnowledgeArticle publishArticle(KnowledgeArticle article) {
         article.setStatus(ArticleStatus.PUBLISHED.getCode());
@@ -222,9 +246,9 @@ public class ArticleConvert {
     }
 
     /**
-     * 下线文章时更新实体
-     * @param article 文章实体
-     * @return 更新后的文章实体
+     * Update entity when taking article offline
+     * @param article Article entity
+     * @return Updated article entity
      */
     public static KnowledgeArticle offlineArticle(KnowledgeArticle article) {
         article.setStatus(ArticleStatus.OFFLINE.getCode());
@@ -233,18 +257,18 @@ public class ArticleConvert {
     }
 
     /**
-     * 获取状态显示文本
-     * @param status 状态代码
-     * @return 状态显示文本
+     * Get status display text
+     * @param status Status code
+     * @return Status display text
      */
     private static String getStatusText(Integer status) {
         if (status == null) {
-            return "未知";
+            return "Unknown";
         }
         try {
             return ArticleStatus.fromCode(status).getDescription();
         } catch (IllegalArgumentException e) {
-            return "未知";
+            return "Unknown";
         }
     }
 }

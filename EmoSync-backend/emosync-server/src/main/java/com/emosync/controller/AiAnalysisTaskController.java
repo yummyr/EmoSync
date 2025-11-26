@@ -1,16 +1,16 @@
 package com.emosync.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.emosync.Result.PageResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Resource;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.springboot.DTO.query.AiAnalysisTaskQueryDTO;
-import org.example.springboot.DTO.response.AiAnalysisTaskResponseDTO;
-import org.example.springboot.common.Result;
-import org.example.springboot.exception.BusinessException;
-import org.example.springboot.service.AiAnalysisTaskService;
+import com.emosync.DTO.query.AiAnalysisTaskQueryDTO;
+import com.emosync.DTO.response.AiAnalysisTaskResponseDTO;
+import com.emosync.Result.Result;
+import com.emosync.exception.BusinessException;
+import com.emosync.service.AiAnalysisTaskService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,18 +23,19 @@ import java.util.Map;
 @Tag(name = "AI分析任务管理", description = "AI情绪分析任务队列管理接口")
 @Slf4j
 @RestController
+@AllArgsConstructor
 @RequestMapping("/ai-analysis-task")
 public class AiAnalysisTaskController {
 
-    @Resource
-    private AiAnalysisTaskService aiAnalysisTaskService;
+
+    private final AiAnalysisTaskService aiAnalysisTaskService;
 
     /**
      * 分页查询AI分析任务
      */
     @Operation(summary = "分页查询AI分析任务", description = "管理员查看AI分析任务队列")
     @GetMapping("/page")
-    public Result<Page<AiAnalysisTaskResponseDTO>> getTaskPage(
+    public Result<PageResult<AiAnalysisTaskResponseDTO>> getTaskPage(
             @Parameter(description = "当前页码") @RequestParam(defaultValue = "1") Integer current,
             @Parameter(description = "每页大小") @RequestParam(defaultValue = "20") Integer size,
             @Parameter(description = "任务状态") @RequestParam(required = false) String status,
@@ -65,8 +66,9 @@ public class AiAnalysisTaskController {
         log.info("原始参数 - priority: {}, 类型: {}", priority, priority != null ? priority.getClass().getSimpleName() : "null");
 
         try {
-            Page<AiAnalysisTaskResponseDTO> page = aiAnalysisTaskService.getTaskPage(queryDTO);
-            return Result.success(page);
+            PageResult<AiAnalysisTaskResponseDTO> page = aiAnalysisTaskService.getTaskPage(queryDTO);
+            return
+                    Result.success(page);
         } catch (Exception e) {
             log.error("分页查询AI分析任务失败: {}", e.getMessage(), e);
             return Result.error("查询失败: " + e.getMessage());

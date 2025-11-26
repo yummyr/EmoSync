@@ -1,21 +1,26 @@
 package com.emosync.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.emosync.Result.PageResult;
+import com.emosync.security.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.springboot.DTO.command.CategoryCreateDTO;
-import org.example.springboot.DTO.command.CategoryUpdateDTO;
-import org.example.springboot.DTO.query.CategoryListQueryDTO;
-import org.example.springboot.DTO.response.CategoryResponseDTO;
-import org.example.springboot.common.Result;
-import org.example.springboot.enumClass.UserType;
-import org.example.springboot.service.KnowledgeCategoryService;
-import org.example.springboot.util.JwtTokenUtils;
+import com.emosync.DTO.command.CategoryCreateDTO;
+import com.emosync.DTO.command.CategoryUpdateDTO;
+import com.emosync.DTO.query.CategoryListQueryDTO;
+import com.emosync.DTO.response.CategoryResponseDTO;
+import com.emosync.Result.Result;
+import com.emosync.enumClass.UserType;
+import com.emosync.service.KnowledgeCategoryService;
+import com.emosync.util.JwtTokenUtils;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,11 +32,35 @@ import java.util.List;
 @Tag(name = "知识分类管理")
 @RestController
 @Slf4j
+@RequiredArgsConstructor
 @RequestMapping("/knowledge/category")
 public class KnowledgeCategoryController {
 
-    @Resource
-    private KnowledgeCategoryService categoryService;
+
+    private final KnowledgeCategoryService categoryService;
+
+    /** Get current authenticated UserDetailsImpl */
+    private UserDetailsImpl getCurrentUserInfo() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !(auth.getPrincipal() instanceof UserDetailsImpl)) {
+            return null;
+        }
+        return (UserDetailsImpl) auth.getPrincipal();
+    }
+
+    /** Check if current user has ROLE_ADMIN */
+    private boolean isAdmin() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) return false;
+
+        for (GrantedAuthority authority : auth.getAuthorities()) {
+            if ("ROLE_admin".equals(authority.getAuthority())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * 创建分类（管理员功能）
@@ -43,9 +72,8 @@ public class KnowledgeCategoryController {
             HttpServletRequest request) {
         
         // 权限检查：只有管理员可以创建分类
-        Integer currentUserRole = JwtTokenUtils.getCurrentUserRole();
-        if (!UserType.ADMIN.getCode().equals(currentUserRole)) { // 2代表管理员
-            return Result.error("权限不足");
+        if (!isAdmin()) {
+            return Result.error("Permission denied");
         }
 
         log.info("管理员创建知识分类: {}", createDTO.getCategoryName());
@@ -64,9 +92,8 @@ public class KnowledgeCategoryController {
             HttpServletRequest request) {
         
         // 权限检查：只有管理员可以更新分类
-        Integer currentUserRole = JwtTokenUtils.getCurrentUserRole();
-        if (!UserType.ADMIN.getCode().equals(currentUserRole)) { // 2代表管理员
-            return Result.error("权限不足");
+        if (!isAdmin()) {
+            return Result.error("Permission denied");
         }
 
         log.info("管理员更新知识分类: categoryId={}", id);
@@ -84,9 +111,8 @@ public class KnowledgeCategoryController {
             HttpServletRequest request) {
         
         // 权限检查：只有管理员可以删除分类
-        Integer currentUserRole = JwtTokenUtils.getCurrentUserRole();
-        if (!UserType.ADMIN.getCode().equals(currentUserRole)) { // 2代表管理员
-            return Result.error("权限不足");
+        if (!isAdmin()) {
+            return Result.error("Permission denied");
         }
 
         log.info("管理员删除知识分类: categoryId={}", id);
@@ -112,7 +138,7 @@ public class KnowledgeCategoryController {
      */
     @Operation(summary = "分页查询知识分类列表")
     @GetMapping("/page")
-    public Result<Page<CategoryResponseDTO>> getCategoryPage(
+    public Result<PageResult<CategoryResponseDTO>> getCategoryPage(
             @Parameter(description = "分类名称") @RequestParam(required = false) String categoryName,
             @Parameter(description = "状态") @RequestParam(required = false) Integer status,
             @Parameter(description = "当前页码") @RequestParam(defaultValue = "1") Long currentPage,
@@ -125,7 +151,7 @@ public class KnowledgeCategoryController {
         queryDTO.setSize(size);
 
         log.info("分页查询知识分类列表: page={}, size={}", currentPage, size);
-        Page<CategoryResponseDTO> response = categoryService.getCategoryPage(queryDTO);
+        PageResult<CategoryResponseDTO> response = categoryService.getCategoryPage(queryDTO);
         return Result.success(response);
     }
 

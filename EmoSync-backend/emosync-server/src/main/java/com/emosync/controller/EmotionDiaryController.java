@@ -1,24 +1,27 @@
 package com.emosync.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.emosync.Result.PageResult;
+import com.emosync.security.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.springboot.AiService.StructOutPut;
-import org.example.springboot.DTO.command.EmotionDiaryCreateDTO;
-import org.example.springboot.DTO.command.EmotionDiaryUpdateDTO;
-import org.example.springboot.DTO.query.EmotionDiaryQueryDTO;
-import org.example.springboot.DTO.response.EmotionDiaryResponseDTO;
-import org.example.springboot.DTO.response.EmotionDiaryStatisticsDTO;
-import org.example.springboot.common.Result;
-import org.example.springboot.exception.BusinessException;
-import org.example.springboot.service.EmotionDiaryService;
-import org.example.springboot.util.JwtTokenUtils;
+import com.emosync.DTO.command.EmotionDiaryCreateDTO;
+import com.emosync.DTO.command.EmotionDiaryUpdateDTO;
+import com.emosync.DTO.query.EmotionDiaryQueryDTO;
+import com.emosync.DTO.response.EmotionDiaryResponseDTO;
+import com.emosync.DTO.response.EmotionDiaryStatisticsDTO;
+import com.emosync.Result.Result;
+import com.emosync.exception.BusinessException;
+import com.emosync.service.EmotionDiaryService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import com.emosync.AiService.StructOutPut;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -33,10 +36,34 @@ import java.util.Map;
 @RestController
 @RequestMapping("/emotion-diary")
 @Validated
+@AllArgsConstructor
 public class EmotionDiaryController {
 
-    @Resource
-    private EmotionDiaryService emotionDiaryService;
+
+    private final EmotionDiaryService emotionDiaryService;
+
+    /** Get current authenticated UserDetailsImpl */
+    private UserDetailsImpl getCurrentUserInfo() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !(auth.getPrincipal() instanceof UserDetailsImpl)) {
+            return null;
+        }
+        return (UserDetailsImpl) auth.getPrincipal();
+    }
+
+    /** Check if current user has ROLE_ADMIN */
+    private boolean isAdmin() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) return false;
+
+        for (GrantedAuthority authority : auth.getAuthorities()) {
+            if ("ROLE_admin".equals(authority.getAuthority())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * 创建或更新情绪日记
@@ -49,7 +76,7 @@ public class EmotionDiaryController {
             @Parameter(description = "是否为编辑模式") @RequestParam(required = false) Boolean isEditMode) {
         log.info("收到创建或更新情绪日记请求: {}, 编辑模式: {}", createDTO, isEditMode);
 
-        Long userId = JwtTokenUtils.getCurrentUserId();
+        Long userId = getCurrentUserInfo().getId();
         if (userId == null) {
             return Result.error("用户未登录");
         }
@@ -73,7 +100,7 @@ public class EmotionDiaryController {
             @Valid @RequestBody EmotionDiaryUpdateDTO updateDTO) {
         log.info("收到更新情绪日记请求，ID: {}, 数据: {}", id, updateDTO);
 
-        Long userId = JwtTokenUtils.getCurrentUserId();
+        Long userId =getCurrentUserInfo().getId();
         if (userId == null) {
             return Result.error("用户未登录");
         }
@@ -99,7 +126,7 @@ public class EmotionDiaryController {
             @Parameter(description = "日记ID") @PathVariable Long id) {
         log.info("收到获取情绪日记请求，ID: {}", id);
 
-        Long userId = JwtTokenUtils.getCurrentUserId();
+        Long userId = getCurrentUserInfo().getId();
         if (userId == null) {
             return Result.error("用户未登录");
         }
@@ -122,7 +149,7 @@ public class EmotionDiaryController {
             @Parameter(description = "日期 (格式: yyyy-MM-dd)") @PathVariable String date) {
         log.info("收到根据日期获取情绪日记请求，日期: {}", date);
 
-        Long userId = JwtTokenUtils.getCurrentUserId();
+        Long userId = getCurrentUserInfo().getId();
         if (userId == null) {
             return Result.error("用户未登录");
         }
@@ -147,7 +174,7 @@ public class EmotionDiaryController {
      */
     @Operation(summary = "分页查询情绪日记", description = "根据条件分页查询用户的情绪日记列表")
     @GetMapping("/page")
-    public Result<Page<EmotionDiaryResponseDTO>> getDiaryPage(
+    public Result<PageResult<EmotionDiaryResponseDTO>> getDiaryPage(
             @Parameter(description = "页码") @RequestParam(defaultValue = "1") Long current,
             @Parameter(description = "每页大小") @RequestParam(defaultValue = "10") Long size,
             @Parameter(description = "开始日期") @RequestParam(required = false) String startDate,
@@ -160,7 +187,7 @@ public class EmotionDiaryController {
         
         log.info("收到分页查询情绪日记请求，页码: {}, 大小: {}", current, size);
 
-        Long userId = JwtTokenUtils.getCurrentUserId();
+        Long userId = getCurrentUserInfo().getId();
         if (userId == null) {
             return Result.error("用户未登录");
         }
@@ -184,7 +211,7 @@ public class EmotionDiaryController {
             queryDTO.setSleepQuality(sleepQuality);
             queryDTO.setStressLevel(stressLevel);
 
-            Page<EmotionDiaryResponseDTO> page = emotionDiaryService.selectPage(queryDTO);
+            PageResult<EmotionDiaryResponseDTO> page = emotionDiaryService.selectPage(queryDTO);
             return Result.success(page);
         } catch (Exception e) {
             log.error("分页查询情绪日记失败: {}", e.getMessage(), e);
@@ -200,7 +227,7 @@ public class EmotionDiaryController {
     public Result<Void> deleteDiary(@Parameter(description = "日记ID") @PathVariable Long id) {
         log.info("收到删除情绪日记请求，ID: {}", id);
 
-        Long userId = JwtTokenUtils.getCurrentUserId();
+        Long userId = getCurrentUserInfo().getId();
         if (userId == null) {
             return Result.error("用户未登录");
         }
@@ -223,7 +250,7 @@ public class EmotionDiaryController {
             @Parameter(description = "统计天数") @RequestParam(defaultValue = "7") Integer days) {
         log.info("收到获取情绪统计数据请求，统计天数: {}", days);
 
-        Long userId = JwtTokenUtils.getCurrentUserId();
+        Long userId = getCurrentUserInfo().getId();
         if (userId == null) {
             return Result.error("用户未登录");
         }
@@ -245,7 +272,7 @@ public class EmotionDiaryController {
     public Result<EmotionDiaryResponseDTO> getTodayDiary() {
         log.info("收到获取今日情绪日记请求");
 
-        Long userId = JwtTokenUtils.getCurrentUserId();
+        Long userId = getCurrentUserInfo().getId();
         if (userId == null) {
             return Result.error("用户未登录");
         }
@@ -274,7 +301,7 @@ public class EmotionDiaryController {
             @Parameter(description = "日记ID") @PathVariable Long id) {
         log.info("收到获取AI情绪分析请求，日记ID: {}", id);
 
-        Long userId = JwtTokenUtils.getCurrentUserId();
+        Long userId = getCurrentUserInfo().getId();
         if (userId == null) {
             return Result.error("用户未登录");
         }
@@ -308,7 +335,7 @@ public class EmotionDiaryController {
             @Parameter(description = "日记ID") @PathVariable Long id) {
         log.info("收到手动触发AI情绪分析请求，日记ID: {}", id);
 
-        Long userId = JwtTokenUtils.getCurrentUserId();
+        Long userId = getCurrentUserInfo().getId();
         if (userId == null) {
             return Result.error("用户未登录");
         }
@@ -341,7 +368,7 @@ public class EmotionDiaryController {
      */
     @Operation(summary = "管理员分页查询情绪日记", description = "管理员查看所有用户的情绪日记记录")
     @GetMapping("/admin/page")
-    public Result<Page<EmotionDiaryResponseDTO>> getAdminDiaryPage(
+    public Result<PageResult<EmotionDiaryResponseDTO>> getAdminDiaryPage(
             @Parameter(description = "页码") @RequestParam(defaultValue = "1") Long current,
             @Parameter(description = "每页大小") @RequestParam(defaultValue = "10") Long size,
             @Parameter(description = "用户ID") @RequestParam(required = false) Long userId,
@@ -372,7 +399,7 @@ public class EmotionDiaryController {
             queryDTO.setMaxMoodScore(maxMoodScore);
             queryDTO.setDominantEmotion(dominantEmotion);
 
-            Page<EmotionDiaryResponseDTO> page = emotionDiaryService.selectAdminPage(queryDTO);
+            PageResult<EmotionDiaryResponseDTO> page = emotionDiaryService.selectAdminPage(queryDTO);
             return Result.success(page);
         } catch (Exception e) {
             log.error("管理员分页查询情绪日记失败: {}", e.getMessage(), e);

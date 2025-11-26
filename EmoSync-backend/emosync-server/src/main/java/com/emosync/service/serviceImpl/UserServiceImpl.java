@@ -232,7 +232,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateUser(Long id, UserUpdateCommandDTO dto) {
-        User user = userRepository.findById(id).orElseThrow();
+        User user = userRepository.findById(id).orElseThrow(()->new RuntimeException("User not found"));
         user.setNickname(dto.getNickname());
         user.setEmail(dto.getEmail());
         userRepository.save(user);

@@ -9,12 +9,9 @@ import com.emosync.Result.PageResult;
 import com.emosync.security.UserDetailsImpl;
 import com.emosync.service.UserService;
 
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
-import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
@@ -42,8 +39,8 @@ import java.util.Map;
 @RequestMapping("/user")
 public class UserController {
 
-    @Resource
-    private UserService userService;
+
+    private final UserService userService;
 
 
     /** Get current authenticated UserDetailsImpl */

@@ -2,6 +2,7 @@ package com.emosync.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +12,7 @@ import java.util.List;
 @Entity
 @Table(name = "knowledge_article")
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class KnowledgeArticle extends BaseEntity {
@@ -49,6 +51,6 @@ public class KnowledgeArticle extends BaseEntity {
     @JoinColumn(name = "author_id")
     private User author;
 
-    @OneToMany(mappedBy = "article")
+    @OneToMany(mappedBy = "knowledgeArticle")
     private List<UserFavorite> favorites;
 }

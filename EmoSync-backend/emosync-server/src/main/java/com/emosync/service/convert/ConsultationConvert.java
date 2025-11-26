@@ -1,53 +1,73 @@
 package com.emosync.service.convert;
 
-import org.example.springboot.DTO.response.ConsultationMessageResponseDTO;
-import org.example.springboot.DTO.response.ConsultationSessionResponseDTO;
-import org.example.springboot.entity.ConsultationMessage;
-import org.example.springboot.entity.ConsultationSession;
+import com.emosync.DTO.response.ConsultationMessageResponseDTO;
+import com.emosync.DTO.response.ConsultationSessionResponseDTO;
+import com.emosync.entity.ConsultationMessage;
+import com.emosync.entity.ConsultationSession;
 import org.springframework.stereotype.Component;
 
 /**
- * 咨询模块对象转换器
+ * Converter for Consultation module
+ *
+ * Converts JPA entities into API response DTOs.
+ * Handles nested relations such as User and Session objects.
+ *
  * @author system
  */
 @Component
 public class ConsultationConvert {
 
     /**
-     * 转换会话实体为响应DTO
+     * Convert ConsultationSession entity to response DTO.
+     *
+     * @param session ConsultationSession entity
+     * @return ConsultationSessionResponseDTO
      */
-    public ConsultationSessionResponseDTO toResponseDTO(ConsultationSession session) {
+    public ConsultationSessionResponseDTO toSessionResponseDTO(ConsultationSession session) {
         if (session == null) {
             return null;
         }
 
-        ConsultationSessionResponseDTO responseDTO = new ConsultationSessionResponseDTO();
-        responseDTO.setId(session.getId());
-        responseDTO.setUserId(session.getUserId());
-        responseDTO.setSessionTitle(session.getSessionTitle());
-        responseDTO.setStartedAt(session.getStartedAt());
+        ConsultationSessionResponseDTO dto = new ConsultationSessionResponseDTO();
+        dto.setId(session.getId());
 
-        return responseDTO;
+        // session.user is an entity → must fetch its ID
+        if (session.getUser() != null) {
+            dto.setUserId(session.getUser().getId());
+        }
+
+        dto.setSessionTitle(session.getSessionTitle());
+        dto.setStartedAt(session.getStartedAt());
+
+        return dto;
     }
 
     /**
-     * 转换消息实体为响应DTO
+     * Convert ConsultationMessage entity to response DTO.
+     *
+     * @param message ConsultationMessage entity
+     * @return ConsultationMessageResponseDTO
      */
     public ConsultationMessageResponseDTO toMessageResponseDTO(ConsultationMessage message) {
         if (message == null) {
             return null;
         }
 
-        ConsultationMessageResponseDTO responseDTO = new ConsultationMessageResponseDTO();
-        responseDTO.setId(message.getId());
-        responseDTO.setSessionId(message.getSessionId());
-        responseDTO.setSenderType(message.getSenderType());
-        responseDTO.setMessageType(message.getMessageType());
-        responseDTO.setContent(message.getContent());
-        responseDTO.setEmotionTag(message.getEmotionTag());
-        responseDTO.setAiModel(message.getAiModel());
-        responseDTO.setCreatedAt(message.getCreatedAt());
+        ConsultationMessageResponseDTO dto = new ConsultationMessageResponseDTO();
+        dto.setId(message.getId());
 
-        return responseDTO;
+        // message.session is an entity → must fetch its ID
+        if (message.getSession() != null) {
+            dto.setSessionId(message.getSession().getId());
+        }
+
+        dto.setSenderType(message.getSenderType());
+        dto.setMessageType(message.getMessageType());
+        dto.setContent(message.getContent());
+        dto.setEmotionTag(message.getEmotionTag());
+        dto.setAiModel(message.getAiModel());
+        dto.setCreatedAt(message.getCreatedAt());
+
+        return dto;
     }
 }

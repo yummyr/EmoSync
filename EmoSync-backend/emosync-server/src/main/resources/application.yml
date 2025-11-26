@@ -17,25 +17,29 @@ spring:
   main:
     allow-bean-definition-overriding: true
   ai:
-    chat:
-      memory:
-        repository:
-          jdbc:
-            initialize-schema: always
-            platform: mariadb
-      options:
-        tool-calling:
-          enabled: true
     openai:
-      chat:
-        options:
-          model: deepseek-ai/DeepSeek-V3
-          tool-calling:
-            enabled: true
-        completions-path: /v1/chat/completions
-      api-key: your-api-key
-      base-url: https://api.siliconflow.cn
+      # OpenAI API Key (或 DeepSeek API Key)
+      api-key: ${OPENAI_API_KEY:your-api-key-here}
 
+      # 基础 URL (OpenAI 或 DeepSeek)
+      base-url: ${OPENAI_BASE_URL:https://api.openai.com}
+      # 如果用 DeepSeek: https://api.deepseek.com
+
+      chat:
+        enabled: true
+        options:
+          # 模型名称
+          model: ${OPENAI_MODEL:gpt-3.5-turbo}
+          # 如果用 DeepSeek: deepseek-chat
+
+          # 温度
+          temperature: 0.7
+
+          # 最大 tokens
+          max-tokens: 2000
+
+          # 启用流式
+          stream: true
   # Web配置
   mvc:
     static-path-pattern: /**  # 允许根路径访问静态资源

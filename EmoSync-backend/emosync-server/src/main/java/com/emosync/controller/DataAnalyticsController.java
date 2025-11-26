@@ -1,14 +1,19 @@
 package com.emosync.controller;
 
+import com.emosync.security.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Resource;
+
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.springboot.DTO.response.DataAnalyticsResponseDTO;
-import org.example.springboot.common.Result;
-import org.example.springboot.service.DataAnalyticsService;
-import org.example.springboot.util.JwtTokenUtils;
+import com.emosync.DTO.response.DataAnalyticsResponseDTO;
+import com.emosync.Result.Result;
+import com.emosync.service.DataAnalyticsService;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,11 +27,33 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/data-analytics")
 @Slf4j
+@AllArgsConstructor
 public class DataAnalyticsController {
 
-    @Resource
-    private DataAnalyticsService dataAnalyticsService;
+    private final DataAnalyticsService dataAnalyticsService;
 
+    /** Get current authenticated UserDetailsImpl */
+    private UserDetailsImpl getCurrentUserInfo() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !(auth.getPrincipal() instanceof UserDetailsImpl)) {
+            return null;
+        }
+        return (UserDetailsImpl) auth.getPrincipal();
+    }
+
+    /** Check if current user has ROLE_ADMIN */
+    private boolean isAdmin() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) return false;
+
+        for (GrantedAuthority authority : auth.getAuthorities()) {
+            if ("ROLE_admin".equals(authority.getAuthority())) {
+                return true;
+            }
+        }
+        return false;
+    }
     @Operation(summary = "获取综合数据分析")
     @GetMapping("/overview")
     public Result<DataAnalyticsResponseDTO> getDataAnalytics(
@@ -35,9 +62,8 @@ public class DataAnalyticsController {
         log.info("获取数据分析，分析天数: {}", days);
         
         // 权限检查：需要管理员权限
-        Long currentUserId = JwtTokenUtils.getCurrentUserId();
-        if (currentUserId == null) {
-            return Result.error("未登录");
+        if (!isAdmin()) {
+            return Result.error("Permission denied — Admin only");
         }
         
         DataAnalyticsResponseDTO analytics = dataAnalyticsService.getDataAnalytics(days);
@@ -52,9 +78,8 @@ public class DataAnalyticsController {
         log.info("获取情绪热力图数据，分析天数: {}", days);
         
         // 权限检查：需要管理员权限
-        Long currentUserId = JwtTokenUtils.getCurrentUserId();
-        if (currentUserId == null) {
-            return Result.error("未登录");
+        if (!isAdmin()) {
+            return Result.error("Permission denied — Admin only");
         }
         
         DataAnalyticsResponseDTO analytics = dataAnalyticsService.getDataAnalytics(days);
@@ -69,9 +94,8 @@ public class DataAnalyticsController {
         log.info("获取系统概览数据，分析天数: {}", days);
         
         // 权限检查：需要管理员权限
-        Long currentUserId = JwtTokenUtils.getCurrentUserId();
-        if (currentUserId == null) {
-            return Result.error("未登录");
+        if (!isAdmin()) {
+            return Result.error("Permission denied — Admin only");
         }
         
         DataAnalyticsResponseDTO analytics = dataAnalyticsService.getDataAnalytics(days);
@@ -86,11 +110,9 @@ public class DataAnalyticsController {
         log.info("获取情绪趋势数据，分析天数: {}", days);
         
         // 权限检查：需要管理员权限
-        Long currentUserId = JwtTokenUtils.getCurrentUserId();
-        if (currentUserId == null) {
-            return Result.error("未登录");
+        if (!isAdmin()) {
+            return Result.error("Permission denied — Admin only");
         }
-        
         DataAnalyticsResponseDTO analytics = dataAnalyticsService.getDataAnalytics(days);
         return Result.success(analytics.getEmotionTrend());
     }
@@ -103,9 +125,8 @@ public class DataAnalyticsController {
         log.info("获取咨询会话统计，分析天数: {}", days);
         
         // 权限检查：需要管理员权限
-        Long currentUserId = JwtTokenUtils.getCurrentUserId();
-        if (currentUserId == null) {
-            return Result.error("未登录");
+        if (!isAdmin()) {
+            return Result.error("Permission denied — Admin only");
         }
         
         DataAnalyticsResponseDTO analytics = dataAnalyticsService.getDataAnalytics(days);
@@ -120,9 +141,8 @@ public class DataAnalyticsController {
         log.info("获取用户活跃度数据，分析天数: {}", days);
         
         // 权限检查：需要管理员权限
-        Long currentUserId = JwtTokenUtils.getCurrentUserId();
-        if (currentUserId == null) {
-            return Result.error("未登录");
+        if (!isAdmin()) {
+            return Result.error("Permission denied — Admin only");
         }
         
         DataAnalyticsResponseDTO analytics = dataAnalyticsService.getDataAnalytics(days);

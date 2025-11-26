@@ -1,10 +1,10 @@
 package com.emosync.service.convert;
 
-import org.example.springboot.DTO.command.CategoryCreateDTO;
-import org.example.springboot.DTO.command.CategoryUpdateDTO;
-import org.example.springboot.DTO.response.CategoryResponseDTO;
-import org.example.springboot.entity.KnowledgeCategory;
-import org.example.springboot.enumClass.CategoryStatus;
+import com.emosync.DTO.command.CategoryCreateDTO;
+import com.emosync.DTO.command.CategoryUpdateDTO;
+import com.emosync.DTO.response.CategoryResponseDTO;
+import com.emosync.entity.KnowledgeCategory;
+import com.emosync.enumClass.CategoryStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,8 +27,6 @@ public class CategoryConvert {
                 .description(createDTO.getDescription())
                 .sortOrder(createDTO.getSortOrder())
                 .status(createDTO.getStatus())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build();
     }
 

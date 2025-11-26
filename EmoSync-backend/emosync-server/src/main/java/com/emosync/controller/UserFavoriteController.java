@@ -1,110 +1,140 @@
 package com.emosync.controller;
 
 
+import com.emosync.Result.PageResult;
+import com.emosync.security.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import com.emosync.DTO.query.UserFavoriteQueryDTO;
 import com.emosync.DTO.response.ArticleSimpleResponseDTO;
-import com.emosync.common.Result;
+import com.emosync.Result.Result;
 import com.emosync.service.UserFavoriteService;
 import com.emosync.util.JwtTokenUtils;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 用户收藏管理控制器
- * @author system
+ * User Favorite Management Controller
+ * @author Yuan
  */
-@Tag(name = "用户收藏管理")
+@Tag(name = "User Favorite Management")
 @RestController
 @Slf4j
+@RequiredArgsConstructor
 @RequestMapping("/knowledge/favorite")
 public class UserFavoriteController {
 
-    @Resource
-    private UserFavoriteService favoriteService;
+
+    private  final UserFavoriteService favoriteService;
+
+    /** Get current authenticated UserDetailsImpl */
+    private UserDetailsImpl getCurrentUserInfo() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !(auth.getPrincipal() instanceof UserDetailsImpl)) {
+            return null;
+        }
+        return (UserDetailsImpl) auth.getPrincipal();
+    }
+
+    /** Check if current user has ROLE_ADMIN */
+    private boolean isAdmin() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) return false;
+
+        for (GrantedAuthority authority : auth.getAuthorities()) {
+            if ("ROLE_admin".equals(authority.getAuthority())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
-     * 收藏文章
+     * Favorite article
      */
-    @Operation(summary = "收藏文章")
+    @Operation(summary = "Favorite article")
     @PostMapping("/{articleId}")
     public Result<Void> favoriteArticle(
-            @Parameter(description = "文章ID") @PathVariable String articleId,
+            @Parameter(description = "Article ID") @PathVariable String articleId,
             HttpServletRequest request) {
         
-        // 获取当前用户ID
-        Long currentUserId = JwtTokenUtils.getCurrentUserId();
+        // Get current user ID
+        Long currentUserId = getCurrentUserInfo().getId();
         if (currentUserId == null) {
-            return Result.error("用户未登录");
+            return Result.error("User not logged in");
         }
 
-        log.info("用户收藏文章: userId={}, articleId={}", currentUserId, articleId);
+        log.info("User favorite article: userId={}, articleId={}", currentUserId, articleId);
         favoriteService.favoriteArticle(currentUserId, articleId);
         return Result.success();
     }
 
     /**
-     * 取消收藏文章
+     * Unfavorite article
      */
-    @Operation(summary = "取消收藏文章")
+    @Operation(summary = "Unfavorite article")
     @DeleteMapping("/{articleId}")
     public Result<Void> unfavoriteArticle(
-            @Parameter(description = "文章ID") @PathVariable String articleId,
+            @Parameter(description = "Article ID") @PathVariable String articleId,
             HttpServletRequest request) {
         
-        // 获取当前用户ID
-        Long currentUserId = JwtTokenUtils.getCurrentUserId();
+        // Get current user ID
+        Long currentUserId = getCurrentUserInfo().getId();
         if (currentUserId == null) {
-            return Result.error("用户未登录");
+            return Result.error("User not logged in");
         }
 
-        log.info("用户取消收藏文章: userId={}, articleId={}", currentUserId, articleId);
+        log.info("User unfavorite article: userId={}, articleId={}", currentUserId, articleId);
         favoriteService.unfavoriteArticle(currentUserId, articleId);
         return Result.success();
     }
 
     /**
-     * 检查文章是否已收藏
+     * Check if article is favorited
      */
-    @Operation(summary = "检查文章是否已收藏")
+    @Operation(summary = "Check if article is favorited")
     @GetMapping("/{articleId}/status")
     public Result<Boolean> checkFavoriteStatus(
-            @Parameter(description = "文章ID") @PathVariable String articleId,
+            @Parameter(description = "Article ID") @PathVariable String articleId,
             HttpServletRequest request) {
         
-        // 获取当前用户ID
-        Long currentUserId = JwtTokenUtils.getCurrentUserId();
+        // Get current user ID
+        Long currentUserId = getCurrentUserInfo().getId();
         if (currentUserId == null) {
             return Result.success(false);
         }
 
-        log.info("检查文章收藏状态: userId={}, articleId={}", currentUserId, articleId);
+        log.info("Check article favorite status: userId={}, articleId={}", currentUserId, articleId);
         boolean isFavorited = favoriteService.isFavorited(currentUserId, articleId);
         return Result.success(isFavorited);
     }
 
     /**
-     * 分页查询用户收藏的文章
+     * Paginated query of user favorite articles
      */
-    @Operation(summary = "分页查询用户收藏的文章")
+    @Operation(summary = "Paginated query of user favorite articles")
     @GetMapping("/page")
-    public Result<Page<ArticleSimpleResponseDTO>> getUserFavoritePage(
-            @Parameter(description = "文章标题") @RequestParam(required = false) String title,
-            @Parameter(description = "分类ID") @RequestParam(required = false) Long categoryId,
-            @Parameter(description = "排序字段") @RequestParam(defaultValue = "createdAt") String sortField,
-            @Parameter(description = "排序方向") @RequestParam(defaultValue = "desc") String sortDirection,
-            @Parameter(description = "当前页码") @RequestParam(defaultValue = "1") Long currentPage,
-            @Parameter(description = "每页大小") @RequestParam(defaultValue = "10") Long size,
+    public Result<PageResult<ArticleSimpleResponseDTO>> getUserFavoritePage(
+            @Parameter(description = "Article title") @RequestParam(required = false) String title,
+            @Parameter(description = "Category ID") @RequestParam(required = false) Long categoryId,
+            @Parameter(description = "Sort field") @RequestParam(defaultValue = "createdAt") String sortField,
+            @Parameter(description = "Sort direction") @RequestParam(defaultValue = "desc") String sortDirection,
+            @Parameter(description = "Current page number") @RequestParam(defaultValue = "1") Long currentPage,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "10") Long size,
             HttpServletRequest request) {
 
-        // 获取当前用户ID
-        Long currentUserId = JwtTokenUtils.getCurrentUserId();
+        // Get current user ID
+        Long currentUserId = getCurrentUserInfo().getId();
         if (currentUserId == null) {
-            return Result.error("用户未登录");
+            return Result.error("User not logged in");
         }
 
         UserFavoriteQueryDTO queryDTO = new UserFavoriteQueryDTO();
@@ -116,25 +146,25 @@ public class UserFavoriteController {
         queryDTO.setCurrentPage(currentPage);
         queryDTO.setSize(size);
 
-        log.info("分页查询用户收藏文章: userId={}, page={}, size={}", currentUserId, currentPage, size);
-        Page<ArticleSimpleResponseDTO> response = favoriteService.getUserFavoritePage(queryDTO);
+        log.info("Paginated query user favorite articles: userId={}, page={}, size={}", currentUserId, currentPage, size);
+        PageResult<ArticleSimpleResponseDTO> response = favoriteService.getUserFavoritePage(queryDTO);
         return Result.success(response);
     }
 
     /**
-     * 获取用户收藏文章总数
+     * Get total count of user favorite articles
      */
-    @Operation(summary = "获取用户收藏文章总数")
+    @Operation(summary = "Get total count of user favorite articles")
     @GetMapping("/count")
     public Result<Long> getUserFavoriteCount(HttpServletRequest request) {
         
-        // 获取当前用户ID
-        Long currentUserId = JwtTokenUtils.getCurrentUserId();
+        // Get current user ID
+        Long currentUserId = getCurrentUserInfo().getId();
         if (currentUserId == null) {
-            return Result.error("用户未登录");
+            return Result.error("User not logged in");
         }
 
-        log.info("获取用户收藏文章总数: userId={}", currentUserId);
+        log.info("Get total count of user favorite articles: userId={}", currentUserId);
         Long count = favoriteService.getUserFavoriteCount(currentUserId);
         return Result.success(count);
     }

@@ -1,85 +1,90 @@
 package com.emosync.DTO;
 
-import cn.hutool.core.date.DateUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
- * 文件信息响应DTO
- * @author system
+ * File Information Response DTO
+ * Represents metadata information of uploaded files.
+ *
+ * - Uses Java built-in DateTimeFormatter
  */
 @Data
-@Schema(description = "文件信息响应DTO")
+@Schema(description = "File Information Response DTO")
 public class FileInfoDTO {
 
-    @Schema(description = "文件ID")
+    private static final DateTimeFormatter FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    @Schema(description = "File ID")
     private Long id;
 
-    @Schema(description = "原始文件名")
+    @Schema(description = "Original file name")
     private String originalName;
 
-    @Schema(description = "文件访问路径")
+    @Schema(description = "File access path")
     private String filePath;
 
-    @Schema(description = "文件大小(字节)")
+    @Schema(description = "File size (bytes)")
     private Long fileSize;
 
-    @Schema(description = "文件类型")
+    @Schema(description = "File type")
     private String fileType;
 
-    @Schema(description = "文件类型描述")
+    @Schema(description = "File type description")
     private String fileTypeDesc;
 
-    @Schema(description = "业务类型")
+    @Schema(description = "Business type")
     private String businessType;
 
-    @Schema(description = "业务类型描述")
+    @Schema(description = "Business type description")
     private String businessTypeDesc;
 
-    @Schema(description = "业务对象ID")
+    @Schema(description = "Business object ID")
     private String businessId;
 
-    @Schema(description = "业务字段名")
+    @Schema(description = "Business field name")
     private String businessField;
 
-    @Schema(description = "上传用户ID")
+    @Schema(description = "Uploader user ID")
     private Long uploadUserId;
 
-    @Schema(description = "是否临时文件")
+    @Schema(description = "Is temporary file")
     private Boolean isTemp;
 
-    @Schema(description = "状态")
+    @Schema(description = "Status")
     private Integer status;
 
-    @Schema(description = "创建时间")
+    @Schema(description = "Creation time (string)")
     private String createTime;
 
-    @Schema(description = "过期时间")
+    @Schema(description = "Expiration time (string)")
     private String expireTime;
 
-    @Schema(description = "文件扩展名")
+    @Schema(description = "File extension")
     private String fileExtension;
 
-    @Schema(description = "是否已过期")
+    @Schema(description = "Whether the file is expired")
     private Boolean isExpired;
 
     /**
-     * 设置创建时间（将LocalDateTime转换为字符串）
+     * Sets creation time (convert LocalDateTime → String)
      */
     public void setCreateTime(LocalDateTime createTime) {
         if (createTime != null) {
-            this.createTime = DateUtil.formatLocalDateTime(createTime);
+            this.createTime = FORMATTER.format(createTime);
         }
     }
 
     /**
-     * 设置过期时间（将LocalDateTime转换为字符串）
+     * Sets expiration time (convert LocalDateTime → String)
      */
     public void setExpireTime(LocalDateTime expireTime) {
         if (expireTime != null) {
-            this.expireTime = DateUtil.formatLocalDateTime(expireTime);
+            this.expireTime = FORMATTER.format(expireTime);
         }
     }
-} 
+}
