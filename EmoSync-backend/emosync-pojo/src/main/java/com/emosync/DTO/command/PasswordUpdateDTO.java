@@ -6,19 +6,19 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 /**
- * 密码更新命令DTO
- * @author system
+ * Password Update Command DTO
+ * @author Yuan
  */
 @Data
-@Schema(description = "密码更新命令")
+@Schema(description = "Password update command")
 public class PasswordUpdateDTO {
 
-    @Schema(description = "旧密码", example = "123456")
-    @NotBlank(message = "旧密码不能为空")
+    @Schema(description = "Old password", example = "123456")
+    @NotBlank(message = "Old password cannot be blank")
     private String oldPassword;
 
-    @Schema(description = "新密码", example = "newpassword123")
-    @NotBlank(message = "新密码不能为空")
-    @Size(min = 6, max = 50, message = "新密码长度必须在6到50个字符之间")
+    @Schema(description = "New password", example = "newpassword123")
+    @NotBlank(message = "New password cannot be blank")
+    @Size(min = 6, max = 50, message = "New password length must be between 6 and 50 characters")
     private String newPassword;
 }

@@ -38,7 +38,7 @@ import org.springframework.web.bind.annotation.*;
 public class KnowledgeArticleController {
 
 
-    private final KnowledgeArticleService articleService;
+    private final KnowledgeArticleService knowledgeArticleService;
 
 
     /** Get current authenticated UserDetailsImpl */
@@ -90,7 +90,7 @@ public class KnowledgeArticleController {
             return Result.error("文章内容不能为空");
         }
         
-        ArticleResponseDTO response = articleService.createArticle(createDTO, currentUserId);
+        ArticleResponseDTO response = knowledgeArticleService.createArticle(createDTO, currentUserId);
         return Result.success("创建文章成功", response);
     }
 
@@ -111,7 +111,7 @@ public class KnowledgeArticleController {
         }
 
         log.info("用户更新知识文章: userId={}, articleId={}", currentUserId, id);
-        ArticleResponseDTO response = articleService.updateArticle(id, updateDTO, currentUserId);
+        ArticleResponseDTO response = knowledgeArticleService.updateArticle(id, updateDTO, currentUserId);
         return Result.success("更新文章成功", response);
     }
 
@@ -131,7 +131,7 @@ public class KnowledgeArticleController {
         }
 
         log.info("用户删除知识文章: userId={}, articleId={}", currentUserId, id);
-        articleService.deleteArticle(id, currentUserId);
+        knowledgeArticleService.deleteArticle(id, currentUserId);
         return Result.success();
     }
 
@@ -148,7 +148,7 @@ public class KnowledgeArticleController {
         Long currentUserId = getCurrentUserInfo().getId();
         
         log.info("获取知识文章详情: articleId={}, userId={}", id, currentUserId);
-        ArticleResponseDTO response = articleService.getArticleById(id, currentUserId);
+        ArticleResponseDTO response = knowledgeArticleService.getArticleById(id, currentUserId);
         return Result.success(response);
     }
 
@@ -165,7 +165,7 @@ public class KnowledgeArticleController {
         Long currentUserId = getCurrentUserInfo().getId();
         
         log.info("阅读知识文章: articleId={}, userId={}", id, currentUserId);
-        ArticleResponseDTO response = articleService.readArticle(id, currentUserId);
+        ArticleResponseDTO response = knowledgeArticleService.readArticle(id, currentUserId);
         return Result.success(response);
     }
 
@@ -185,7 +185,7 @@ public class KnowledgeArticleController {
         }
 
         log.info("用户发布知识文章: userId={}, articleId={}", currentUserId, id);
-        ArticleResponseDTO response = articleService.publishArticle(id, currentUserId);
+        ArticleResponseDTO response = knowledgeArticleService.publishArticle(id, currentUserId);
         return Result.success("发布文章成功", response);
     }
 
@@ -205,7 +205,7 @@ public class KnowledgeArticleController {
         }
 
         log.info("用户下线知识文章: userId={}, articleId={}", currentUserId, id);
-        ArticleResponseDTO response = articleService.offlineArticle(id, currentUserId);
+        ArticleResponseDTO response = knowledgeArticleService.offlineArticle(id, currentUserId);
         return Result.success("下线文章成功", response);
     }
 
@@ -247,7 +247,7 @@ public class KnowledgeArticleController {
         queryDTO.setSize(size);
 
         log.info("分页查询知识文章列表: keyword={}, page={}, size={}, userId={}", keyword, currentPage, size, currentUserId);
-        PageResult<ArticleSimpleResponseDTO> response = articleService.getArticlePage(queryDTO, currentUserId);
+        PageResult<ArticleSimpleResponseDTO> response = knowledgeArticleService.getArticlePage(queryDTO, currentUserId);
         return Result.success(response);
     }
 
@@ -268,7 +268,7 @@ public class KnowledgeArticleController {
         }
 
         log.info("用户更新文章状态: userId={}, articleId={}, status={}", currentUserId, id, statusUpdateDTO.getStatus());
-        ArticleResponseDTO response = articleService.updateArticleStatus(id, statusUpdateDTO.getStatus(), currentUserId);
+        ArticleResponseDTO response = knowledgeArticleService.updateArticleStatus(id, statusUpdateDTO.getStatus(), currentUserId);
         return Result.success("状态更新成功", response);
     }
 
@@ -288,7 +288,7 @@ public class KnowledgeArticleController {
         }
 
         log.info("用户批量删除文章: userId={}, articleIds={}", currentUserId, batchDeleteDTO.getIds());
-        articleService.batchDeleteArticles(batchDeleteDTO.getIds(), currentUserId);
+        knowledgeArticleService.batchDeleteArticles(batchDeleteDTO.getIds(), currentUserId);
         return Result.success();
     }
 
@@ -306,7 +306,7 @@ public class KnowledgeArticleController {
         }
 
         log.info("获取文章统计信息: userId={}", currentUserId);
-        ArticleStatisticsResponseDTO response = articleService.getArticleStatistics(currentUserId);
+        ArticleStatisticsResponseDTO response = knowledgeArticleService.getArticleStatistics(currentUserId);
         return Result.success(response);
     }
 }

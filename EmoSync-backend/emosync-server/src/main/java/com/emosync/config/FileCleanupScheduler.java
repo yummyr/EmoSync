@@ -1,5 +1,6 @@
 package com.emosync.config;
 
+import jakarta.annotation.Resource;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import com.emosync.service.FileService;
@@ -8,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * 文件清理定时任务
- * @author system
+ * @author Yuan
  */
 @Slf4j
 @Component
@@ -16,7 +17,8 @@ import org.springframework.stereotype.Component;
 public class FileCleanupScheduler {
 
 
-    private final FileService sysFileInfoService;
+    @Resource
+    private FileService sysFileInfoService;
 
     /**
      * 清理过期临时文件

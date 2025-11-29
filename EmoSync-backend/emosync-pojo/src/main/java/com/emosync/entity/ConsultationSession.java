@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ConsultationSession extends BaseEntity {
+public class ConsultationSession  {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,4 +39,34 @@ public class ConsultationSession extends BaseEntity {
     // OneToMany messages
     @OneToMany(mappedBy = "session", fetch = FetchType.LAZY)
     private List<ConsultationMessage> messages;
+
+    /**
+     * 计算会话持续时间（分钟）
+     * 从开始时间到现在的持续时间
+     */
+    public Long getDurationMinutes() {
+        if (startedAt == null) {
+            return null;
+        }
+        LocalDateTime endTime = LocalDateTime.now();
+        return java.time.Duration.between(startedAt, endTime).toMinutes();
+    }
+
+    /**
+     * 判断是否有情绪分析数据
+     */
+    public boolean hasEmotionAnalysis() {
+        return lastEmotionAnalysis != null && !lastEmotionAnalysis.trim().isEmpty();
+    }
+
+    /**
+     * 判断情绪分析数据是否需要更新
+     * @param thresholdMinutes 更新阈值（分钟）
+     */
+    public boolean needsEmotionAnalysisUpdate(int thresholdMinutes) {
+        if (lastEmotionUpdatedAt == null) {
+            return true;
+        }
+        return java.time.Duration.between(lastEmotionUpdatedAt, LocalDateTime.now()).toMinutes() >= thresholdMinutes;
+    }
 }

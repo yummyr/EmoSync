@@ -15,6 +15,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 /**
  * Spring Security 企业级配置类
@@ -35,13 +37,18 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  * @date 2025-01-27
  */
 @Configuration
-@RequiredArgsConstructor
 @EnableWebSecurity
 @EnableMethodSecurity  // 启用方法级安全，支持@PreAuthorize等注解
 public class SecurityConfig {
     private final JwtTokenUtils jwtTokenUtils;
     private final UserService userService;
     private final UserRepository userRepository;
+
+    public SecurityConfig(JwtTokenUtils jwtTokenUtils, UserService userService, UserRepository userRepository) {
+        this.jwtTokenUtils = jwtTokenUtils;
+        this.userService = userService;
+        this.userRepository = userRepository;
+    }
     /**
      * 定义公开访问路径常量
      * 这些路径不需要JWT验证，可以直接访问
@@ -135,7 +142,21 @@ public class SecurityConfig {
      */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        // 创建本地CORS配置源
+        org.springframework.web.cors.UrlBasedCorsConfigurationSource corsSource = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
+        org.springframework.web.cors.CorsConfiguration corsConfig = new org.springframework.web.cors.CorsConfiguration();
+        corsConfig.setAllowCredentials(true);
+        corsConfig.addAllowedOriginPattern("*");
+        corsConfig.addAllowedMethod("*");
+        corsConfig.addAllowedHeader("*");
+        corsConfig.addExposedHeader("Authorization");
+        corsConfig.addExposedHeader("Content-Type");
+        corsSource.registerCorsConfiguration("/**", corsConfig);
+
         http
+                // 启用CORS配置
+                .cors(cors -> cors.configurationSource(corsSource))
+
                 // 禁用CSRF保护（API服务通常不需要）
                 .csrf(csrf -> csrf.disable())
 

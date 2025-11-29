@@ -70,7 +70,8 @@ public class UserController {
     @Operation(summary = "User Login")
     @PostMapping("/login")
     public Result<UserLoginResponseDTO> login(@Valid @RequestBody UserLoginCommandDTO loginDTO) {
-        log.info("Login request: {}", loginDTO.getUsername());
+        log.info("UserController Login request: {}", loginDTO.getUsername());
+        log.info("get loginDTO:{}",loginDTO);
         UserLoginResponseDTO response = userService.login(loginDTO);
         return Result.success("Login successful", response);
     }

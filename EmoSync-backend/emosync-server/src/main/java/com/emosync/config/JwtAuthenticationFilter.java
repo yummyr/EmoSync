@@ -61,7 +61,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             // 1. 提取JWT token
-            String token = JwtTokenUtils.extractTokenFromRequest(request);
+            String token = jwtTokenUtils.extractTokenFromRequest(request);
 
             if (StringUtils.hasText(token)) {
                 log.debug("成功提取token，长度：{}", token.length());

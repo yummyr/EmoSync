@@ -9,39 +9,39 @@ import lombok.Data;
 import java.time.LocalDate;
 
 /**
- * 用户信息更新命令DTO
- * @author system
+ * User Information Update Command DTO
+ * @author Yuan
  */
 @Data
-@Schema(description = "用户信息更新命令")
+@Schema(description = "User information update command")
 public class UserUpdateCommandDTO {
 
-    @Schema(description = "邮箱", example = "test@drone.com")
-    @Email(message = "邮箱格式不正确")
-    @Size(max = 100, message = "邮箱长度不能超过100个字符")
+    @Schema(description = "Email", example = "test@drone.com")
+    @Email(message = "Invalid email format")
+    @Size(max = 100, message = "Email length cannot exceed 100 characters")
     private String email;
 
-    @Schema(description = "昵称", example = "测试用户")
-    @Size(max = 50, message = "昵称长度不能超过50个字符")
+    @Schema(description = "Nickname", example = "testuser")
+    @Size(max = 50, message = "Nickname length cannot exceed 50 characters")
     private String nickname;
 
-    @Schema(description = "头像", example = "/avatars/user.jpg")
-    @Size(max = 255, message = "头像路径长度不能超过255个字符")
+    @Schema(description = "Avatar", example = "/avatars/user.jpg")
+    @Size(max = 255, message = "Avatar path length cannot exceed 255 characters")
     private String avatar;
 
-    @Schema(description = "手机号", example = "13800138000")
-    @Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式不正确")
+    @Schema(description = "Phone number", example = "6266261234")
+    @Pattern(regexp = "^\\d{10}$", message = "Phone number must be exactly 10 digits")
     private String phone;
 
-    @Schema(description = "性别 0:未知 1:男 2:女", example = "1")
+    @Schema(description = "Gender 0:Unknown 1:Male 2:Female", example = "1")
     private Integer gender;
 
-    @Schema(description = "生日", example = "1990-01-01")
+    @Schema(description = "Birthday", example = "1990-01-01")
     private LocalDate birthday;
 
-    @Schema(description = "用户类型 1:普通用户 2:管理员", example = "1")
+    @Schema(description = "User type 1:Regular user 2:Administrator", example = "1")
     private Integer userType;
 
-    @Schema(description = "用户状态 0:禁用 1:正常", example = "1")
+    @Schema(description = "User status 0:Disabled 1:Normal", example = "1")
     private Integer status;
 }

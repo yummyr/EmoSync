@@ -37,7 +37,7 @@ import java.util.List;
 public class KnowledgeCategoryController {
 
 
-    private final KnowledgeCategoryService categoryService;
+    private final KnowledgeCategoryService knowledgeCategoryService;
 
     /** Get current authenticated UserDetailsImpl */
     private UserDetailsImpl getCurrentUserInfo() {
@@ -77,7 +77,7 @@ public class KnowledgeCategoryController {
         }
 
         log.info("管理员创建知识分类: {}", createDTO.getCategoryName());
-        CategoryResponseDTO response = categoryService.createCategory(createDTO);
+        CategoryResponseDTO response = knowledgeCategoryService.createCategory(createDTO);
         return Result.success("创建分类成功", response);
     }
 
@@ -97,7 +97,7 @@ public class KnowledgeCategoryController {
         }
 
         log.info("管理员更新知识分类: categoryId={}", id);
-        CategoryResponseDTO response = categoryService.updateCategory(id, updateDTO);
+        CategoryResponseDTO response = knowledgeCategoryService.updateCategory(id, updateDTO);
         return Result.success("更新分类成功", response);
     }
 
@@ -116,7 +116,7 @@ public class KnowledgeCategoryController {
         }
 
         log.info("管理员删除知识分类: categoryId={}", id);
-        categoryService.deleteCategory(id);
+        knowledgeCategoryService.deleteCategory(id);
         return Result.success();
     }
 
@@ -129,7 +129,7 @@ public class KnowledgeCategoryController {
             @Parameter(description = "分类ID") @PathVariable Long id) {
         
         log.info("获取知识分类详情: categoryId={}", id);
-        CategoryResponseDTO response = categoryService.getCategoryById(id);
+        CategoryResponseDTO response = knowledgeCategoryService.getCategoryById(id);
         return Result.success(response);
     }
 
@@ -151,7 +151,7 @@ public class KnowledgeCategoryController {
         queryDTO.setSize(size);
 
         log.info("分页查询知识分类列表: page={}, size={}", currentPage, size);
-        PageResult<CategoryResponseDTO> response = categoryService.getCategoryPage(queryDTO);
+        PageResult<CategoryResponseDTO> response = knowledgeCategoryService.getCategoryPage(queryDTO);
         return Result.success(response);
     }
 
@@ -163,7 +163,7 @@ public class KnowledgeCategoryController {
     @GetMapping("/tree")
     public Result<List<CategoryResponseDTO>> getCategoryTree() {
         log.info("获取知识分类树");
-        List<CategoryResponseDTO> response = categoryService.getCategoryTree();
+        List<CategoryResponseDTO> response = knowledgeCategoryService.getCategoryTree();
         return Result.success(response);
     }
 }

@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserFavoriteController {
 
 
-    private  final UserFavoriteService favoriteService;
+    private  final UserFavoriteService userFavoriteService;
 
     /** Get current authenticated UserDetailsImpl */
     private UserDetailsImpl getCurrentUserInfo() {
@@ -73,7 +73,7 @@ public class UserFavoriteController {
         }
 
         log.info("User favorite article: userId={}, articleId={}", currentUserId, articleId);
-        favoriteService.favoriteArticle(currentUserId, articleId);
+        userFavoriteService.favoriteArticle(currentUserId, articleId);
         return Result.success();
     }
 
@@ -93,7 +93,7 @@ public class UserFavoriteController {
         }
 
         log.info("User unfavorite article: userId={}, articleId={}", currentUserId, articleId);
-        favoriteService.unfavoriteArticle(currentUserId, articleId);
+        userFavoriteService.unfavoriteArticle(currentUserId, articleId);
         return Result.success();
     }
 
@@ -113,7 +113,7 @@ public class UserFavoriteController {
         }
 
         log.info("Check article favorite status: userId={}, articleId={}", currentUserId, articleId);
-        boolean isFavorited = favoriteService.isFavorited(currentUserId, articleId);
+        boolean isFavorited = userFavoriteService.isFavorited(currentUserId, articleId);
         return Result.success(isFavorited);
     }
 
@@ -147,7 +147,7 @@ public class UserFavoriteController {
         queryDTO.setSize(size);
 
         log.info("Paginated query user favorite articles: userId={}, page={}, size={}", currentUserId, currentPage, size);
-        PageResult<ArticleSimpleResponseDTO> response = favoriteService.getUserFavoritePage(queryDTO);
+        PageResult<ArticleSimpleResponseDTO> response = userFavoriteService.getUserFavoritePage(queryDTO);
         return Result.success(response);
     }
 
@@ -165,7 +165,7 @@ public class UserFavoriteController {
         }
 
         log.info("Get total count of user favorite articles: userId={}", currentUserId);
-        Long count = favoriteService.getUserFavoriteCount(currentUserId);
+        Long count = userFavoriteService.getUserFavoriteCount(currentUserId);
         return Result.success(count);
     }
 }

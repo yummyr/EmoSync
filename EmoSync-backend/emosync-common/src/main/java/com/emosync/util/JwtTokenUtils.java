@@ -18,10 +18,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * JWT Utility Class - Unified JWT Token Management
@@ -46,7 +43,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class JwtTokenUtils {
 
-    private  final JwtConfig jwtConfig;
+    private final JwtConfig jwtConfig ;
 
 
     /**
@@ -73,8 +70,10 @@ public class JwtTokenUtils {
      * @return SecretKey
      */
     private static SecretKey getSecretKey(String secretKey) {
-        return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+        byte[] decodedKey = java.util.Base64.getDecoder().decode(secretKey);
+        return Keys.hmacShaKeyFor(decodedKey);
     }
+
 
     /**
      * generate JWT token
@@ -87,19 +86,12 @@ public class JwtTokenUtils {
      */
     public  String generateToken(Long userId, String username, Integer roleType) {
         try {
-            String roleName;
-            if (roleType== 1){
-                roleName = "regularUser";
-            }else if (roleType ==2){
-                roleName = "admin";
-            }else {
-                throw new IllegalArgumentException("role type is illegal");
-            }
+
             // 创建claims
             Map<String, Object> claims = new HashMap<>();
             claims.put("userId", userId);
             claims.put("username", username);
-            claims.put("roles", Collections.singletonList("ROLE_" + roleName));
+            claims.put("roleType", roleType);
             claims.put("iss", ISSUER);
 
             long nowMillis = System.currentTimeMillis();
@@ -195,15 +187,10 @@ public class JwtTokenUtils {
     public Integer getRoleTypeFromToken(String token) {
         try {
             Claims claims = verifyToken(token);
-            Object roleType = claims.get("roleType");
-            if (roleType instanceof Integer) {
-                return (Integer) roleType;
-            } else if (roleType instanceof String) {
-                return Integer.valueOf((String) roleType);
-            } else {
-                log.warn("Role type format mismatch: {}", roleType.getClass().getSimpleName());
-                return null;
-            }
+            Integer roleType = claims.get("roleType", Integer.class);
+
+            log.warn("Role not found or unrecognized in token");
+            return roleType;
         } catch (Exception e) {
             log.warn("Failed to get role code from token: {}", e.getMessage());
             return null;
@@ -233,18 +220,14 @@ public class JwtTokenUtils {
      * @param request HTTP request
      * @return Token string, returns null if not found or format incorrect
      */
-    public static String extractTokenFromRequest(HttpServletRequest request) {
-        if (request == null) {
-            return null;
+    public  String extractTokenFromRequest(HttpServletRequest request) {
+        // 1. 标准 Authorization: Bearer xxx
+        String header = request.getHeader(jwtConfig.getHeader());
+        if (StringUtils.hasText(header) && header.startsWith(jwtConfig.getTokenPrefix())) {
+            return header.substring(jwtConfig.getTokenPrefix().length());
         }
 
-        // Method 1: Extract from Authorization Header (standard method)
-        String authHeader = request.getHeader(HEADER_NAME);
-        if (StringUtils.hasText(authHeader) && authHeader.startsWith(TOKEN_PREFIX)) {
-            return authHeader.substring(TOKEN_PREFIX.length());
-        }
-
-        // Method 2: Extract from token Header (method used by frontend)
+        // 2. 备用 token 头（兼容旧前端）
         String tokenHeader = request.getHeader("token");
         if (StringUtils.hasText(tokenHeader)) {
             return tokenHeader;
@@ -276,132 +259,7 @@ public class JwtTokenUtils {
         return null;
     }
 
-    /**
-     * Get current user ID from token
-     *
-     * @param token JWT token
-     * @return User ID, returns null if failed to get
-     */
-    public Long getCurrentUserId(String token) {
-        return getUserIdFromToken(token);
-    }
 
-    /**
-     * Get current username from token
-     *
-     * @param token JWT token
-     * @return Username, returns null if failed to get
-     */
-    public String getCurrentUsername(String token) {
-        return getUsernameFromToken(token);
-    }
-
-    /**
-     * Get current user role from token
-     *
-     * @param token JWT token
-     * @return Role code, returns null if failed to get
-     */
-    public Integer getCurrentUserRole(String token) {
-        return getRoleTypeFromToken(token);
-    }
-
-    /**
-     * Get token from current request context
-     *
-     * @return JWT token string, returns null if unable to extract or no request context
-  */
-    // public String getCurrentToken() {
-    //     try {
-    //         // Get request attributes from current thread context
-    //         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-    //
-    //         if (requestAttributes == null) {
-    //             log.debug("No request context available - likely outside of web request");
-    //             return null;
-    //         }
-    //
-    //         // Ensure we have ServletRequestAttributes for web requests
-    //         if (!(requestAttributes instanceof ServletRequestAttributes)) {
-    //             log.warn("RequestAttributes is not a ServletRequestAttributes: {}",
-    //                     requestAttributes.getClass().getSimpleName());
-    //             return null;
-    //         }
-    //
-    //         ServletRequestAttributes servletAttributes = (ServletRequestAttributes) requestAttributes;
-    //         HttpServletRequest request = servletAttributes.getRequest();
-    //
-    //         if (request == null) {
-    //             log.warn("Unable to get HttpServletRequest from ServletRequestAttributes");
-    //             return null;
-    //         }
-    //
-    //         // Priority 1: Check if token was set by filter in request attributes
-    //         String filterToken = (String) request.getAttribute("jwtToken");
-    //         if (StringUtils.hasText(filterToken)) {
-    //             log.debug("Found JWT token in request attributes");
-    //             return filterToken;
-    //         }
-    //
-    //         // Priority 2: Extract token from request headers
-    //         String headerToken = extractTokenFromRequest(request);
-    //         if (StringUtils.hasText(headerToken)) {
-    //             log.debug("Found JWT token in request headers");
-    //             return headerToken;
-    //         }
-    //
-    //         log.debug("No JWT token found in current request");
-    //         return null;
-    //
-    //     } catch (IllegalStateException e) {
-    //         // This happens when no request is bound to current thread
-    //         log.debug("No request bound to current thread: {}", e.getMessage());
-    //         return null;
-    //     } catch (ClassCastException e) {
-    //         log.warn("Type casting error while getting request attributes: {}", e.getMessage());
-    //         return null;
-    //     } catch (Exception e) {
-    //         log.warn("Unexpected error while extracting token from request: {}", e.getMessage(), e);
-    //         return null;
-    //     }
-    // }
-
-
-    /**
-     * Get current user ID (from current request context)
-     *
-     * @return Current user ID, returns null if failed to get
-     */
-    // public Long getCurrentUserId() {
-    //     String token = getCurrentToken();
-    //     return token != null ? getUserIdFromToken(token) : null;
-    // }
-
-    /**
-     * Get current username (from current request context)
-     *
-     * @return Current username, returns null if failed to get
-     */
-    // public String getCurrentUsername() {
-    //     String token = getCurrentToken();
-    //     return token != null ? getUsernameFromToken(token) : null;
-    // }
-
-    /**
-     * Get current user role (from current request context)
-     *
-     * @return Current user role code, returns null if failed to get
-     */
-    // public Integer getCurrentUserRole() {
-    //     String token = getCurrentToken();
-    //     if (token == null) {
-    //         log.warn("Failed to get current user role: Unable to get token");
-    //         return null;
-    //     }
-    //     Integer role = getRoleTypeFromToken(token);
-    //     log.debug("Get current user role: token exists={}, role={}", token != null, role);
-    //     return role;
-    // }
 
     /**
      * Validate token integrity and extract user info.
@@ -410,43 +268,18 @@ public class JwtTokenUtils {
      * @return TokenValidationResult or null if invalid
      */
     public TokenValidationResult validateToken(String token) {
-        if (!StringUtils.hasText(token)) {
-            return null;
-        }
-
         try {
-            Claims claims = verifyToken(token);
-            if (claims == null) {
-                return null;
-            }
+            Claims c = verifyToken(token);
 
-            Long userId = null;
-            Object userIdObj = claims.get("userId");
-            if (userIdObj instanceof Integer) {
-                userId = ((Integer) userIdObj).longValue();
-            } else if (userIdObj instanceof Long) {
-                userId = (Long) userIdObj;
-            }
-
-            String username = claims.get("username", String.class);
-
-            Integer roleType = null;
-            Object roleObj = claims.get("roleType");
-            if (roleObj instanceof Integer) {
-                roleType = (Integer) roleObj;
-            } else if (roleObj instanceof String) {
-                roleType = Integer.valueOf((String) roleObj);
-            }
-
-            if (userId != null && StringUtils.hasText(username) && roleType != null) {
-                return new TokenValidationResult(userId, username, roleType, true);
-            }
-
+            return new TokenValidationResult(
+                    c.get("userId", Long.class),
+                    c.get("username", String.class),
+                    c.get("roleType", Integer.class),
+                    true
+            );
         } catch (Exception e) {
-            log.warn("Token validation failed: {}", e.getMessage());
+            return new TokenValidationResult(null, null, null, false);
         }
-
-        return null;
     }
 
 

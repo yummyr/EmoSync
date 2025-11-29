@@ -42,10 +42,11 @@ public class UserServiceImpl implements UserService {
     /** Login */
     @Override
     public UserLoginResponseDTO login(UserLoginCommandDTO loginDTO) {
+        log.info("User Service get loginDTO:{}",loginDTO);
 
         User user = userRepository.findByUsername(loginDTO.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
+        log.info("User service login get user:{}",user.toString());
         // Check user status
         if (user.getStatus() == 0) {
             throw new BusinessException("Account is disabled");

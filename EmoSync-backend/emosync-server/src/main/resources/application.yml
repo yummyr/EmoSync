@@ -1,13 +1,21 @@
-spring:
-  application:
-    name: springboot
+# 服务器配置
+server:
+  port: 8080
+  servlet:
+    context-path: /
 
+spring:
   # 数据源配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/mental_health_assistant?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3306/EmoSync_db?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true
     username: root
     password: rt123456
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
 
   # 安全配置
   security:
@@ -58,18 +66,6 @@ spring:
   jackson:
     default-property-inclusion: non_empty
 
-# 服务器配置
-server:
-  port: 8080
-  servlet:
-    context-path: /
-
-# MyBatis-Plus配置
-mybatis-plus:
-  mapper-locations: classpath:/mapper/*.xml
-  configuration:
-    map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 # SpringDoc配置
 springdoc:
@@ -85,6 +81,7 @@ springdoc:
   paths-to-match: /**
   packages-to-scan: org.example.springboot
 
+
 # Knife4j配置
 knife4j:
   enable: true
@@ -95,10 +92,11 @@ knife4j:
     username: admin
     password: admin
 
+
 # JWT配置
 jwt:
-  secret: MySecretKeyForJWT2025!@#$%^&*()_+SecureKeyHere
-  expiration: 86400000  # 24小时（毫秒）
+  secret: A9zTqVaKpN7xH3p7lP0YZlhcQ+q1YTWPFZ3LG10T/4A=
+  expiration: 86400000000  # 24小时（毫秒）
   refresh-expiration: 604800000  # 7天（毫秒）
   header: Authorization  # token头部名称
   token-prefix: "Bearer "  # token前缀
@@ -112,3 +110,9 @@ file:
   upload:
     path: ./files
     maxSize: 10485760  # 10MB
+
+EmoSync:
+  cloud-name: ${EmoSync.cloudinary.cloud-name}
+  api-key: ${EmoSync.cloudinary.api-key}
+  api-secret: ${EmoSync.cloudinary.api-secret}
+  secure: ${EmoSync.cloudinary.secure}
