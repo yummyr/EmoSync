@@ -1,280 +1,271 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { login, logout } from '@/api/user'
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import {
+  login,
+  logout,
+  updateUser,
+  updatePassword,
+} from "@/api/user";
 
-// 安全的localStorage操作工具
+// Secure localStorage utility
 const storage = {
   get(key) {
     try {
-      const item = localStorage.getItem(key)
-      return item ? JSON.parse(item) : null
+      const item = localStorage.getItem(key);
+      if (!item) return null;
+
+      // Try to parse as JSON first
+      try {
+        return JSON.parse(item);
+      } catch {
+        // If parsing fails, return as string (for tokens)
+        return item;
+      }
     } catch (error) {
-      console.warn(`Failed to parse localStorage item: ${key}`, error)
-      localStorage.removeItem(key)
-      return null
+      console.warn(`Failed to parse localStorage item: ${key}`, error);
+      localStorage.removeItem(key);
+      return null;
     }
   },
 
   set(key, value) {
     try {
-      localStorage.setItem(key, JSON.stringify(value))
+      // Don't stringify strings (especially tokens) to avoid extra quotes
+      if (typeof value === 'string') {
+        localStorage.setItem(key, value);
+      } else {
+        localStorage.setItem(key, JSON.stringify(value));
+      }
     } catch (error) {
-      console.error(`Failed to set localStorage item: ${key}`, error)
+      console.error(`Failed to set localStorage item: ${key}`, error);
     }
   },
 
   remove(key) {
     try {
-      localStorage.removeItem(key)
+      localStorage.removeItem(key);
     } catch (error) {
-      console.error(`Failed to remove localStorage item: ${key}`, error)
+      console.error(`Failed to remove localStorage item: ${key}`, error);
     }
-  }
-}
+  },
+};
 
-// 初始状态
+// Initial state
 const initialState = {
-  userInfo: storage.get('userInfo'),
-  token: storage.get('token') || '',
-  loginTime: storage.get('loginTime') || null,
-  isInitialized: false,
+  user: storage.get("user") || null,
+  token: storage.get("token") || "",
+  roleType: storage.get("roleType") || null,
   isLoading: false,
   error: null,
-  // 确保有默认的状态值
-  isLoggedIn: false,
-  isUser: false,
-  isAdmin: false,
-}
+};
 
-// 异步actions
+// --- Thunks ---
 export const loginUser = createAsyncThunk(
-  'user/login',
+  "user/login",
   async (loginForm, { rejectWithValue }) => {
     try {
-      if (!loginForm) {
-        throw new Error('登录表单不能为空')
+      const data = await login(loginForm); // data should be { user, token, roleType }
+
+      console.log("Raw login API response:", data);
+
+      // Validate the response data structure
+      if (!data) {
+        throw new Error("No data returned from login API");
       }
 
-      const res = await login(loginForm)
+      // Handle different possible response structures
+      const { user, token, roleType, userInfo, roleCode } = data;
 
-      if (!res || !res.token) {
-        throw new Error('登录响应数据异常')
+      // If the API returns userInfo instead of user, use that
+      const userData = user || userInfo;
+
+      // Check for token in different possible locations
+      const userToken = token || data.accessToken || data.authorization;
+
+      console.log("Processed login data:", { userData, userToken, roleType, roleCode });
+
+      if (!userData && !userToken) {
+        // If no user data but we have some response, try to work with it
+        console.warn("Login API returned minimal data, proceeding with basic info");
+        return {
+          user: { username: loginForm.username }, // Minimal user data
+          token: userToken || "temp-token", // Use whatever token we got
+          roleType: roleType || roleCode ? (roleCode === 'admin' ? 2 : 1) : 1
+        };
       }
 
-      return res
-    } catch (error) {
-      return rejectWithValue(error.message || '登录失败')
+      if (!userData) {
+        throw new Error("Invalid login response: missing user data");
+      }
+
+      if (!userToken) {
+        throw new Error("Invalid login response: missing token");
+      }
+
+      return {
+        user: userData,
+        token: userToken,
+        roleType: roleType || userData.userType || (roleCode === 'admin' ? 2 : 1) || 1
+      };
+    } catch (err) {
+      console.error("Login error:", err);
+      return rejectWithValue(err.message || "Login failed");
     }
   }
-)
+);
 
-export const logoutUser = createAsyncThunk(
-  'user/logout',
+export const logoutUser = createAsyncThunk("user/logout", async () => {
+  await logout();
+});
+
+// export const fetchCurrentUser = createAsyncThunk(
+//   "user/fetchCurrentUser",
+//   async (_, { rejectWithValue }) => {
+//     try {
+//       const data = await getCurrentUser();
+//       return data;
+//     } catch (err) {
+//       return rejectWithValue(err.message);
+//     }
+//   }
+// );
+
+// export const updateProfileInfo = createAsyncThunk(
+//   "user/updateProfileInfo",
+//   async (formData, { rejectWithValue }) => {
+//     try {
+//       const data = await updateUser(formData);
+//       return data;
+//     } catch (err) {
+//       return rejectWithValue(err.message);
+//     }
+//   }
+// );
+
+export const fetchCurrentUser = createAsyncThunk(
+  "user/current",
   async (_, { getState, rejectWithValue }) => {
     try {
-      const { token } = getState().user
-      if (token) {
-        await logout()
+      const { user, token } = getState().user;
+
+      // First check local cache
+      if (user && token) {
+        return user;
       }
+
+      // Return null instead of throwing error to prevent component crashes
+      return null;
     } catch (error) {
-      console.error('调用登出接口失败:', error)
-      // 即使接口失败，也要继续清除本地状态
+      return rejectWithValue(error.message);
     }
   }
-)
-
-export const getUserInfo = createAsyncThunk(
-  'user/getUserInfo',
-  async (_, { getState, rejectWithValue }) => {
+);
+export const updateProfileInfo = createAsyncThunk(
+  "user/profile",
+  async (formData, { rejectWithValue }) => {
     try {
-      const { userInfo, isLoggedIn } = getState().user
-
-      // 首先检查本地缓存
-      if (userInfo && isLoggedIn) {
-        return { userInfo }
-      }
-
-      throw new Error('用户未登录或登录已过期')
-    } catch (error) {
-      return rejectWithValue(error.message)
+      const data = await updateUser(formData);
+      return data;
+    } catch (err) {
+      return rejectWithValue(err.message);
     }
   }
-)
-
-// 用户slice
+);
+export const changePassword = createAsyncThunk(
+  "user/password",
+ async ({ oldPassword, newPassword }, { rejectWithValue }) => {
+    try {
+  
+      await updatePassword({ oldPassword, newPassword });
+      return true; 
+    } catch (err) {
+      return rejectWithValue(err.message || "Failed to change password");
+    }
+  }
+);
+// User slice
 const userSlice = createSlice({
-  name: 'user',
+  name: "user",
   initialState,
   reducers: {
-    initialize: (state) => {
-      if (state.isInitialized) return
-
-      // 检查登录状态有效性
-      if (!getters.isLoggedIn(state)) {
-        userSlice.caseReducers.clearUserInfo(state)
-      }
-
-      state.isInitialized = true
-    },
-
-    setUserInfo: (state, action) => {
-      const data = action.payload
-      if (!data) {
-        console.warn('setUserInfo: 传入数据为空')
-        return
-      }
-
-      // 数据验证
-      const userInfo = data.userInfo || data
-      const token = data.token
-
-      if (!token) {
-        console.error('setUserInfo: token不能为空')
-        return
-      }
-
-      // 更新状态
-      state.userInfo = userInfo
-      state.token = token
-      state.loginTime = Date.now()
-
-      // 持久化存储
-      saveToStorage(state)
-    },
-
-    updateUserInfo: (state, action) => {
-      const data = action.payload
-      if (!data) {
-        console.warn('updateUserInfo: 传入数据为空')
-        return
-      }
-
-      // 合并用户信息
-      state.userInfo = { ...state.userInfo, ...data }
-
-      // 更新存储
-      storage.set('userInfo', state.userInfo)
-    },
-
-    clearUserInfo: (state) => {
-      state.userInfo = null
-      state.token = ''
-      state.loginTime = null
-      state.isInitialized = false
-      state.error = null
-
-      // 清除存储
-      clearStorage()
-    },
-
     clearError: (state) => {
-      state.error = null
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
     builder
-      // 登录
+      // Login
       .addCase(loginUser.pending, (state) => {
-        state.isLoading = true
-        state.error = null
+        state.isLoading = true;
+        state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
-        state.isLoading = false
-        userSlice.caseReducers.setUserInfo(state, action)
+        const { user, token, roleType } = action.payload;
+
+        state.isLoading = false;
+        state.user = user;
+        state.token = token;
+        state.roleType = roleType;
+
+        // Persist
+        storage.set("user", user);
+        storage.set("token", token);
+        storage.set("roleType", roleType);
       })
       .addCase(loginUser.rejected, (state, action) => {
-        state.isLoading = false
-        state.error = action.payload
-        userSlice.caseReducers.clearUserInfo(state)
+        state.isLoading = false;
+        state.error = action.payload;
       })
-      // 登出
-      .addCase(logoutUser.pending, (state) => {
-        state.isLoading = true
-      })
+
+      // Logout
       .addCase(logoutUser.fulfilled, (state) => {
-        state.isLoading = false
-        userSlice.caseReducers.clearUserInfo(state)
+        state.user = null;
+        state.token = "";
+        state.roleType = null;
+
+        localStorage.clear();
       })
-      .addCase(logoutUser.rejected, (state) => {
-        state.isLoading = false
-        userSlice.caseReducers.clearUserInfo(state)
-      })
-      // 获取用户信息
-      .addCase(getUserInfo.fulfilled, (state, action) => {
+      .addCase(fetchCurrentUser.fulfilled, (state, action) => {
         if (action.payload) {
-          state.userInfo = action.payload.userInfo
+          state.user = action.payload;
+          storage.set("user", state.user);
         }
       })
-      .addCase(getUserInfo.rejected, (state) => {
-        userSlice.caseReducers.clearUserInfo(state)
+      .addCase(fetchCurrentUser.rejected, (state) => {
+        state.user = null;
       })
+
+      .addCase(updateProfileInfo.fulfilled, (state, action) => {
+        state.user = { ...state.user, ...action.payload };
+        storage.set("user", state.user);
+      })
+       // 🔐 Change Password
+    .addCase(changePassword.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    })
+    .addCase(changePassword.fulfilled, (state) => {
+      state.isLoading = false;
+    })
+    .addCase(changePassword.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload || "Failed to change password";
+    });
   },
-})
+});
 
-// 私有工具函数
-const saveToStorage = (state) => {
-  storage.set('userInfo', state.userInfo)
-  storage.set('token', state.token)
-  storage.set('loginTime', state.loginTime)
-}
+export const { clearError } = userSlice.actions;
 
-const clearStorage = () => {
-  storage.remove('userInfo')
-  storage.remove('token')
-  storage.remove('loginTime')
-}
+// --- Selectors ---
+export const selectUser = (state) => state.user.user;
+export const selectToken = (state) => state.user.token;
+export const selectRoleType = (state) => state.user.roleType;
+export const selectIsLoading = (state) => state.user.isLoading;
+export const selectError = (state) => state.user.error;
 
-// Getters (计算属性)
-export const getters = {
-  isLoggedIn: (state) => {
-    if (!state.token || !state.loginTime) return false
+export const selectIsLoggedIn = (state) =>
+  !!state.user.token && !!state.user.user;
 
-    // 检查token是否过期（假设24小时过期）
-    const tokenExpireTime = 24 * 60 * 60 * 1000 // 24小时
-    const isExpired = Date.now() - state.loginTime > tokenExpireTime
+export const selectIsAdmin = (state) => state.user.roleType === 2;
+export const selectIsUser = (state) => state.user.roleType === 1;
 
-    return !isExpired
-  },
-
-  userRole: (state) => {
-    if (!state.userInfo) return ''
-    // 兼容roleType和userType字段
-    return state.userInfo.roleType || state.userInfo.userType?.toString() || ''
-  },
-
-  isAdmin: (state) => {
-    if (!state.userInfo) return false
-    return state.userInfo.userType === 2 || state.userInfo.roleType === 'ADMIN' || state.userInfo.roleType === '2'
-  },
-
-  isUser: (state) => {
-    if (!state.userInfo) return false
-    return state.userInfo.userType === 1 || state.userInfo.roleType === 'USER' || state.userInfo.roleType === '1'
-  },
-
-  displayName: (state) => {
-    if (!state.userInfo) return '未登录'
-    return state.userInfo.nickname || state.userInfo.username || '用户'
-  },
-
-  avatar: (state) => state.userInfo?.avatar || '',
-
-  userId: (state) => state.userInfo?.id || null,
-}
-
-// 导出actions
-export const { initialize, setUserInfo, updateUserInfo, clearUserInfo, clearError } = userSlice.actions
-
-// 选择器
-export const selectUser = (state) => state.user
-export const selectUserInfo = (state) => state.user.userInfo
-export const selectToken = (state) => state.user.token
-export const selectIsLoggedIn = (state) => getters.isLoggedIn(state.user)
-export const selectIsAdmin = (state) => getters.isAdmin(state.user)
-export const selectIsUser = (state) => getters.isUser(state.user)
-export const selectDisplayName = (state) => getters.displayName(state.user)
-export const selectAvatar = (state) => getters.avatar(state.user)
-export const selectUserId = (state) => getters.userId(state.user)
-export const selectIsLoading = (state) => state.user.isLoading
-export const selectError = (state) => state.user.error
-
-export default userSlice.reducer
+export default userSlice.reducer;

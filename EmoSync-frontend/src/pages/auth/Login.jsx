@@ -25,7 +25,7 @@ const Login = () => {
     password: "",
   });
 
-  const from = location.state?.from?.pathname || "/";
+  const from = location.state?.from?.pathname;
 
   const handleChange = (e) => {
     setFormData({
@@ -38,9 +38,26 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      await dispatch(loginUser(formData)).unwrap();
-      navigate(from, { replace: true });
+      console.log("开始登录，表单数据:", formData);
+      console.log("当前from路径:", from);
+
+      // Clear any existing token before login to avoid conflicts
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      localStorage.removeItem("roleType");
+
+      // Dispatch the loginUser action
+      const result = await dispatch(loginUser(formData)).unwrap();
+
+      console.log("Login success:", result);
+
+      const { roleType } = result;
+
+      // Redirect rules - prioritize dashboard over profile for fresh login
+      let redirectPath = "/back/dashboard"; // Always go to dashboard after successful login
+      navigate(redirectPath, { replace: true });
     } catch (err) {
+      console.error("登录失败:", err);
       // error is already stored in Redux
     }
   };

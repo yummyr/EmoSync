@@ -1,5 +1,4 @@
 import axios from "axios";
-// import { isTokenExpired } from "../utils/tokenUtils";
 
 const api = axios.create({
   baseURL: "http://localhost:8080/api", //  backend API base URL
@@ -21,14 +20,6 @@ api.interceptors.request.use(
     // add Token to request headers
     const token = localStorage.getItem("token");
     if (token) {
-      // Check if token is expired before sending request
-      if (isTokenExpired(token)) {
-        console.warn("Token is expired, redirecting to login...");
-        localStorage.clear();
-        window.location.href = "/auth/login";
-        return Promise.reject(new Error("Token expired"));
-      }
-
       config.headers["Authorization"] = `Bearer ${token}`;
     }
 
@@ -78,7 +69,13 @@ api.interceptors.response.use(
       // if token expired, clear local storage and nav to login
       console.error("Unauthorized access - token invalid or expired");
       localStorage.removeItem("token");
-      window.location.href = "/auth/login";
+      localStorage.removeItem("user");
+      localStorage.removeItem("roleType");
+
+      // Only redirect if not already on login page to avoid redirect loops
+      if (!window.location.pathname.includes('/login')) {
+        window.location.href = "/auth/login";
+      }
     }
     if (axios.isCancel(error)) {
     } else if (error.config) {

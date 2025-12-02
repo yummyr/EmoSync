@@ -1,33 +1,33 @@
 /**
- * 认证相关工具函数
- * 配合Redux store使用
+ * permission utils
+ * all permission related helper functions
  */
 
 import store from '@/store'
 import { selectIsLoggedIn, selectUserInfo, selectToken } from '@/store/userSlice'
 
 /**
- * 初始化认证状态
- * 应用启动时调用
+ * initialize auth state
+ * check if token is expired and clear user info if needed
  */
 export function initAuth() {
   const state = store.getState()
 
-  // 如果token过期，自动跳转到登录页
+  // if not logged in but token exists, token might be expired
   if (!selectIsLoggedIn(state) && selectToken(state)) {
-    console.log('Token已过期，自动登出')
+    console.log('Token expired, redirecting to login page...')
     store.dispatch({ type: 'user/clearUserInfo' })
     redirectToLogin()
   }
 }
 
 /**
- * 跳转到登录页
+ * redirect to login page with current path as redirect param
  */
 export function redirectToLogin() {
   const currentPath = window.location.pathname
 
-  // 避免在登录页重复跳转
+  // avoid redirect loop
   if (currentPath.includes('/auth/')) {
     return
   }
@@ -36,8 +36,8 @@ export function redirectToLogin() {
 }
 
 /**
- * 检查用户权限
- * @param {string} permission 权限标识
+ * check if user has specific permission
+ * @param {string} permission permission string to check
  * @returns {boolean}
  */
 export function checkPermission(permission) {
@@ -48,7 +48,7 @@ export function checkPermission(permission) {
     return false
   }
 
-  // 管理员拥有所有权限
+  // admin has all permissions by default
   if (userInfo.userType === 2 || userInfo.roleType === 'ADMIN') {
     return true
   }
@@ -57,28 +57,28 @@ export function checkPermission(permission) {
 }
 
 /**
- * 权限守卫函数
- * 用于路由守卫或组件守卫
- * @param {string|Array} permissions 需要的权限
+ * permission guard function
+ * used before accessing protected routes or actions
+ * @param {string|Array} permissions needed permission(s)
  * @returns {boolean}
  */
 export function requireAuth(permissions = []) {
   const state = store.getState()
 
-  // 检查是否登录
+  // check login status
   if (!selectIsLoggedIn(state)) {
     redirectToLogin()
     return false
   }
 
-  // 检查权限
+  // check permissions
   if (permissions.length > 0) {
     const hasPermission = Array.isArray(permissions)
       ? permissions.some(p => checkPermission(p))
       : checkPermission(permissions)
 
     if (!hasPermission) {
-      console.warn('用户权限不足:', permissions)
+      console.warn('Permission denied:', permissions)
       return false
     }
   }
@@ -87,16 +87,16 @@ export function requireAuth(permissions = []) {
 }
 
 /**
- * 安全登出
- * 清除所有用户状态并跳转
+ * logout user safely
+ * calls logout action and redirects to login page
  */
 export async function safeLogout() {
   try {
     await store.dispatch({ type: 'user/logoutUser' })
   } catch (error) {
-    console.error('登出过程中发生错误:', error)
+    console.error('Error while logging out:', error)
   } finally {
-    // 确保跳转到登录页
+    // ensure redirect to login page
     window.location.href = '/auth/login'
   }
 }
@@ -125,7 +125,8 @@ export function getCurrentUser() {
 }
 
 /**
- * 角色检查工具
+ * roleCheck function
+ * provide methods to check user roles
  */
 export const roleCheck = {
   isAdmin() {

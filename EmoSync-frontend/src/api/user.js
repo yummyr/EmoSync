@@ -7,8 +7,24 @@ import api from "./index";
  * url地址：/user/login
  * 请求方式：POST
  */
-export function login(params, config = {}) {
-  return api.post('/user/login', params, config)
+export function login(loginForm) {
+  return api.post("/user/login", loginForm)
+    .then(res => {
+      console.log("Login API response:", res.data);
+      const data = res.data?.data || res.data;
+
+      if (!data) {
+        throw new Error("No data returned from server");
+      }
+
+      return data;
+    })
+    .catch(err => {
+      console.error("Login API error:", err);
+      // Extract error message from response if available
+      const errorMessage = err.response?.data?.message || err.message || "Login failed";
+      throw new Error(errorMessage);
+    });
 }
 
 /**
@@ -31,9 +47,10 @@ export function register(params, config = {}) {
  * url地址：/user/current
  * 请求方式：GET
  */
-export function getCurrentUser(params, config = {}) {
-  return api.get('/user/current', params, config)
+export function getCurrentUser() {
+  return api.get('/user/current').then(res => res.data.data);
 }
+
 
 /**
  * 根据ID获取用户信息
@@ -43,9 +60,10 @@ export function getCurrentUser(params, config = {}) {
  * url地址：/user/{id}
  * 请求方式：GET
  */
-export function getUserById(id, config = {}) {
-  return api.get(`/user/${id}`, null, config)
+export function getUserById(id) {
+  return api.get(`/user/${id}`).then(res => res.data.data);
 }
+
 
 /**
  * 更新用户个人信息
@@ -55,9 +73,10 @@ export function getUserById(id, config = {}) {
  * url地址：/user/profile
  * 请求方式：PUT
  */
-export function updateUser(params, config = {}) {
-  return api.put('/user/profile', params, config)
+export function updateUser(params) {
+  return api.put('/user/profile', params).then(res => res.data.data);
 }
+
 
 /**
  * 修改用户密码
@@ -67,9 +86,10 @@ export function updateUser(params, config = {}) {
  * url地址：/user/password
  * 请求方式：PUT
  */
-export function updatePassword(params, config = {}) {
-  return api.put('/user/password', params, config)
+export function updatePassword(params) {
+  return api.put('/user/password', params).then(res => res.data.data);
 }
+
 
 /**
  * 忘记密码
@@ -91,8 +111,8 @@ export function forgetPassword(params, config = {}) {
  * url地址：/user/logout
  * 请求方式：POST
  */
-export function logout(config = {}) {
-  return api.post('/user/logout', null, config)
+export function logout() {
+  return api.post('/user/logout').then(res => res.data);
 }
 
 /**
@@ -103,9 +123,10 @@ export function logout(config = {}) {
  * url地址：/user/page
  * 请求方式：GET
  */
-export function getUserPage(params, config = {}) {
-  return api.get('/user/page', params, config)
+export function getUserPage(params) {
+  return api.get('/user/page', { params }).then(res => res.data.data);
 }
+
 
 /**
  * 获取用户统计数据（管理员功能）
@@ -115,9 +136,10 @@ export function getUserPage(params, config = {}) {
  * url地址：/user/statistics
  * 请求方式：GET
  */
-export function getUserStatistics(config = {}) {
-  return api.get('/user/statistics', null, config)
+export function getUserStatistics() {
+  return api.get('/user/statistics').then(res => res.data.data);
 }
+
 
 /**
  * 更新用户状态（管理员功能）
@@ -127,12 +149,11 @@ export function getUserStatistics(config = {}) {
  * url地址：/user/{id}/status
  * 请求方式：PUT
  */
-export function updateUserStatus(id, params, config = {}) {
-  return api.put(`/user/${id}/status`, null, {
-    ...config,
-    params: params
-  })
+export function updateUserStatus(id, params) {
+  return api.put(`/user/${id}/status`, null, { params })
+    .then(res => res.data.data);
 }
+
 
 /**
  * 删除用户（管理员功能）
@@ -142,9 +163,6 @@ export function updateUserStatus(id, params, config = {}) {
  * url地址：/user/{id}
  * 请求方式：DELETE
  */
-export function deleteUser(id, config = {}) {
-  return api.delete(`/user/${id}`, {
-    successMsg: '删除成功',
-    ...config
-  })
+export function deleteUser(id) {
+  return api.delete(`/user/${id}`).then(res => res.data.data);
 }

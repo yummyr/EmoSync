@@ -8,27 +8,13 @@ import {
   faArrowRight,
   faRobot,
 } from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from "react-router-dom";
 
-
-// Mock user state - in real app, you'd get this from Redux/Context/Zustand
-const useUserStore = () => {
-  // Simulate logged in (true) or not logged in (false)
-  const isLoggedIn = true; // Change to false to simulate not logged in state
-  return { isLoggedIn };
-};
-
-// Mock Link component - using regular <a> tag instead of router Link
-const Link = ({ to, className, children }) => (
-  <a href={to} className={className}>
-    {children}
-  </a>
-);
 
 
 const Home = () => {
-  const { isLoggedIn } = useUserStore();
-
-  const getActionLink = (path) => (isLoggedIn ? path : "/auth/login");
+  const navigate = useNavigate();
+  // const getActionLink = (path) => (isLoggedIn ? path : "/auth/login");
 
   return (
     <div className="home font-sans">
@@ -52,18 +38,16 @@ const Home = () => {
               <div className="flex flex-wrap gap-4 hero-actions py-4">
                 {/* Primary Button */}
                 <button
-                  onClick={() =>
-                    (window.location.href = getActionLink("/auth/login"))
-                  }
+                  onClick={() =>navigate("/auth/login")}
+              
+                
                   className="primary-btn bg-white w-full py-4 text-blue-600 text-lg rounded-full shadow-md hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:shadow-md"
                 >
                   <FontAwesomeIcon icon={faHeart} /> Start Sharing, Find Support
                 </button>
                 {/* Secondary Button */}
                 <button
-                  onClick={() =>
-                    (window.location.href = getActionLink("/auth/login"))
-                  }
+                 onClick={() =>navigate("/auth/login")}
                   className="secondary-btn border border-white w-full py-4 text-white text-lg rounded-full bg-white/10  backdrop-blur-sm hover:-translate-y-0.5 hover:shadow-lg hover:bg-white/20 active:translate-y-0 active:shadow-md"
                 >
                   <FontAwesomeIcon icon={faPenFancy} /> Record Emotions, Release
@@ -106,9 +90,7 @@ const Home = () => {
           <div className="grid gap-8 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1">
             {/* ---------- CARD 1：Heart-to-Heart Chat (AI Counseling)---------- */}
             <button
-              onClick={() =>
-                (window.location.href = getActionLink("/auth/login"))
-              }
+             onClick={() =>navigate("/auth/login")}
               className="group block p-8 rounded-2xl bg-white shadow-md 
                          hover:shadow-xl hover:-translate-y-1 
                          transition-all duration-300 text-center cursor-pointer"
@@ -141,9 +123,7 @@ const Home = () => {
 
             {/* ---------- CARD 2：Emotional Recording (Mood Tracking) ---------- */}
             <button
-              onClick={() =>
-                (window.location.href = getActionLink("/auth/login"))
-              }
+             onClick={() =>navigate("/auth/login")}
               className="group block p-8 rounded-2xl bg-white shadow-md 
                          hover:shadow-xl hover:-translate-y-1 
                          transition-all duration-300 text-center cursor-pointer"
@@ -176,9 +156,7 @@ const Home = () => {
 
             {/* ---------- CARD 3：Soul Growth (Knowledge Learning)  ---------- */}
             <button
-              onClick={() =>
-                (window.location.href = getActionLink("/knowledge"))
-              }
+             onClick={() =>navigate("/auth/login")}
               className="group block p-8 rounded-2xl bg-white shadow-md 
                          hover:shadow-xl hover:-translate-y-1 
                          transition-all duration-300 text-center cursor-pointer"

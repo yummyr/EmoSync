@@ -1,12 +1,8 @@
 import React from 'react'
 import { Outlet } from 'react-router-dom'
-import { useSelector } from 'react-redux'
-import { selectIsLoggedIn } from '@/store/userSlice'
 import "./HomeLayout.css"
 
 const HomeLayout = () => {
-  const isLoggedIn = useSelector(selectIsLoggedIn)
-
   return (
     <div className="min-h-screen bg-gray-50">
   
@@ -31,13 +27,9 @@ const HomeLayout = () => {
             
             </nav>
 
-            {/* User Actions */}
+            {/* Actions */}
             <div className="flex items-center space-x-4">
-              {isLoggedIn ? (
-                <a href="/profile" className="text-gray-500 hover:text-primary-400 px-3 py-2 text-sm font-medium">
-                  Profile
-                </a>
-              ) : (
+            
                 <div className="flex space-x-4">
                   <a href="/auth/login" className="text-gray-500 hover:text-primary-400 px-3 py-2 text-sm font-medium">
                     Login
@@ -46,7 +38,7 @@ const HomeLayout = () => {
                     Register
                   </a>
                 </div>
-              )}
+             
             </div>
           </div>
         </div>
