@@ -41,6 +41,14 @@ public class ConsultationSession  {
     private List<ConsultationMessage> messages;
 
     /**
+     * 获取用户ID
+     */
+    public Long getUserId() {
+        return user != null ? user.getId() : null;
+    }
+
+
+    /**
      * 计算会话持续时间（分钟）
      * 从开始时间到现在的持续时间
      */
@@ -69,4 +77,6 @@ public class ConsultationSession  {
         }
         return java.time.Duration.between(lastEmotionUpdatedAt, LocalDateTime.now()).toMinutes() >= thresholdMinutes;
     }
+
+
 }

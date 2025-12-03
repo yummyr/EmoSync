@@ -13,51 +13,51 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
 /**
- * 用户注册命令DTO
+ * User Registration Command DTO
  * @author system
  */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Schema(description = "用户注册命令")
+@Schema(description = "User registration command")
 public class UserRegisterCommandDTO {
 
-    @Schema(description = "用户名", example = "testuser")
-    @NotBlank(message = "用户名不能为空")
-    @Size(min = 3, max = 50, message = "用户名长度必须在3到50个字符之间")
-    @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "用户名只能包含字母、数字和下划线")
+    @Schema(description = "Username", example = "testuser")
+    @NotBlank(message = "Username cannot be empty")
+    @Size(min = 3, max = 50, message = "Username length must be between 3 and 50 characters")
+    @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "Username can only contain letters, numbers and underscores")
     private String username;
 
-    @Schema(description = "邮箱", example = "test@drone.com")
-    @NotBlank(message = "邮箱不能为空")
-    @Email(message = "邮箱格式不正确")
-    @Size(max = 100, message = "邮箱长度不能超过100个字符")
+    @Schema(description = "Email", example = "test@drone.com")
+    @NotBlank(message = "Email cannot be empty")
+    @Email(message = "Email format is invalid")
+    @Size(max = 100, message = "Email length cannot exceed 100 characters")
     private String email;
 
-    @Schema(description = "密码", example = "123456")
-    @NotBlank(message = "密码不能为空")
-    @Size(min = 6, max = 50, message = "密码长度必须在6到50个字符之间")
+    @Schema(description = "Password", example = "123456")
+    @NotBlank(message = "Password cannot be empty")
+    @Size(min = 6, max = 50, message = "Password length must be between 6 and 50 characters")
     private String password;
 
-    @Schema(description = "确认密码", example = "123456")
-    @NotBlank(message = "确认密码不能为空")
+    @Schema(description = "Confirm password", example = "123456")
+    @NotBlank(message = "Confirm password cannot be empty")
     private String confirmPassword;
 
-    @Schema(description = "昵称", example = "测试用户")
-    @Size(max = 50, message = "昵称长度不能超过50个字符")
+    @Schema(description = "Nickname", example = "Test User")
+    @Size(max = 50, message = "Nickname length cannot exceed 50 characters")
     private String nickname;
 
-    @Schema(description = "性别 0:未知 1:男 2:女", example = "0")
+    @Schema(description = "Gender 0:Unknown 1:Male 2:Female", example = "0")
     private Integer gender;
 
-    @Schema(description = "生日", example = "1990-01-01")
+    @Schema(description = "Birthday", example = "1990-01-01")
     private LocalDate birthday;
 
-    @Schema(description = "手机号", example = "13800138000")
-    @Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式不正确")
+    @Schema(description = "Phone number", example = "6266261234")
+    @Pattern(regexp = "^\\d{10}$", message = "Phone number must be exactly 10 digits")
     private String phone;
 
-    @Schema(description = "用户类型 1:普通用户 2:管理员", example = "1")
+    @Schema(description = "User type 1:Regular user 2:Administrator", example = "1")
     private Integer userType = 1;
 }

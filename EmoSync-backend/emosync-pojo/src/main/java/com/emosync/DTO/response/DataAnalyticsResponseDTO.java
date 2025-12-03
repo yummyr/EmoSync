@@ -12,209 +12,209 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 数据分析响应DTO
- * @author system
+ * Data Analytics Response DTO
+ * @author Yuan
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "数据分析响应DTO")
+@Schema(description = "Data Analytics Response DTO")
 public class DataAnalyticsResponseDTO {
 
-    @Schema(description = "系统概览数据")
+    @Schema(description = "System overview data")
     private SystemOverview systemOverview;
 
-    @Schema(description = "情绪热力图数据")
+    @Schema(description = "Emotion heatmap data")
     private EmotionHeatmapData emotionHeatmap;
 
-    @Schema(description = "情绪趋势数据")
+    @Schema(description = "Emotion trend data")
     private List<EmotionTrendData> emotionTrend;
 
-    @Schema(description = "咨询会话统计")
+    @Schema(description = "Consultation session statistics")
     private ConsultationStatistics consultationStats;
 
-    @Schema(description = "用户活跃度数据")
+    @Schema(description = "User activity data")
     private List<UserActivityData> userActivity;
 
     /**
-     * 系统概览数据
+     * System overview data
      */
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    @Schema(description = "系统概览数据")
+    @Schema(description = "System overview data")
     public static class SystemOverview {
-        @Schema(description = "总用户数")
+        @Schema(description = "Total users")
         private Long totalUsers;
 
-        @Schema(description = "活跃用户数")
+        @Schema(description = "Active users")
         private Long activeUsers;
 
-        @Schema(description = "情绪日记总数")
+        @Schema(description = "Total emotion diaries")
         private Long totalDiaries;
 
-        @Schema(description = "咨询会话总数")
+        @Schema(description = "Total consultation sessions")
         private Long totalSessions;
 
-        @Schema(description = "平均情绪评分")
+        @Schema(description = "Average mood score")
         private BigDecimal avgMoodScore;
 
-        @Schema(description = "今日新增用户")
+        @Schema(description = "Today's new users")
         private Long todayNewUsers;
 
-        @Schema(description = "今日新增日记")
+        @Schema(description = "Today's new diaries")
         private Long todayNewDiaries;
 
-        @Schema(description = "今日新增会话")
+        @Schema(description = "Today's new sessions")
         private Long todayNewSessions;
     }
 
     /**
-     * 情绪热力图数据
+     * Emotion heatmap data
      */
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    @Schema(description = "情绪热力图数据")
+    @Schema(description = "Emotion heatmap data")
     public static class EmotionHeatmapData {
-        @Schema(description = "热力图网格数据 - 按小时和星期分布")
+        @Schema(description = "Heatmap grid data - distributed by hour and day of week")
         private List<List<HeatmapPoint>> gridData;
 
-        @Schema(description = "情绪分布统计")
+        @Schema(description = "Emotion distribution statistics")
         private Map<String, Integer> emotionDistribution;
 
-        @Schema(description = "最高情绪活跃时段")
+        @Schema(description = "Peak emotion active time period")
         private String peakEmotionTime;
 
-        @Schema(description = "数据统计时间范围")
+        @Schema(description = "Data statistics time range")
         private String dateRange;
     }
 
     /**
-     * 热力图点数据
+     * Heatmap point data
      */
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    @Schema(description = "热力图点数据")
+    @Schema(description = "Heatmap point data")
     public static class HeatmapPoint {
-        @Schema(description = "X坐标(小时: 0-23)")
+        @Schema(description = "X coordinate (hour: 0-23)")
         private Integer x;
 
-        @Schema(description = "Y坐标(星期: 0-6, 0为周日)")
+        @Schema(description = "Y coordinate (day of week: 0-6, 0 is Sunday)")
         private Integer y;
 
-        @Schema(description = "数值强度(记录数量)")
+        @Schema(description = "Value intensity (record count)")
         private Integer value;
 
-        @Schema(description = "平均情绪评分")
+        @Schema(description = "Average mood score")
         private BigDecimal avgMoodScore;
 
-        @Schema(description = "主要情绪类型")
+        @Schema(description = "Dominant emotion type")
         private String dominantEmotion;
     }
 
     /**
-     * 情绪趋势数据
+     * Emotion trend data
      */
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    @Schema(description = "情绪趋势数据")
+    @Schema(description = "Emotion trend data")
     public static class EmotionTrendData {
-        @Schema(description = "日期")
+        @Schema(description = "Date")
         private LocalDate date;
 
-        @Schema(description = "平均情绪评分")
+        @Schema(description = "Average mood score")
         private BigDecimal avgMoodScore;
 
-        @Schema(description = "记录数量")
+        @Schema(description = "Record count")
         private Integer recordCount;
 
-        @Schema(description = "正面情绪占比")
+        @Schema(description = "Positive emotion ratio")
         private BigDecimal positiveRatio;
 
-        @Schema(description = "负面情绪占比")
+        @Schema(description = "Negative emotion ratio")
         private BigDecimal negativeRatio;
 
-        @Schema(description = "主要情绪类型")
+        @Schema(description = "Dominant emotion type")
         private String dominantEmotion;
     }
 
     /**
-     * 咨询会话统计
+     * Consultation session statistics
      */
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    @Schema(description = "咨询会话统计")
+    @Schema(description = "Consultation session statistics")
     public static class ConsultationStatistics {
-        @Schema(description = "总会话数")
+        @Schema(description = "Total sessions")
         private Long totalSessions;
 
-        @Schema(description = "平均会话时长(分钟)")
+        @Schema(description = "Average session duration (minutes)")
         private BigDecimal avgDurationMinutes;
 
-        @Schema(description = "情绪改善会话数")
+        @Schema(description = "Emotion improved sessions")
         private Long improvedSessions;
 
-        @Schema(description = "情绪改善率")
+        @Schema(description = "Emotion improvement rate")
         private BigDecimal improvementRate;
 
-        @Schema(description = "每日会话数趋势")
+        @Schema(description = "Daily session count trend")
         private List<DailySessionCount> dailyTrend;
 
-        @Schema(description = "高频情绪标签")
+        @Schema(description = "Top emotion tags")
         private Map<String, Integer> topEmotionTags;
     }
 
     /**
-     * 每日会话数统计
+     * Daily session count statistics
      */
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    @Schema(description = "每日会话数统计")
+    @Schema(description = "Daily session count statistics")
     public static class DailySessionCount {
-        @Schema(description = "日期")
+        @Schema(description = "Date")
         private LocalDate date;
 
-        @Schema(description = "会话数量")
+        @Schema(description = "Session count")
         private Integer sessionCount;
 
-        @Schema(description = "参与用户数")
+        @Schema(description = "Participating users count")
         private Integer userCount;
     }
 
     /**
-     * 用户活跃度数据
+     * User activity data
      */
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    @Schema(description = "用户活跃度数据")
+    @Schema(description = "User activity data")
     public static class UserActivityData {
-        @Schema(description = "日期")
+        @Schema(description = "Date")
         private LocalDate date;
 
-        @Schema(description = "活跃用户数")
+        @Schema(description = "Active users")
         private Integer activeUsers;
 
-        @Schema(description = "新增用户数")
+        @Schema(description = "New users")
         private Integer newUsers;
 
-        @Schema(description = "日记记录用户数")
+        @Schema(description = "Diary recording users")
         private Integer diaryUsers;
 
-        @Schema(description = "咨询用户数")
+        @Schema(description = "Consultation users")
         private Integer consultationUsers;
     }
 }

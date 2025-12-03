@@ -3,15 +3,15 @@ package com.emosync.enumClass;
 import lombok.Getter;
 
 /**
- * 知识文章状态枚举
- * @author system
+ * Knowledge Article Status Enum
+ * @author Yuan
  */
 @Getter
 public enum ArticleStatus {
 
-    DRAFT(0, "草稿"),
-    PUBLISHED(1, "已发布"),
-    OFFLINE(2, "已下线");
+    DRAFT(0, "Draft"),
+    PUBLISHED(1, "Published"),
+    OFFLINE(2, "Offline");
 
     private final Integer code;
     private final String description;
@@ -22,7 +22,7 @@ public enum ArticleStatus {
     }
 
     /**
-     * 根据代码获取枚举
+     * Get enum by code
      */
     public static ArticleStatus fromCode(Integer code) {
         for (ArticleStatus status : ArticleStatus.values()) {
@@ -30,11 +30,11 @@ public enum ArticleStatus {
                 return status;
             }
         }
-        throw new IllegalArgumentException("未知的文章状态代码: " + code);
+        throw new IllegalArgumentException("Unknown article status code: " + code);
     }
 
     /**
-     * 验证文章状态代码是否有效
+     * Validate if article status code is valid
      */
     public static boolean isValidCode(Integer code) {
         for (ArticleStatus status : ArticleStatus.values()) {
@@ -46,21 +46,21 @@ public enum ArticleStatus {
     }
 
     /**
-     * 是否可以发布
+     * Can publish
      */
     public boolean canPublish() {
         return this == DRAFT || this == OFFLINE;
     }
 
     /**
-     * 是否可以下线
+     * Can offline
      */
     public boolean canOffline() {
         return this == PUBLISHED;
     }
 
     /**
-     * 是否可以编辑
+     * Can edit
      */
     public boolean canEdit() {
         return this == DRAFT || this == OFFLINE;

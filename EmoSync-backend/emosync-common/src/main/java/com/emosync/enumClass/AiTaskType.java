@@ -1,14 +1,14 @@
 package com.emosync.enumClass;
 
 /**
- * AI分析任务类型枚举
- * @author system
+ * AI Analysis Task Type Enum
+ * @author Yuan
  */
 public enum AiTaskType {
-    AUTO("AUTO", "自动触发"),
-    MANUAL("MANUAL", "手动触发"),
-    ADMIN("ADMIN", "管理员触发"),
-    BATCH("BATCH", "批量触发");
+    AUTO("AUTO", "Auto triggered"),
+    MANUAL("MANUAL", "Manual triggered"),
+    ADMIN("ADMIN", "Admin triggered"),
+    BATCH("BATCH", "Batch triggered");
 
     private final String code;
     private final String description;
@@ -32,7 +32,7 @@ public enum AiTaskType {
                 return type;
             }
         }
-        throw new IllegalArgumentException("未知的任务类型: " + code);
+        throw new IllegalArgumentException("Unknown task type: " + code);
     }
 }
 

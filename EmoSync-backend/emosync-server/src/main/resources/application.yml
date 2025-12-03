@@ -16,7 +16,18 @@ spring:
       host: localhost
       port: 6379
       database: 0
-
+  jpa:
+    hibernate:
+      ddl-auto: update  # 开发环境可用update，生产环境用validate或none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+    show-sql: true  # 开发环境可开启，生产环境关闭
   # 安全配置
   security:
     user:
@@ -95,8 +106,8 @@ knife4j:
 
 # JWT配置
 jwt:
-  secret: A9zTqVaKpN7xH3p7lP0YZlhcQ+q1YTWPFZ3LG10T/4A=
-  expiration: 86400000000  # 24小时（毫秒）
+  secret: MySuperLongAndSecureSecretKey12345678901234567890
+  expiration: 86400000  # 24小时（毫秒）
   refresh-expiration: 604800000  # 7天（毫秒）
   header: Authorization  # token头部名称
   token-prefix: "Bearer "  # token前缀
@@ -115,4 +126,4 @@ EmoSync:
   cloud-name: ${EmoSync.cloudinary.cloud-name}
   api-key: ${EmoSync.cloudinary.api-key}
   api-secret: ${EmoSync.cloudinary.api-secret}
-  secure: ${EmoSync.cloudinary.secure}
+  secure: ${EmoSync.cloudinary.secure}compact

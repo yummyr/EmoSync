@@ -3,14 +3,14 @@ package com.emosync.enumClass;
 import lombok.Getter;
 
 /**
- * 用户类型枚举
- * @author system
+ * User Type Enum
+ * @author Yuan
  */
 @Getter
 public enum UserType {
-    
-    USER(1, "普通用户"),
-    ADMIN(2, "管理员");
+
+    USER(1, "Regular User"),
+    ADMIN(2, "Administrator");
 
     private final Integer code;
     private final String description;
@@ -21,7 +21,7 @@ public enum UserType {
     }
 
     /**
-     * 根据代码获取枚举
+     * Get enum by code
      */
     public static UserType fromCode(Integer code) {
         for (UserType type : UserType.values()) {
@@ -29,11 +29,11 @@ public enum UserType {
                 return type;
             }
         }
-        throw new IllegalArgumentException("未知的用户类型代码: " + code);
+        throw new IllegalArgumentException("Unknown user type code: " + code);
     }
 
     /**
-     * 验证用户类型代码是否有效
+     * Validate if user type code is valid
      */
     public static boolean isValidCode(Integer code) {
         for (UserType type : UserType.values()) {

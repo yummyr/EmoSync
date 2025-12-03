@@ -53,13 +53,13 @@ public class UserController {
         return (UserDetailsImpl) auth.getPrincipal();
     }
 
-    /** Check if current user has ROLE_ADMIN */
+    /** Check if current user has ROLE_2  */
     private boolean isAdmin() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null) return false;
 
         for (GrantedAuthority authority : auth.getAuthorities()) {
-            if ("ROLE_admin".equals(authority.getAuthority())) {
+            if ("ROLE_2".equals(authority.getAuthority())) {
                 return true;
             }
         }

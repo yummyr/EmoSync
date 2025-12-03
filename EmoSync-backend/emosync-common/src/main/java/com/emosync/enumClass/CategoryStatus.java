@@ -3,14 +3,14 @@ package com.emosync.enumClass;
 import lombok.Getter;
 
 /**
- * 知识分类状态枚举
- * @author system
+ * Knowledge Category Status Enum
+ * @author Yuan
  */
 @Getter
 public enum CategoryStatus {
 
-    DISABLED(0, "禁用"),
-    ENABLED(1, "启用");
+    DISABLED(0, "Disabled"),
+    ENABLED(1, "Enabled");
 
     private final Integer code;
     private final String description;
@@ -21,7 +21,7 @@ public enum CategoryStatus {
     }
 
     /**
-     * 根据代码获取枚举
+     * Get enum by code
      */
     public static CategoryStatus fromCode(Integer code) {
         for (CategoryStatus status : CategoryStatus.values()) {
@@ -29,11 +29,11 @@ public enum CategoryStatus {
                 return status;
             }
         }
-        throw new IllegalArgumentException("未知的分类状态代码: " + code);
+        throw new IllegalArgumentException("Unknown category status code: " + code);
     }
 
     /**
-     * 验证分类状态代码是否有效
+     * Validate if category status code is valid
      */
     public static boolean isValidCode(Integer code) {
         for (CategoryStatus status : CategoryStatus.values()) {
@@ -45,14 +45,14 @@ public enum CategoryStatus {
     }
 
     /**
-     * 是否启用
+     * Is enabled
      */
     public boolean isEnabled() {
         return this == ENABLED;
     }
 
     /**
-     * 是否禁用
+     * Is disabled
      */
     public boolean isDisabled() {
         return this == DISABLED;

@@ -3,8 +3,12 @@ package com.emosync.repository;
 import com.emosync.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -22,7 +26,7 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     /**
      * Find user by username.
      */
-    Optional<User> findByUsername(String username);
+    User findByUsername(String username);
 
     /**
      * Find user by email.
@@ -54,5 +58,21 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
      * Check if phone already exists.
      */
     boolean existsByPhone(String phone);
+
+    /**
+     * 统计在指定时间范围内创建的用户数量
+     */
+    @Query("SELECT COUNT(u) FROM User u WHERE u.createdAt >= :start AND u.createdAt <= :end")
+    Long countByCreatedAtBetween(@Param("start")LocalDateTime start, @Param("end")LocalDateTime end);
+
+    /**
+     * 查找在指定时间范围内活跃的用户ID（根据createdAt判断）
+     * 注意：这个方法返回的是在指定时间范围内创建的用户ID
+     * 如果你需要根据用户活动判断活跃用户，需要在业务逻辑中处理
+     */
+    @Query("SELECT DISTINCT u.id FROM User u WHERE u.createdAt >= :start AND u.createdAt <= :end")
+    List<Long> findActiveUserIdsBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    boolean existsByIdAndUserType(Long id, Integer userType);
 }
 

@@ -8,6 +8,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import com.emosync.config.JwtConfig;
 import org.springframework.stereotype.Component;
@@ -69,10 +70,14 @@ public class JwtTokenUtils {
      * @param secretKey Secret key string
      * @return SecretKey
      */
+    // private static SecretKey getSecretKey(String secretKey) {
+    //     byte[] decodedKey = java.util.Base64.getDecoder().decode(secretKey);
+    //     return Keys.hmacShaKeyFor(decodedKey);
+    // }
     private static SecretKey getSecretKey(String secretKey) {
-        byte[] decodedKey = java.util.Base64.getDecoder().decode(secretKey);
-        return Keys.hmacShaKeyFor(decodedKey);
+        return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     }
+
 
 
     /**
@@ -96,7 +101,9 @@ public class JwtTokenUtils {
 
             long nowMillis = System.currentTimeMillis();
             Date now = new Date(nowMillis);
-            SecretKey key = getSecretKey(jwtConfig.getSecret());
+            String secret = jwtConfig.getSecret();
+            log.info("JWT generation using secret: {}", secret);
+            SecretKey key = getSecretKey(secret);
 
             String token = Jwts.builder()
                     .setClaims(claims)
@@ -106,6 +113,7 @@ public class JwtTokenUtils {
                     .compact();
 
             log.debug("JWT token generated successfully, User ID: {}, Username: {}, Role: {}", userId, username, roleType);
+            log.info("生成token:{}",token);
             return token;
         } catch (Exception e) {
             log.error("Failed to generate JWT token, User ID: {}, Username: {}, Role: {}", userId, username, roleType, e);
@@ -125,16 +133,50 @@ public class JwtTokenUtils {
             throw new RuntimeException("Token cannot be empty");
         }
         try {
-            SecretKey key = getSecretKey(jwtConfig.getSecret());
-            return Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
+            // First try with the configured secret
+            String secret = jwtConfig.getSecret();
+            log.info("JWT verification using configured secret: {}", secret);
+            log.info("Verify token: {}", token);
+            try {
+                SecretKey key = getSecretKey(secret);
+                Claims claims= Jwts.parserBuilder()
+                        .setSigningKey(key)
+                        .build()
+                        .parseClaimsJws(token)
+                        .getBody();
+                log.info("verify token get claims:{}", String.valueOf(claims));
+                return claims;
+            } catch (Exception e) {
+                log.warn("JWT verification failed with configured secret, trying fallback secret");
+                // Fallback to old hardcoded secret for backward compatibility
+                String fallbackSecret = "MySuperLongAndSecureSecretKey12345678901234567890";
+                log.info("JWT verification using fallback secret: {}", fallbackSecret);
+                SecretKey fallbackKey = getSecretKey(fallbackSecret);
+                Claims claims= Jwts.parserBuilder()
+                        .setSigningKey(fallbackKey)
+                        .build()
+                        .parseClaimsJws(token)
+                        .getBody();
+                log.info("verify token get claims with fallback:{}", String.valueOf(claims));
+                return claims;
+            }
         } catch (Exception e) {
             log.error("Token verification failed: {}", e.getMessage());
             throw new RuntimeException("Token verification failed", e);
         }
+    }
+
+    public static void main(String[] args) {
+        JwtConfig config = new JwtConfig();
+        config.setSecret("MySuperLongAndSecureSecretKey12345678901234567890");
+        config.setExpiration(86400000);
+        config.setRefreshExpiration(604800000);
+        config.setTokenPrefix("Bearer ");
+        JwtTokenUtils jwtTokenUtils = new JwtTokenUtils(config);
+        String token = jwtTokenUtils.generateToken(5L, "ad1", 2);
+        System.out.println("token: " + token);
+        TokenValidationResult result = jwtTokenUtils.validateToken(token);
+        System.out.println("validate result: " + result);
     }
 
     /**
@@ -287,6 +329,7 @@ public class JwtTokenUtils {
      * Token validation result wrapper class
      */
     @Getter
+    @ToString
     public static class TokenValidationResult {
         private final Long userId;
         private final String username;

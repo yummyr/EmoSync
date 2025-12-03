@@ -12,7 +12,7 @@ import java.util.List;
  *
  * Replaced Hutool StrUtil with Spring's StringUtils.
  *
- * @author
+ * @author Yuan
  */
 @Getter
 public enum FileTypeEnum {

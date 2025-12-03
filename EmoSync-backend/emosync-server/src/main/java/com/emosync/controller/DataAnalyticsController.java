@@ -32,6 +32,7 @@ public class DataAnalyticsController {
 
     private final DataAnalyticsService dataAnalyticsService;
 
+
     /** Get current authenticated UserDetailsImpl */
     private UserDetailsImpl getCurrentUserInfo() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -42,13 +43,15 @@ public class DataAnalyticsController {
         return (UserDetailsImpl) auth.getPrincipal();
     }
 
-    /** Check if current user has ROLE_ADMIN */
+    /** Check if current user has administrator role type */
     private boolean isAdmin() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null) return false;
 
         for (GrantedAuthority authority : auth.getAuthorities()) {
-            if ("ROLE_admin".equals(authority.getAuthority())) {
+            log.info("permission:{}",authority.getAuthority());
+            // role type: 1 = regular user, 2= administrator
+            if ("ROLE_2".equals(authority.getAuthority())) {
                 return true;
             }
         }

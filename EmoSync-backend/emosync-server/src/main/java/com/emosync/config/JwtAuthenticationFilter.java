@@ -88,6 +88,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                         // Build ROLE
                         String roleCode = "ROLE_" + validationResult.getRoleType();
+                        log.info("创建角色：{}",roleCode);
                         List<SimpleGrantedAuthority> authorities = Collections.singletonList(
                                 new SimpleGrantedAuthority(roleCode)
                         );

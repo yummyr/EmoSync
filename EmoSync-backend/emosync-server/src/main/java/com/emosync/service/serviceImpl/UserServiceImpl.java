@@ -44,11 +44,10 @@ public class UserServiceImpl implements UserService {
     public UserLoginResponseDTO login(UserLoginCommandDTO loginDTO) {
         log.info("User Service get loginDTO:{}",loginDTO);
 
-        User user = userRepository.findByUsername(loginDTO.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findByUsername(loginDTO.getUsername());
         log.info("User service login get user:{}",user.toString());
         // Check user status
-        if (user.getStatus() == 0) {
+        if (user.getStatus() == null || user.getStatus() == 0) {
             throw new BusinessException("Account is disabled");
         }
 
@@ -142,7 +141,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public PageResult<UserDetailResponseDTO> getUserPage(UserListQueryDTO query) {
-        // TODO: Implement real paging
+
         try {
             // create page query
             Pageable pageable = PageRequest.of(

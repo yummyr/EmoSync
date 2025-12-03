@@ -2,22 +2,28 @@ package com.emosync.repository;
 
 import com.emosync.entity.UserFavorite;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+
 @Repository
 public interface UserFavoriteRepository extends JpaRepository<UserFavorite, Long> {
 
-    // 使用对象导航查询
-    Optional<UserFavorite> findByUser_IdAndKnowledgeArticle_Id(Long userId, String articleId);
 
-    List<UserFavorite> findByUser_IdOrderByCreatedAtDesc(Long userId);
+    boolean existsByUser_IdAndKnowledgeArticle_Id(Long userId, String knowledgeArticleId);
 
-    boolean existsByUser_IdAndKnowledgeArticle_Id(Long userId, String articleId);
+    void deleteByKnowledgeArticle_Id(String knowledgeArticleId);
 
-    // 其他查询方法
-    List<UserFavorite> findByKnowledgeArticle_Id(String articleId);
+    List<UserFavorite> findByUserIdAndKnowledgeArticle_IdIn(Long userId, List<String> articleIds);
 
-    int countByUser_Id(Long userId);
+    @Query("""
+                SELECT f.knowledgeArticle.id, COUNT(f)
+                FROM UserFavorite f
+                WHERE f.knowledgeArticle.id IN :articleIds
+                GROUP BY f.knowledgeArticle.id
+            """)
+    List<Object[]> countByArticleIdsGrouped(List<String> articleIds);
 }

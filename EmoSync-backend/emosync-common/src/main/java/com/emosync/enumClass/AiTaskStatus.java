@@ -1,14 +1,14 @@
 package com.emosync.enumClass;
 
 /**
- * AI分析任务状态枚举
- * @author system
+ * AI Analysis Task Status Enum
+ * @author Yuan
  */
 public enum AiTaskStatus {
-    PENDING("PENDING", "待处理"),
-    PROCESSING("PROCESSING", "处理中"),
-    COMPLETED("COMPLETED", "已完成"),
-    FAILED("FAILED", "失败");
+    PENDING("PENDING", "Pending"),
+    PROCESSING("PROCESSING", "Processing"),
+    COMPLETED("COMPLETED", "Completed"),
+    FAILED("FAILED", "Failed");
 
     private final String code;
     private final String description;
@@ -32,7 +32,7 @@ public enum AiTaskStatus {
                 return status;
             }
         }
-        throw new IllegalArgumentException("未知的任务状态: " + code);
+        throw new IllegalArgumentException("Unknown task status: " + code);
     }
 }
 

@@ -3,14 +3,14 @@ package com.emosync.enumClass;
 import lombok.Getter;
 
 /**
- * 用户状态枚举
- * @author system
+ * User Status Enum
+ * @author Yuan
  */
 @Getter
 public enum UserStatus {
-    
-    DISABLED(0, "禁用"),
-    NORMAL(1, "正常");
+
+    DISABLED(0, "Disabled"),
+    NORMAL(1, "Normal");
 
     private final Integer code;
     private final String description;
@@ -21,7 +21,7 @@ public enum UserStatus {
     }
 
     /**
-     * 根据代码获取枚举
+     * Get enum by code
      */
     public static UserStatus fromCode(Integer code) {
         for (UserStatus status : UserStatus.values()) {
@@ -29,11 +29,11 @@ public enum UserStatus {
                 return status;
             }
         }
-        throw new IllegalArgumentException("未知的用户状态代码: " + code);
+        throw new IllegalArgumentException("Unknown user status code: " + code);
     }
 
     /**
-     * 验证用户状态代码是否有效
+     * Validate if user status code is valid
      */
     public static boolean isValidCode(Integer code) {
         for (UserStatus status : UserStatus.values()) {
