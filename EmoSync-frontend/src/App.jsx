@@ -19,7 +19,7 @@ import NotFound from "./pages/NotFound";
 import ProfilePage from "./pages/admin/ProfilePage";
 import ConsultationManagementPage from "./pages/admin/ConsultationManagementPage";
 import CategoryManagementPage from "./pages/admin/CategoryManagementPage";
-import KnowledgeBasePage from "./pages/admin/KnowledgeBasePage";
+import KnowledgeBasePage from "./pages/admin/KnowledgeArticlePage";
 import UserManagementPage from "./pages/admin/UserManagementPage";
 
 function App() {

@@ -26,7 +26,10 @@ const Login = () => {
   });
 
   const from = location.state?.from?.pathname;
-
+  const [showResetPasswordForm, setShowResetPasswordForm] = useState(false);
+  const handleForgetPassword = () => {
+    setShowResetPasswordForm(true);
+  };
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -165,7 +168,11 @@ const Login = () => {
             Remember me
           </label>
 
-          <button type="button" className="text-blue-600 hover:underline">
+          <button
+            onClick={handleForgetPassword}
+            type="button"
+            className="text-blue-600 hover:underline"
+          >
             Forgot password?
           </button>
         </div>
@@ -203,6 +210,21 @@ const Login = () => {
           devices.
         </p>
       </div>
+      {showResetPasswordForm && (
+        <div className="mt-6 p-4 border rounded-lg bg-yellow-50 text-yellow-700 text-sm">
+          <h3 className="font-semibold mb-2">Reset Password</h3>
+          <p>
+            A password reset link has been sent to your registered email address
+            if it exists in our system.
+          </p>
+          <button
+            onClick={() => setShowResetPasswordForm(false)}
+            className="mt-4 px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
+          >
+            Close
+          </button>
+        </div>
+      )}
     </div>
   );
 };

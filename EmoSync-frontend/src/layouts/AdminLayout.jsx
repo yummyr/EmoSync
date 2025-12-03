@@ -44,7 +44,7 @@ const SideBar = ({
     },
     {
       id: "knowledge",
-      label: "Knowledge Base",
+      label: "Knowledge Articles",
       icon: <FontAwesomeIcon icon={faBook} />,
       path: "/back/knowledge",
     },
