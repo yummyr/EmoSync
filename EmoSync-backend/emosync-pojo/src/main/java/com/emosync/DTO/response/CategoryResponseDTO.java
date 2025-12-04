@@ -14,8 +14,6 @@ import java.time.LocalDateTime;
  */
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Schema(description = "知识分类响应")
 public class CategoryResponseDTO {
 
@@ -45,4 +43,18 @@ public class CategoryResponseDTO {
 
     @Schema(description = "更新时间")
     private LocalDateTime updatedAt;
+    // 用于JPQL查询的构造函数
+    public CategoryResponseDTO(Long id, String categoryName, String description,
+                               Integer sortOrder, Integer status, String statusText,
+                               Integer articleCount, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.categoryName = categoryName;
+        this.description = description;
+        this.sortOrder = sortOrder;
+        this.status = status;
+        this.statusText = statusText;
+        this.articleCount = articleCount;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 }

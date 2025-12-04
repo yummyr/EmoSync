@@ -22,7 +22,6 @@ import com.emosync.repository.KnowledgeArticleRepository;
 import com.emosync.repository.KnowledgeCategoryRepository;
 import com.emosync.repository.UserFavoriteRepository;
 import com.emosync.repository.UserRepository;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
@@ -50,14 +49,14 @@ public class KnowledgeArticleServiceImpl implements KnowledgeArticleService {
     private final UserRepository userRepository;
     private final UserFavoriteRepository favoriteRepository;
 
-    /** Get current authenticated UserDetailsImpl */
-    private UserDetailsImpl getCurrentUserInfo() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !(auth.getPrincipal() instanceof UserDetailsImpl)) {
-            return null;
-        }
-        return (UserDetailsImpl) auth.getPrincipal();
-    }
+    // /** Get current authenticated UserDetailsImpl */
+    // private UserDetailsImpl getCurrentUserInfo() {
+    //     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    //     if (auth == null || !(auth.getPrincipal() instanceof UserDetailsImpl)) {
+    //         return null;
+    //     }
+    //     return (UserDetailsImpl) auth.getPrincipal();
+    // }
 
     /** Check if current user has ROLE_2  */
     private boolean isAdmin() {
@@ -78,47 +77,47 @@ public class KnowledgeArticleServiceImpl implements KnowledgeArticleService {
     @Transactional
     public ArticleResponseDTO createArticle(ArticleCreateDTO createDTO, Long authorId) {
         try {
-            log.info("📝 创建文章请求: authorId={}, id={}, title={}, contentLength={}, summary={}",
+            log.info("📝 Create article request: authorId={}, id={}, title={}, contentLength={}, summary={}",
                     authorId, createDTO.getId(), createDTO.getTitle(),
                     createDTO.getContent() != null ? createDTO.getContent().length() : 0,
                     createDTO.getSummary());
 
             if (createDTO.getContent() == null || createDTO.getContent().trim().isEmpty()) {
-                log.warn("⚠️ 文章内容为空: {}", createDTO);
-                throw new BusinessException("文章内容不能为空");
+                log.warn("⚠️ Article content is empty: {}", createDTO);
+                throw new BusinessException("Article content cannot be empty");
             }
 
-            // 分类验证
+            // Category validation
             KnowledgeCategory category = categoryRepository.findById(createDTO.getCategoryId())
-                    .orElseThrow(() -> new BusinessException("文章分类不存在"));
+                    .orElseThrow(() -> new BusinessException("Article category not found"));
             if (Objects.equals(category.getStatus(), CategoryStatus.DISABLED.getCode())) {
-                throw new BusinessException("文章分类已禁用");
+                throw new BusinessException("Article category is disabled");
             }
 
-            // 作者验证
+            // Author validation
             User author = userRepository.findById(authorId)
-                    .orElseThrow(() -> new BusinessException("作者用户不存在"));
+                    .orElseThrow(() -> new BusinessException("Author user not found"));
 
-            // 创建实体
+            // Create entity
             KnowledgeArticle article = ArticleConvert.createCommandToEntity(createDTO, authorId);
             if (Objects.equals(createDTO.getStatus(), ArticleStatus.PUBLISHED.getCode())) {
                 article.setPublishedAt(LocalDateTime.now());
             }
 
-            log.info("🔄 转换后的文章实体: title={}, contentLength={}",
+            log.info("🔄 Converted article entity: title={}, contentLength={}",
                     article.getTitle(),
                     article.getContent() != null ? article.getContent().length() : 0);
 
             articleRepository.save(article);
 
             KnowledgeArticle saved = articleRepository.findById(article.getId())
-                    .orElseThrow(() -> new ServiceException("文章保存失败"));
+                    .orElseThrow(() -> new ServiceException("Failed to save article"));
 
-            log.info("📋 数据库保存结果: id={}, title={}, contentLength={}",
+            log.info("📋 Database save result: id={}, title={}, contentLength={}",
                     saved.getId(), saved.getTitle(),
                     saved.getContent() != null ? saved.getContent().length() : 0);
 
-            log.info("✅ 创建知识文章成功: {}", saved.getTitle());
+            log.info("✅ Knowledge article created successfully: {}", saved.getTitle());
 
             return buildArticleResponse(
                     saved,
@@ -129,8 +128,8 @@ public class KnowledgeArticleServiceImpl implements KnowledgeArticleService {
         } catch (BusinessException e) {
             throw e;
         } catch (Exception e) {
-            log.error("创建知识文章失败", e);
-            throw new ServiceException("创建文章失败，请稍后重试");
+            log.error("Failed to create knowledge article", e);
+            throw new ServiceException("Failed to create article, please try again later");
         }
     }
 
@@ -141,23 +140,23 @@ public class KnowledgeArticleServiceImpl implements KnowledgeArticleService {
     public void deleteArticle(String articleId, Long currentUserId) {
         try {
             KnowledgeArticle article = articleRepository.findById(articleId)
-                    .orElseThrow(() -> new BusinessException("文章不存在"));
+                    .orElseThrow(() -> new BusinessException("Article not found"));
 
             User currentUser = userRepository.findById(currentUserId)
-                    .orElseThrow(() -> new BusinessException("用户不存在"));
+                    .orElseThrow(() -> new BusinessException("User not found"));
 
-            if (!article.getAuthor().getId().equals(currentUserId) && currentUser.getUserType()!=2) {
-                throw new BusinessException("无权限删除此文章");
+            if (!article.getAuthor().getId().equals(currentUserId) && !isAdmin()) {
+                throw new BusinessException("No permission to delete this article");
             }
 
             deleteRelatedFavorites(articleId);
             articleRepository.deleteById(articleId);
-            log.info("删除知识文章成功: {}", article.getTitle());
+            log.info("Knowledge article deleted successfully: {}", article.getTitle());
         } catch (BusinessException e) {
             throw e;
         } catch (Exception e) {
-            log.error("删除知识文章失败", e);
-            throw new ServiceException("删除文章失败，请稍后重试");
+            log.error("Failed to delete knowledge article", e);
+            throw new ServiceException("Failed to delete article, please try again later");
         }
     }
 
@@ -166,18 +165,18 @@ public class KnowledgeArticleServiceImpl implements KnowledgeArticleService {
     @Override
     public ArticleResponseDTO getArticleById(String articleId, Long currentUserId) {
         KnowledgeArticle article = articleRepository.findById(articleId)
-                .orElseThrow(() -> new BusinessException("文章不存在"));
+                .orElseThrow(() -> new BusinessException("Article not found"));
 
         if (currentUserId != null) {
             User currentUser = userRepository.findById(currentUserId)
-                    .orElseThrow(() -> new BusinessException("用户不存在"));
+                    .orElseThrow(() -> new BusinessException("User not found"));
             if (article.getStatus() !=1
                     && !article.getAuthor().getId().equals(currentUserId)
-                    && currentUser.getUserType() !=2) {
-                throw new BusinessException("文章不存在");
+                    && !isAdmin()) {
+                throw new BusinessException("Article not found");
             }
         } else if (article.getStatus() !=1) {
-            throw new BusinessException("文章不存在");
+            throw new BusinessException("Article not found");
         }
 
         KnowledgeCategory category = categoryRepository.findById(article.getCategory().getId()).orElse(null);
@@ -190,8 +189,8 @@ public class KnowledgeArticleServiceImpl implements KnowledgeArticleService {
 
         return buildArticleResponse(
                 article,
-                category != null ? category.getCategoryName() : "未知分类",
-                author != null ? author.getUsername() : "未知作者",
+                category != null ? category.getCategoryName() : "Unknown Category",
+                author != null ? author.getUsername() : "Unknown Author",
                 isFavorited
         );
     }
@@ -205,7 +204,7 @@ public class KnowledgeArticleServiceImpl implements KnowledgeArticleService {
             ArticleResponseDTO dto = getArticleById(articleId, currentUserId);
 
             KnowledgeArticle article = articleRepository.findById(articleId)
-                    .orElseThrow(() -> new BusinessException("文章不存在"));
+                    .orElseThrow(() -> new BusinessException("Article not found"));
 
             Integer old = article.getReadCount() == null ? 0 : article.getReadCount();
             article.setReadCount(old + 1);
@@ -216,8 +215,8 @@ public class KnowledgeArticleServiceImpl implements KnowledgeArticleService {
         } catch (BusinessException e) {
             throw e;
         } catch (Exception e) {
-            log.error("阅读文章失败", e);
-            throw new ServiceException("阅读文章失败，请稍后重试");
+            log.error("Failed to read article", e);
+            throw new ServiceException("Failed to read article, please try again later");
         }
     }
 
@@ -226,7 +225,7 @@ public class KnowledgeArticleServiceImpl implements KnowledgeArticleService {
     @Override
     public PageResult<ArticleSimpleResponseDTO> getArticlePage(ArticleListQueryDTO queryDTO, Long currentUserId) {
         try {
-            // 排序
+            // Sorting
             Sort sort;
             String sortField = queryDTO.getSortField();
             String sortDirection = queryDTO.getSortDirection();
@@ -246,11 +245,11 @@ public class KnowledgeArticleServiceImpl implements KnowledgeArticleService {
                     sort
             );
 
-            // 动态条件 (Specification)
+            // Dynamic conditions (Specification)
             Specification<KnowledgeArticle> spec = (root, query, cb) -> {
                 List<Predicate> predicates = new ArrayList<>();
 
-                // 权限：非管理员限制
+                // Permission: Non-admin restrictions
                 if (currentUserId == null) {
                     predicates.add(cb.equal(root.get("status"), ArticleStatus.PUBLISHED.getCode()));
                 } else {
@@ -287,7 +286,7 @@ public class KnowledgeArticleServiceImpl implements KnowledgeArticleService {
                     predicates.add(cb.equal(root.get("status"), queryDTO.getStatus()));
                 }
 
-                // 日期范围（基于 publishedAt）
+                // Date range (based on publishedAt)
                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                 if (StringUtils.hasText(queryDTO.getStartDate())) {
                     LocalDateTime start = LocalDateTime.parse(queryDTO.getStartDate() + " 00:00:00", dtf);
@@ -312,8 +311,8 @@ public class KnowledgeArticleServiceImpl implements KnowledgeArticleService {
             return result;
 
         } catch (Exception e) {
-            log.error("查询知识文章列表失败", e);
-            throw new ServiceException("查询文章列表失败，请稍后重试");
+            log.error("Failed to query knowledge article list", e);
+            throw new ServiceException("Query article listfailed, please try again later");
         }
     }
 
@@ -324,17 +323,17 @@ public class KnowledgeArticleServiceImpl implements KnowledgeArticleService {
     public ArticleResponseDTO publishArticle(String articleId, Long currentUserId) {
         try {
             KnowledgeArticle article = articleRepository.findById(articleId)
-                    .orElseThrow(() -> new BusinessException("文章不存在"));
+                    .orElseThrow(() -> new BusinessException("Article not found"));
 
             User currentUser = userRepository.findById(currentUserId)
-                    .orElseThrow(() -> new BusinessException("用户不存在"));
+                    .orElseThrow(() -> new BusinessException("User not found"));
 
-            if (!article.getAuthor().getId().equals(currentUserId) && currentUser.getUserType()!=2) {
-                throw new BusinessException("无权限发布此文章");
+            if (!article.getAuthor().getId().equals(currentUserId) && !isAdmin()) {
+                throw new BusinessException("No permission to publish this article");
             }
 
             if (!ArticleStatus.fromCode(article.getStatus()).canPublish()) {
-                throw new BusinessException("当前状态不允许发布");
+                throw new BusinessException("Current status does not allow publishing");
             }
 
             KnowledgeArticle published = ArticleConvert.publishArticle(article);
@@ -343,13 +342,13 @@ public class KnowledgeArticleServiceImpl implements KnowledgeArticleService {
             article.setUpdatedAt(published.getUpdatedAt());
             articleRepository.save(article);
 
-            log.info("发布知识文章成功: {}", article.getTitle());
+            log.info("Knowledge article published successfully: {}", article.getTitle());
             return getArticleById(articleId, currentUserId);
         } catch (BusinessException e) {
             throw e;
         } catch (Exception e) {
-            log.error("发布知识文章失败", e);
-            throw new ServiceException("发布文章失败，请稍后重试");
+            log.error("Failed to publish knowledge article", e);
+            throw new ServiceException("Publish articlefailed, please try again later");
         }
     }
 
@@ -358,17 +357,17 @@ public class KnowledgeArticleServiceImpl implements KnowledgeArticleService {
     public ArticleResponseDTO offlineArticle(String articleId, Long currentUserId) {
         try {
             KnowledgeArticle article = articleRepository.findById(articleId)
-                    .orElseThrow(() -> new BusinessException("文章不存在"));
+                    .orElseThrow(() -> new BusinessException("Article not found"));
 
             User currentUser = userRepository.findById(currentUserId)
-                    .orElseThrow(() -> new BusinessException("用户不存在"));
+                    .orElseThrow(() -> new BusinessException("User not found"));
 
-            if (!article.getAuthor().getId().equals(currentUserId) && currentUser.getUserType()!=2) {
-                throw new BusinessException("无权限下线此文章");
+            if (!article.getAuthor().getId().equals(currentUserId) && !isAdmin()) {
+                throw new BusinessException("No permission to offline this article");
             }
 
             if (!ArticleStatus.fromCode(article.getStatus()).canOffline()) {
-                throw new BusinessException("当前状态不允许下线");
+                throw new BusinessException("Current status is offline, does not allow taking offline");
             }
 
             KnowledgeArticle offlined = ArticleConvert.offlineArticle(article);
@@ -376,13 +375,13 @@ public class KnowledgeArticleServiceImpl implements KnowledgeArticleService {
             article.setUpdatedAt(offlined.getUpdatedAt());
             articleRepository.save(article);
 
-            log.info("下线知识文章成功: {}", article.getTitle());
+            log.info("Knowledge article taken offline successfully: {}", article.getTitle());
             return getArticleById(articleId, currentUserId);
         } catch (BusinessException e) {
             throw e;
         } catch (Exception e) {
-            log.error("下线知识文章失败", e);
-            throw new ServiceException("下线文章失败，请稍后重试");
+            log.error("Failed to take knowledge article offline", e);
+            throw new ServiceException("Take article offlinefailed, please try again later");
         }
     }
 
@@ -393,19 +392,19 @@ public class KnowledgeArticleServiceImpl implements KnowledgeArticleService {
     public ArticleResponseDTO updateArticle(String articleId, ArticleUpdateDTO updateDTO, Long currentUserId) {
         try {
             KnowledgeArticle existing = articleRepository.findById(articleId)
-                    .orElseThrow(() -> new BusinessException("文章不存在"));
+                    .orElseThrow(() -> new BusinessException("Article not found"));
 
             User currentUser = userRepository.findById(currentUserId)
-                    .orElseThrow(() -> new BusinessException("用户不存在"));
-            if (!existing.getAuthor().getId().equals(currentUserId) && currentUser.getUserType()!=2) {
-                throw new BusinessException("无权限编辑此文章");
+                    .orElseThrow(() -> new BusinessException("User not found"));
+            if (!existing.getAuthor().getId().equals(currentUserId) && !isAdmin()) {
+                throw new BusinessException("No permission to edit this article");
             }
 
             if (updateDTO.getCategoryId() != null) {
                 KnowledgeCategory category = categoryRepository.findById(updateDTO.getCategoryId())
-                        .orElseThrow(() -> new BusinessException("文章分类不存在"));
+                        .orElseThrow(() -> new BusinessException("Article category not found"));
                 if (Objects.equals(category.getStatus(),CategoryStatus.DISABLED.getCode())) {
-                    throw new BusinessException("文章分类已禁用");
+                    throw new BusinessException("Article category is disabled");
                 }
                 existing.setCategory(category);
             }
@@ -438,13 +437,13 @@ public class KnowledgeArticleServiceImpl implements KnowledgeArticleService {
             existing.setUpdatedAt(LocalDateTime.now());
             articleRepository.save(existing);
 
-            log.info("更新知识文章成功: {}", existing.getTitle());
+            log.info("Knowledge article updated successfully: {}", existing.getTitle());
             return getArticleById(articleId, currentUserId);
         } catch (BusinessException e) {
             throw e;
         } catch (Exception e) {
-            log.error("更新知识文章失败", e);
-            throw new ServiceException("更新文章失败，请稍后重试");
+            log.error("Failed to update knowledge article", e);
+            throw new ServiceException("Update articlefailed, please try again later");
         }
     }
 
@@ -453,18 +452,18 @@ public class KnowledgeArticleServiceImpl implements KnowledgeArticleService {
     public ArticleResponseDTO updateArticleStatus(String articleId, Integer status, Long currentUserId) {
         try {
             KnowledgeArticle article = articleRepository.findById(articleId)
-                    .orElseThrow(() -> new BusinessException("文章不存在"));
+                    .orElseThrow(() -> new BusinessException("Article not found"));
 
             User currentUser = userRepository.findById(currentUserId)
-                    .orElseThrow(() -> new BusinessException("用户不存在"));
+                    .orElseThrow(() -> new BusinessException("User not found"));
 
-            if (!article.getAuthor().getId().equals(currentUserId) && currentUser.getUserType()!=2) {
-                throw new BusinessException("无权限更新此文章状态");
+            if (!article.getAuthor().getId().equals(currentUserId) && !isAdmin()) {
+                throw new BusinessException("No permission to update this article status");
             }
 
             ArticleStatus targetStatus = ArticleStatus.fromCode(status);
             if (targetStatus == null) {
-                throw new BusinessException("无效的文章状态");
+                throw new BusinessException("Invalid article status");
             }
 
             article.setStatus(status);
@@ -475,14 +474,14 @@ public class KnowledgeArticleServiceImpl implements KnowledgeArticleService {
             }
 
             articleRepository.save(article);
-            log.info("更新文章状态成功: articleId={}, status={}", articleId, status);
+            log.info("Article status updated successfully: articleId={}, status={}", articleId, status);
 
             return getArticleById(articleId, currentUserId);
         } catch (BusinessException e) {
             throw e;
         } catch (Exception e) {
-            log.error("更新文章状态失败", e);
-            throw new ServiceException("更新文章状态失败，请稍后重试");
+            log.error("Failed to update article status", e);
+            throw new ServiceException("Update article statusfailed, please try again later");
         }
     }
 
@@ -493,45 +492,45 @@ public class KnowledgeArticleServiceImpl implements KnowledgeArticleService {
     public void batchDeleteArticles(List<String> ids, Long currentUserId) {
         try {
             if (ids == null || ids.isEmpty()) {
-                throw new BusinessException("删除的文章ID列表不能为空");
+                throw new BusinessException("Article ID list for deletion cannot be empty");
             }
 
             User currentUser = userRepository.findById(currentUserId)
-                    .orElseThrow(() -> new BusinessException("用户不存在"));
+                    .orElseThrow(() -> new BusinessException("User not found"));
 
             int deletedCount = 0;
             for (String articleId : ids) {
                 try {
                     KnowledgeArticle article = articleRepository.findById(articleId).orElse(null);
                     if (article == null) {
-                        log.warn("文章不存在，跳过删除: articleId={}", articleId);
+                        log.warn("Article not found, skipping deletion: articleId={}", articleId);
                         continue;
                     }
 
-                    if (!article.getAuthor().getId().equals(currentUserId) && currentUser.getUserType()!=2) {
-                        log.warn("无权限删除文章，跳过: articleId={}, userId={}", articleId, currentUserId);
+                    if (!article.getAuthor().getId().equals(currentUserId) && !isAdmin()) {
+                        log.warn("No permission to delete article, skipping: articleId={}, userId={}", articleId, currentUserId);
                         continue;
                     }
 
                     deleteRelatedFavorites(articleId);
                     articleRepository.deleteById(articleId);
                     deletedCount++;
-                    log.info("删除文章成功: articleId={}", articleId);
+                    log.info("Article deleted successfully: articleId={}", articleId);
                 } catch (Exception ex) {
-                    log.error("删除文章失败: articleId={}", articleId, ex);
+                    log.error("Failed to delete article: articleId={}", articleId, ex);
                 }
             }
 
             if (deletedCount == 0) {
-                throw new BusinessException("没有成功删除任何文章");
+                throw new BusinessException("No articles were successfully deleted");
             }
 
-            log.info("批量删除文章完成: 总数={}, 成功删除={}", ids.size(), deletedCount);
+            log.info("Batch article deletion completed: Total count={}, Successfully deleted={}", ids.size(), deletedCount);
         } catch (BusinessException e) {
             throw e;
         } catch (Exception e) {
-            log.error("批量删除文章失败", e);
-            throw new ServiceException("批量删除文章失败，请稍后重试");
+            log.error("Batch article deletion failed", e);
+            throw new ServiceException("Batch delete articlefailed, please try again later");
         }
     }
 
@@ -542,7 +541,7 @@ public class KnowledgeArticleServiceImpl implements KnowledgeArticleService {
         try {
             User currentUser = userRepository.findById(currentUserId).orElse(null);
             if (currentUser == null || currentUser.getUserType()!=2) {
-                throw new BusinessException("无权限查看统计信息");
+                throw new BusinessException("No permission to view statistics");
             }
 
             long totalArticles = articleRepository.count();
@@ -568,8 +567,8 @@ public class KnowledgeArticleServiceImpl implements KnowledgeArticleService {
         } catch (BusinessException e) {
             throw e;
         } catch (Exception e) {
-            log.error("获取文章统计信息失败", e);
-            throw new ServiceException("获取统计信息失败，请稍后重试");
+            log.error("Failed to get article statistics", e);
+            throw new ServiceException("Get statisticsfailed, please try again later");
         }
     }
 

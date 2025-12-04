@@ -23,7 +23,15 @@ public interface KnowledgeArticleRepository extends JpaRepository<KnowledgeArtic
 
     long countByStatus(Integer status);
 
+    /** 统计某分类下是否存在文章（用于删除校验） */
+    Long countByCategory_Id(Long categoryId);
+
+    /** 统计分类下的文章数量（分页展示用） */
+    Long countByCategory_IdAndStatus(Long categoryId, Integer status);
 
 
     Page<KnowledgeArticle> findAll(Specification<KnowledgeArticle> spec, Pageable pageable);
+
+    @Query("SELECT COUNT(a) FROM KnowledgeArticle a WHERE a.category.id = :categoryId AND a.status = 1")
+    Long countPublishedArticlesByCategory(@Param("categoryId") Long id);
 }

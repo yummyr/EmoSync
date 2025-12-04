@@ -1,6 +1,7 @@
 package com.emosync.controller;
 
 import com.emosync.Result.PageResult;
+import com.emosync.entity.KnowledgeCategory;
 import com.emosync.security.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -24,6 +25,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 知识分类管理控制器
@@ -155,6 +157,16 @@ public class KnowledgeCategoryController {
         return Result.success(response);
     }
 
+    /**
+     * 获取所有enable的knowledge_Category 的id和category_name
+     */
+    @Operation(summary = "获取启用的知识 ")
+    @GetMapping("/all")
+    public Result<Map<Long,String>> getEnabledCategory() {
+        log.info("获取启用的知识分类");
+        Map<Long,String> response = knowledgeCategoryService.getEnabledCategory();
+        return Result.success(response);
+    }
 
     /**
      * 获取分类树（用于前端展示）
