@@ -14,6 +14,6 @@ public interface ConsultationSessionService {
     void updateLastEmotionAnalysis(Long sessionId, String emotionAnalysisJson);
     PageResult<ConsultationSessionResponseDTO> selectPage(ConsultationSessionQueryDTO queryDTO);
     ConsultationSessionResponseDTO getSessionDetail(Long sessionId);
-    boolean deleteSession(Long sessionId, Long userId);
+    boolean deleteSession(Long sessionId);
     boolean updateSessionTitle(Long sessionId, Long userId, String newTitle);
 }

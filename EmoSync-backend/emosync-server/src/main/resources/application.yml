@@ -27,7 +27,7 @@ spring:
           batch_size: 20
         order_inserts: true
         order_updates: true
-    show-sql: true  # 开发环境可开启，生产环境关闭
+    show-sql: false  # 开发环境可开启，生产环境关闭
   # 安全配置
   security:
     user:

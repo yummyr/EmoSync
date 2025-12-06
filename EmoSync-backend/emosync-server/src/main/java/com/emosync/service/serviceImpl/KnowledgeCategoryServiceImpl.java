@@ -10,6 +10,7 @@ import com.emosync.exception.BusinessException;
 import com.emosync.repository.KnowledgeArticleRepository;
 import com.emosync.repository.KnowledgeCategoryRepository;
 import com.emosync.service.KnowledgeCategoryService;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 public class KnowledgeCategoryServiceImpl implements KnowledgeCategoryService {
     private final KnowledgeCategoryRepository knowledgeCategoryRepository;
     private final KnowledgeArticleRepository articleRepository;
+
     @Override
     public CategoryResponseDTO createCategory(CategoryCreateDTO createDTO) {
         // 分类重名检查
@@ -101,6 +103,7 @@ public class KnowledgeCategoryServiceImpl implements KnowledgeCategoryService {
 
         log.info("删除分类成功 ID={}", categoryId);
     }
+
     /**
      * 根据ID获取分类
      */
@@ -145,7 +148,7 @@ public class KnowledgeCategoryServiceImpl implements KnowledgeCategoryService {
                 .collect(Collectors.toList());
 
 
-        return new PageResult<>(page.getTotalElements(),records);
+        return new PageResult<>(page.getTotalElements(), records);
     }
 
     @Override
@@ -153,8 +156,9 @@ public class KnowledgeCategoryServiceImpl implements KnowledgeCategoryService {
 
         return knowledgeCategoryRepository.findAllCategoryDTOs();
     }
+
     @Override
-    public Map<Long,String> getEnabledCategory() {
+    public Map<Long, String> getEnabledCategory() {
         List<KnowledgeCategory> categories = knowledgeCategoryRepository.findAllEnabled();
 
         return categories.stream()
@@ -163,6 +167,16 @@ public class KnowledgeCategoryServiceImpl implements KnowledgeCategoryService {
                         KnowledgeCategory::getCategoryName,
                         (existing, replacement) -> existing
                 ));
+    }
+
+    @Override
+    public void updateStatus(Long id) {
+        KnowledgeCategory knowledgeCategory = knowledgeCategoryRepository.findById(id).orElseThrow();
+        Integer oldStatus = knowledgeCategory.getStatus();
+        Integer status = oldStatus == 1 ? 0 : 1;
+        knowledgeCategory.setStatus(status);
+        knowledgeCategoryRepository.save(knowledgeCategory);
+
     }
 
 

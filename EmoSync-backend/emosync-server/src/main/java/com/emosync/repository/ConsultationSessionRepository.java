@@ -1,6 +1,9 @@
 package com.emosync.repository;
 
 import com.emosync.entity.ConsultationSession;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -47,4 +50,5 @@ public interface ConsultationSessionRepository extends JpaRepository<Consultatio
     List<ConsultationSession> findRecentSessions(@Param("limit") int limit);
 
 
+    Page<ConsultationSession> findAll(Specification<ConsultationSession> spec, Pageable pageable);
 }

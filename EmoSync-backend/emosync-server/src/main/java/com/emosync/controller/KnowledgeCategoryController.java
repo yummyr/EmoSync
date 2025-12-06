@@ -29,7 +29,7 @@ import java.util.Map;
 
 /**
  * 知识分类管理控制器
- * @author system
+ * @author Yuan
  */
 @Tag(name = "知识分类管理")
 @RestController
@@ -133,6 +133,18 @@ public class KnowledgeCategoryController {
         log.info("获取知识分类详情: categoryId={}", id);
         CategoryResponseDTO response = knowledgeCategoryService.getCategoryById(id);
         return Result.success(response);
+    }
+
+    /**
+     * 根据ID获取分类详情
+     */
+    @Operation(summary = "更新知识分类状态")
+    @PutMapping("/status/{id}")
+    public Result<CategoryResponseDTO> updateCategoryStatus(@PathVariable Long id) {
+
+        log.info("更新知识分类状态: categoryId={}", id);
+         knowledgeCategoryService.updateStatus(id);
+        return Result.success();
     }
 
     /**

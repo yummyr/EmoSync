@@ -67,6 +67,7 @@ public class PsychologicalChatController {
      */
     private Long getCurrentUserId() {
         UserDetailsImpl userDetails = getCurrentUserInfo();
+        log.info("userDetails.getId():{}",userDetails.getId());
         return userDetails != null ? userDetails.getId() : null;
     }
     /** Check if current user has ROLE_ADMIN */
@@ -75,7 +76,7 @@ public class PsychologicalChatController {
         if (auth == null) return false;
 
         for (GrantedAuthority authority : auth.getAuthorities()) {
-            if ("ROLE_admin".equals(authority.getAuthority())) {
+            if ("ROLE_2".equals(authority.getAuthority())) {
                 return true;
             }
         }
@@ -382,7 +383,7 @@ public class PsychologicalChatController {
                 return Result.error("User not logged in");
             }
 
-            boolean success = consultationSessionService.deleteSession(sessionId, userId);
+            boolean success = consultationSessionService.deleteSession(sessionId);
 
             if (success) {
                 log.info("Session deleted successfully, sessionId: {}", sessionId);

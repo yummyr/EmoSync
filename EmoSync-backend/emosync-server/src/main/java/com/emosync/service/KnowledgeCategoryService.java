@@ -23,4 +23,6 @@ public interface KnowledgeCategoryService {
     CategoryResponseDTO getCategoryById(Long id);
 
     Map<Long,String> getEnabledCategory();
+
+    void updateStatus(Long id);
 }
