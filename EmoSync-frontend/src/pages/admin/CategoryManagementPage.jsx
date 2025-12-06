@@ -13,7 +13,76 @@ const CategoryManagementPage = () => {
   const [loading, setLoading] = useState(false);
   const [records, setRecords] = useState([]);
   const [total, setTotal] = useState(0);
+  const [isEditMode, setIsEditMode] = useState(false);
 
+  const [formData, setFormData] = useState({
+    id: "",
+    categoryName: "",
+    description: "",
+    sortOrder: 0,
+    status: 1,
+  });
+  const [openEditForm, setOpenEditForm] = useState(false);
+
+  const handleOpenEditForm = (id) => {
+    setIsEditMode(true);
+    setOpenEditForm(true);
+    const category = records.find((item) => item.id === id);
+
+    setFormData({
+      id: category.id,
+      categoryName: category.categoryName,
+      description: category.description,
+      sortOrder: category.sortOrder,
+      status: category.status,
+    });
+  };
+
+  const handleCloseEditForm = () => {
+    setIsEditMode(false);
+    setOpenEditForm(false);
+    setFormData({
+      id: "",
+      categoryName: "",
+      description: "",
+      sortOrder: "",
+      status: "",
+    });
+  };
+
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  }
+  const handleAdd = () => {
+    setIsEditMode(false);
+    setOpenEditForm(true);
+  };
+
+  const handleSubmitForm = async () => {
+    try {
+      const dataToSubmit = {
+        categoryName: formData.categoryName,
+        description: formData.description,
+        sortOrder: Number(formData.sortOrder),
+        status: Number(formData.status),
+      };
+      if (isEditMode) {
+        // Update existing category
+        await api.put(`/knowledge/category/${formData.id}`, dataToSubmit);
+      } else {
+        // Create new category
+        await api.post("/knowledge/category", dataToSubmit);
+      }
+      handleCloseEditForm();
+      loadData();
+    } catch (err) {
+      console.error("Failed to submit form", err);
+    }
+  }
   // pagination
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
@@ -22,6 +91,22 @@ const CategoryManagementPage = () => {
   const [categoryName, setCategoryName] = useState("");
   const [status, setStatus] = useState("");
 
+  const handleStatusChange = async (id) => {
+    try {
+      await api.put(`/knowledge/category/status/${id}`);
+      loadData();
+    } catch (err) {
+      console.error("Failed to change category status", err);
+    }
+  };
+  const handleDelete = async (id) => {
+    try {
+      await api.delete(`/knowledge/category/${id}`);
+      loadData();
+    } catch (err) {
+      console.error("Failed to delete category", err);
+    }
+  };
   /** Load category list */
   const loadData = async () => {
     setLoading(true);
@@ -41,7 +126,9 @@ const CategoryManagementPage = () => {
       setRecords(records);
       setTotal(total);
     } catch (err) {
-      console.error("Failed to load category list", err);
+      if (err.code !== "ERR_CANCELED") {
+        console.error("Failed to load category list", err);
+      }
     } finally {
       setLoading(false);
     }
@@ -50,7 +137,7 @@ const CategoryManagementPage = () => {
   /** initial load */
   useEffect(() => {
     loadData();
-  }, [currentPage]);
+  }, [currentPage, categoryName, status]);
 
   /** search */
   const handleSearch = () => {
@@ -70,13 +157,17 @@ const CategoryManagementPage = () => {
     <div className="w-full px-6 py-8">
       {/* Page Header */}
       <div className="mb-8">
-        <h3 className="text-2xl font-bold text-gray-900">Category Management</h3>
-        <p className="text-gray-600 mt-2">View and manage knowledge categories</p>
+        <h3 className="text-2xl font-bold text-gray-900">
+          Category Management
+        </h3>
+        <p className="text-gray-600 mt-2">
+          View and manage knowledge categories
+        </p>
       </div>
 
       {/* Action Buttons */}
       <div className="flex justify-end gap-3 mb-6">
-        <button className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg flex items-center gap-2">
+        <button onClick={handleAdd} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg flex items-center gap-2">
           <FontAwesomeIcon icon={faPlus} className="h-5 w-5" />
           Create Category
         </button>
@@ -187,16 +278,26 @@ const CategoryManagementPage = () => {
                     {item.createdAt?.split("T")[0] ?? "--"}
                   </td>
                   <td className="p-4 flex gap-3">
-                    <button className="text-indigo-600 hover:underline flex items-center gap-1">
+                    <button onClick={() => handleOpenEditForm(item.id)} className="text-indigo-600 hover:underline flex items-center gap-1">
                       <FontAwesomeIcon icon={faEdit} className="h-5 w-5" />
                       Edit
                     </button>
 
-                    <button className="text-yellow-600 hover:underline">
+                    <button
+                      onClick={() => handleStatusChange(item.id)}
+                      className={
+                        item.status === 1
+                          ? "bg-pink-400  text-white text-sm rounded-md p-1  hover:underline"
+                          : "bg-gray-600 text-white text-sm rounded-md p-1  hover:underline"
+                      }
+                    >
                       {item.status === 1 ? "Disable" : "Enable"}
                     </button>
 
-                    <button className="text-red-500 hover:underline flex items-center gap-1">
+                    <button
+                      onClick={() => handleDelete(item.id)}
+                      className="text-red-500 hover:underline flex items-center gap-1"
+                    >
                       <FontAwesomeIcon icon={faTrash} className="h-5 w-5" />
                       Delete
                     </button>
@@ -222,9 +323,7 @@ const CategoryManagementPage = () => {
               {"<"}
             </button>
 
-            <span className="text-indigo-600 font-semibold">
-              {currentPage}
-            </span>
+            <span className="text-indigo-600 font-semibold">{currentPage}</span>
 
             <button
               className="px-2"
@@ -245,6 +344,89 @@ const CategoryManagementPage = () => {
           </div>
         </div>
       </div>
+      {/* Edit Form Modal - To be implemented */}
+      {openEditForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg w-96">
+            <h2 className="text-xl font-bold mb-4">
+              {isEditMode ? "Edit Category" : "Create Category"}
+            </h2>
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2">Category Name</label>
+              <input
+                type="text"
+                name="categoryName"
+                value={formData.categoryName}
+                onChange={handleFormChange}
+                className="w-full border rounded px-3 py-2"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2">Description</label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleFormChange}
+                className="w-full border rounded px-3 py-2"
+              ></textarea>
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2">Sort Order</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  name="sortOrder"
+                  value={formData.sortOrder}
+                  onChange={handleFormChange}
+                  className="flex-1 border rounded px-3 py-2"
+                />
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, sortOrder: Number(prev.sortOrder) - 10 }))}
+                  className="px-3 py-2 bg-gray-200 hover:bg-gray-300 rounded"
+                  title="Decrease by 10"
+                >
+                  -10
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, sortOrder: Number(prev.sortOrder) + 10 }))}
+                  className="px-3 py-2 bg-gray-200 hover:bg-gray-300 rounded"
+                  title="Increase by 10"
+                >
+                  +10
+                </button>
+              </div>
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2">Status</label>
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleFormChange}
+                className="w-full border rounded px-3 py-2"
+              >
+                <option value={1}>Enabled</option>
+                <option value={0}>Disabled</option>
+              </select>
+            </div>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={handleCloseEditForm}
+                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmitForm}
+                className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+              >
+                {isEditMode ? "Update" : "Create"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
