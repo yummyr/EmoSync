@@ -20,7 +20,6 @@ import com.emosync.enumClass.UserType;
 import com.emosync.service.KnowledgeCategoryService;
 import com.emosync.util.JwtTokenUtils;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,10 +27,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 知识分类管理控制器
+ * Knowledge Category Management Controller
  * @author Yuan
  */
-@Tag(name = "知识分类管理")
+@Tag(name = "Knowledge Category Management")
 @RestController
 @Slf4j
 @RequiredArgsConstructor
@@ -53,110 +52,103 @@ public class KnowledgeCategoryController {
 
     /** Check if current user has ROLE_ADMIN */
     private boolean isAdmin() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null) return false;
-
-        for (GrantedAuthority authority : auth.getAuthorities()) {
-            if ("ROLE_2".equals(authority.getAuthority())) {
-                return true;
-            }
-        }
-        return false;
+        UserDetailsImpl userDetails = getCurrentUserInfo();
+        return userDetails != null && userDetails.isAdmin();
     }
 
     /**
-     * 创建分类（管理员功能）
+     * Create category (Admin feature)
      */
-    @Operation(summary = "创建知识分类")
+    @Operation(summary = "Create knowledge category")
     @PostMapping
     public Result<CategoryResponseDTO> createCategory(
             @Valid @RequestBody CategoryCreateDTO createDTO,
             HttpServletRequest request) {
         
-        // 权限检查：只有管理员可以创建分类
+        // Permission check: only admin can create categories
         if (!isAdmin()) {
             return Result.error("Permission denied");
         }
 
-        log.info("管理员创建知识分类: {}", createDTO.getCategoryName());
+        log.info("Admin creates knowledge category: {}", createDTO.getCategoryName());
         CategoryResponseDTO response = knowledgeCategoryService.createCategory(createDTO);
-        return Result.success("创建分类成功", response);
+        return Result.success("Category created successfully", response);
     }
 
     /**
-     * 更新分类（管理员功能）
+     * Update category (Admin feature)
      */
-    @Operation(summary = "更新知识分类")
+    @Operation(summary = "Update knowledge category")
     @PutMapping("/{id}")
     public Result<CategoryResponseDTO> updateCategory(
-            @Parameter(description = "分类ID") @PathVariable Long id,
+            @Parameter(description = "Category ID") @PathVariable Long id,
             @Valid @RequestBody CategoryUpdateDTO updateDTO,
             HttpServletRequest request) {
         
-        // 权限检查：只有管理员可以更新分类
+        // Permission check: only admin can update categories
         if (!isAdmin()) {
             return Result.error("Permission denied");
         }
 
-        log.info("管理员更新知识分类: categoryId={}", id);
+        log.info("Admin updates knowledge category: categoryId={}", id);
         CategoryResponseDTO response = knowledgeCategoryService.updateCategory(id, updateDTO);
-        return Result.success("更新分类成功", response);
+        return Result.success("Category updated successfully", response);
     }
 
     /**
-     * 删除分类（管理员功能）
+     * Delete category (Admin feature)
      */
-    @Operation(summary = "删除知识分类")
+    @Operation(summary = "Delete knowledge category")
     @DeleteMapping("/{id}")
     public Result<Void> deleteCategory(
-            @Parameter(description = "分类ID") @PathVariable Long id,
+            @Parameter(description = "Category ID") @PathVariable Long id,
             HttpServletRequest request) {
         
-        // 权限检查：只有管理员可以删除分类
+        // Permission check: only admin can delete categories
         if (!isAdmin()) {
             return Result.error("Permission denied");
         }
 
-        log.info("管理员删除知识分类: categoryId={}", id);
+        log.info("Admin deletes knowledge category: categoryId={}", id);
         knowledgeCategoryService.deleteCategory(id);
         return Result.success();
     }
 
     /**
-     * 根据ID获取分类详情
+     * Get category details by ID
      */
-    @Operation(summary = "获取知识分类详情")
+    @Operation(summary = "Get knowledge category details")
     @GetMapping("/{id}")
     public Result<CategoryResponseDTO> getCategoryById(
             @Parameter(description = "分类ID") @PathVariable Long id) {
         
-        log.info("获取知识分类详情: categoryId={}", id);
+        log.info("Get knowledge category details: categoryId={}", id);
         CategoryResponseDTO response = knowledgeCategoryService.getCategoryById(id);
         return Result.success(response);
     }
 
     /**
-     * 根据ID获取分类详情
+     * Update knowledge category status
      */
-    @Operation(summary = "更新知识分类状态")
+    @Operation(summary = "Update knowledge category status")
     @PutMapping("/status/{id}")
     public Result<CategoryResponseDTO> updateCategoryStatus(@PathVariable Long id) {
 
-        log.info("更新知识分类状态: categoryId={}", id);
+        log.info("Update knowledge category status: categoryId={}", id);
          knowledgeCategoryService.updateStatus(id);
         return Result.success();
     }
 
     /**
-     * 分页查询分类列表
+     * Paginated category list query
      */
-    @Operation(summary = "分页查询知识分类列表")
+    @Operation(summary = "Get paginated knowledge category list")
     @GetMapping("/page")
     public Result<PageResult<CategoryResponseDTO>> getCategoryPage(
-            @Parameter(description = "分类名称") @RequestParam(required = false) String categoryName,
-            @Parameter(description = "状态") @RequestParam(required = false) Integer status,
-            @Parameter(description = "当前页码") @RequestParam(defaultValue = "1") Long currentPage,
-            @Parameter(description = "每页大小") @RequestParam(defaultValue = "10") Long size) {
+            @Parameter(description = "Category name") @RequestParam(required = false) String categoryName,
+            @Parameter(description = "Status") @RequestParam(required = false) Integer status,
+            @Parameter(description = "Current page") @RequestParam(defaultValue = "1") Long currentPage,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "10") Long size) {
 
         CategoryListQueryDTO queryDTO = new CategoryListQueryDTO();
         queryDTO.setCategoryName(categoryName);
@@ -164,29 +156,29 @@ public class KnowledgeCategoryController {
         queryDTO.setCurrentPage(currentPage);
         queryDTO.setSize(size);
 
-        log.info("分页查询知识分类列表: page={}, size={}", currentPage, size);
+        log.info("Get paginated knowledge category list: page={}, size={}", currentPage, size);
         PageResult<CategoryResponseDTO> response = knowledgeCategoryService.getCategoryPage(queryDTO);
         return Result.success(response);
     }
 
     /**
-     * 获取所有enable的knowledge_Category 的id和category_name
+     * Get all enabled knowledge category IDs and names
      */
-    @Operation(summary = "获取启用的知识 ")
+    @Operation(summary = "Get enabled knowledge categories")
     @GetMapping("/all")
     public Result<Map<Long,String>> getEnabledCategory() {
-        log.info("获取启用的知识分类");
+        log.info("Get enabled knowledge categories");
         Map<Long,String> response = knowledgeCategoryService.getEnabledCategory();
         return Result.success(response);
     }
 
     /**
-     * 获取分类树（用于前端展示）
+     * Get category tree (for frontend display)
      */
-    @Operation(summary = "获取知识分类树")
+    @Operation(summary = "Get knowledge category tree")
     @GetMapping("/tree")
     public Result<List<CategoryResponseDTO>> getCategoryTree() {
-        log.info("获取知识分类树");
+        log.info("Get knowledge category tree");
         List<CategoryResponseDTO> response = knowledgeCategoryService.getCategoryTree();
         return Result.success(response);
     }

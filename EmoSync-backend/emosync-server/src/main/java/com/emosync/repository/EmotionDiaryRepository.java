@@ -1,6 +1,10 @@
 package com.emosync.repository;
 
+import com.emosync.entity.ConsultationSession;
 import com.emosync.entity.EmotionDiary;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,6 +17,7 @@ import java.util.Optional;
 
 @Repository
 public interface EmotionDiaryRepository extends JpaRepository<EmotionDiary, Long> {
+    Optional<EmotionDiary> findByUserIdAndDiaryDate(Long userId, LocalDate diaryDate);
 
 
     /**
@@ -75,4 +80,10 @@ public interface EmotionDiaryRepository extends JpaRepository<EmotionDiary, Long
      */
     @Query("SELECT e FROM EmotionDiary e WHERE e.user.id = :userId ORDER BY e.diaryDate DESC, e.createdAt DESC LIMIT 1")
     EmotionDiary findLatestByUserId(@Param("userId") Long userId);
+
+    List<EmotionDiary> findByUserIdAndDiaryDateBetween(Long userId, LocalDate start, LocalDate end);
+
+
+
+    Page<EmotionDiary> findAll(Specification<EmotionDiary> spec, Pageable pageable);
 }

@@ -40,7 +40,7 @@ public class SpringAIConfig {
         return new OpenAiChatModel(openAiApi,
                 OpenAiChatOptions.builder()
                         .withModel(model)
-                        .withTemperature(0.7F)
+                        .withTemperature(0.7)
                         .build()
         );
     }

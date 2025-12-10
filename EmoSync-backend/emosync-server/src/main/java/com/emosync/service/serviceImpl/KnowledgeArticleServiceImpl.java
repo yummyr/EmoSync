@@ -49,15 +49,6 @@ public class KnowledgeArticleServiceImpl implements KnowledgeArticleService {
     private final UserRepository userRepository;
     private final UserFavoriteRepository favoriteRepository;
 
-    // /** Get current authenticated UserDetailsImpl */
-    // private UserDetailsImpl getCurrentUserInfo() {
-    //     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    //     if (auth == null || !(auth.getPrincipal() instanceof UserDetailsImpl)) {
-    //         return null;
-    //     }
-    //     return (UserDetailsImpl) auth.getPrincipal();
-    // }
-
     /** Check if current user has ROLE_2  */
     private boolean isAdmin() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

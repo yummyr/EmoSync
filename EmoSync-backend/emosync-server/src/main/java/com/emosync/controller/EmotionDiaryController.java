@@ -17,7 +17,6 @@ import com.emosync.Result.Result;
 import com.emosync.exception.BusinessException;
 import com.emosync.service.EmotionDiaryService;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -28,10 +27,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 情绪日记控制器
- * @author system
+ * Emotion Diary Controller
+ * @author Yuan
  */
-@Tag(name = "情绪日记管理", description = "情绪日记的增删改查及统计分析")
+@Tag(name = "Emotion Diary Management", description = "CRUD operations and statistical analysis for emotion diaries")
 @Slf4j
 @RestController
 @RequestMapping("/emotion-diary")
@@ -54,104 +53,97 @@ public class EmotionDiaryController {
 
     /** Check if current user has ROLE_ADMIN */
     private boolean isAdmin() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null) return false;
-
-        for (GrantedAuthority authority : auth.getAuthorities()) {
-            if ("ROLE_admin".equals(authority.getAuthority())) {
-                return true;
-            }
-        }
-        return false;
+        UserDetailsImpl userDetails = getCurrentUserInfo();
+        return userDetails != null && userDetails.isAdmin();
     }
 
     /**
-     * 创建或更新情绪日记
-     * 同一天只能有一条记录，如果已存在则提示进入编辑模式
+     * Create or update emotion diary
+     * Only one record per day, if record exists for the day, prompt to enter edit mode
      */
-    @Operation(summary = "创建或更新情绪日记", description = "创建新的情绪日记记录，同一天已存在记录则提示进入编辑模式")
+    @Operation(summary = "Create or update emotion diary", description = "Create new emotion diary record, prompt to enter edit mode if record exists for the day")
     @PostMapping
     public Result<EmotionDiaryResponseDTO> createOrUpdateDiary(
             @Valid @RequestBody EmotionDiaryCreateDTO createDTO,
-            @Parameter(description = "是否为编辑模式") @RequestParam(required = false) Boolean isEditMode) {
-        log.info("收到创建或更新情绪日记请求: {}, 编辑模式: {}", createDTO, isEditMode);
+            @Parameter(description = "Whether in edit mode") @RequestParam(required = false) Boolean isEditMode) {
+        log.info("Received create or update emotion diary request: {}, edit mode: {}", createDTO, isEditMode);
 
         Long userId = getCurrentUserInfo().getId();
         if (userId == null) {
-            return Result.error("用户未登录");
+            return Result.error("User not logged in");
         }
 
         try {
             EmotionDiaryResponseDTO responseDTO = emotionDiaryService.createOrUpdateDiary(userId, createDTO, isEditMode);
             return Result.success(responseDTO);
         } catch (Exception e) {
-            log.error("创建或更新情绪日记失败: {}", e.getMessage(), e);
-            return Result.error("操作失败: " + e.getMessage());
+            log.error("Failed to create or update emotion diary: {}", e.getMessage(), e);
+            return Result.error("Operation failed: " + e.getMessage());
         }
     }
 
     /**
-     * 更新情绪日记
+     * Update emotion diary
      */
-    @Operation(summary = "更新情绪日记", description = "更新指定的情绪日记记录")
+    @Operation(summary = "Update emotion diary", description = "Update specified emotion diary record")
     @PutMapping("/{id}")
     public Result<EmotionDiaryResponseDTO> updateDiary(
-            @Parameter(description = "日记ID") @PathVariable Long id,
+            @Parameter(description = "Diary ID") @PathVariable Long id,
             @Valid @RequestBody EmotionDiaryUpdateDTO updateDTO) {
-        log.info("收到更新情绪日记请求，ID: {}, 数据: {}", id, updateDTO);
+        log.info("Received update emotion diary request, ID: {}, data: {}", id, updateDTO);
 
         Long userId =getCurrentUserInfo().getId();
         if (userId == null) {
-            return Result.error("用户未登录");
+            return Result.error("User not logged in");
         }
 
-        // 设置日记ID
+        // Set diary ID
         updateDTO.setId(id);
 
         try {
             EmotionDiaryResponseDTO responseDTO = emotionDiaryService.updateDiary(userId, updateDTO);
             return Result.success(responseDTO);
         } catch (Exception e) {
-            log.error("更新情绪日记失败: {}", e.getMessage(), e);
-            return Result.error("更新失败: " + e.getMessage());
+            log.error("Failed to update emotion diary: {}", e.getMessage(), e);
+            return Result.error("Update failed: " + e.getMessage());
         }
     }
 
     /**
-     * 根据ID获取情绪日记
+     * Get emotion diary by ID
      */
-    @Operation(summary = "获取情绪日记详情", description = "根据日记ID获取情绪日记详细信息")
+    @Operation(summary = "Get emotion diary details", description = "Get detailed emotion diary information by diary ID")
     @GetMapping("/{id}")
     public Result<EmotionDiaryResponseDTO> getDiaryById(
-            @Parameter(description = "日记ID") @PathVariable Long id) {
-        log.info("收到获取情绪日记请求，ID: {}", id);
+            @Parameter(description = "Diary ID") @PathVariable Long id) {
+        log.info("Received get emotion diary request, ID: {}", id);
 
         Long userId = getCurrentUserInfo().getId();
         if (userId == null) {
-            return Result.error("用户未登录");
+            return Result.error("User not logged in");
         }
 
         try {
             EmotionDiaryResponseDTO responseDTO = emotionDiaryService.getDiaryById(userId, id);
             return Result.success(responseDTO);
         } catch (Exception e) {
-            log.error("获取情绪日记失败: {}", e.getMessage(), e);
-            return Result.error("获取失败: " + e.getMessage());
+            log.error("Failed to get emotion diary: {}", e.getMessage(), e);
+            return Result.error("Get failed: " + e.getMessage());
         }
     }
 
     /**
-     * 根据日期获取情绪日记
+     * Get emotion diary by date
      */
-    @Operation(summary = "根据日期获取情绪日记", description = "获取指定日期的情绪日记记录")
+    @Operation(summary = "Get emotion diary by date", description = "Get emotion diary record for specified date")
     @GetMapping("/date/{date}")
     public Result<EmotionDiaryResponseDTO> getDiaryByDate(
-            @Parameter(description = "日期 (格式: yyyy-MM-dd)") @PathVariable String date) {
-        log.info("收到根据日期获取情绪日记请求，日期: {}", date);
+            @Parameter(description = "Date (format: yyyy-MM-dd)") @PathVariable String date) {
+        log.info("Received get emotion diary by date request, date: {}", date);
 
         Long userId = getCurrentUserInfo().getId();
         if (userId == null) {
-            return Result.error("用户未登录");
+            return Result.error("User not logged in");
         }
 
         try {
@@ -159,46 +151,51 @@ public class EmotionDiaryController {
             EmotionDiaryResponseDTO responseDTO = emotionDiaryService.getDiaryByDate(userId, diaryDate);
             
             if (responseDTO == null) {
-                return Result.error("该日期没有日记记录");
+                return Result.error("No diary record for this date");
             }
             
             return Result.success(responseDTO);
         } catch (Exception e) {
-            log.error("根据日期获取情绪日记失败: {}", e.getMessage(), e);
-            return Result.error("获取失败: " + e.getMessage());
+            log.error("Failed to get emotion diary by date: {}", e.getMessage(), e);
+            return Result.error("Get failed: " + e.getMessage());
         }
     }
 
     /**
-     * 分页查询情绪日记
+     * Paginated query emotion diary
      */
-    @Operation(summary = "分页查询情绪日记", description = "根据条件分页查询用户的情绪日记列表")
+    @Operation(summary = "Paginated query emotion diary", description = "Paginated query user's emotion diary list based on conditions")
     @GetMapping("/page")
     public Result<PageResult<EmotionDiaryResponseDTO>> getDiaryPage(
-            @Parameter(description = "页码") @RequestParam(defaultValue = "1") Long current,
-            @Parameter(description = "每页大小") @RequestParam(defaultValue = "10") Long size,
-            @Parameter(description = "开始日期") @RequestParam(required = false) String startDate,
-            @Parameter(description = "结束日期") @RequestParam(required = false) String endDate,
-            @Parameter(description = "最低情绪评分") @RequestParam(required = false) Integer minMoodScore,
-            @Parameter(description = "最高情绪评分") @RequestParam(required = false) Integer maxMoodScore,
-            @Parameter(description = "主要情绪") @RequestParam(required = false) String dominantEmotion,
-            @Parameter(description = "睡眠质量") @RequestParam(required = false) Integer sleepQuality,
-            @Parameter(description = "压力水平") @RequestParam(required = false) Integer stressLevel) {
+            @Parameter(description = "Page number") @RequestParam(defaultValue = "1") Integer current,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "10") Integer size,
+            @Parameter(description = "Start date") @RequestParam(required = false) String startDate,
+            @Parameter(description = "End date") @RequestParam(required = false) String endDate,
+            @Parameter(description = "Minimum mood score") @RequestParam(required = false) Integer minMoodScore,
+            @Parameter(description = "Maximum mood score") @RequestParam(required = false) Integer maxMoodScore,
+            @Parameter(description = "Dominant emotion") @RequestParam(required = false) String dominantEmotion,
+            @Parameter(description = "Sleep quality") @RequestParam(required = false) Integer sleepQuality,
+            @Parameter(description = "Stress level") @RequestParam(required = false) Integer stressLevel) {
         
-        log.info("收到分页查询情绪日记请求，页码: {}, 大小: {}", current, size);
+        log.info("Received paginated query emotion diary request, page: {}, size: {}", current, size);
 
         Long userId = getCurrentUserInfo().getId();
         if (userId == null) {
-            return Result.error("用户未登录");
+            return Result.error("User not logged in");
         }
 
         try {
             EmotionDiaryQueryDTO queryDTO = new EmotionDiaryQueryDTO();
-            queryDTO.setUserId(userId);
+            if(isAdmin()){
+                queryDTO.setUserId(null);
+            }else{
+                queryDTO.setUserId(userId);
+            }
+
             queryDTO.setCurrent(current);
             queryDTO.setSize(size);
             
-            // 设置查询条件
+            // Set query conditions
             if (startDate != null) {
                 queryDTO.setStartDate(LocalDate.parse(startDate));
             }
@@ -214,67 +211,67 @@ public class EmotionDiaryController {
             PageResult<EmotionDiaryResponseDTO> page = emotionDiaryService.selectPage(queryDTO);
             return Result.success(page);
         } catch (Exception e) {
-            log.error("分页查询情绪日记失败: {}", e.getMessage(), e);
-            return Result.error("查询失败: " + e.getMessage());
+            log.error("Failed to paginate query emotion diary: {}", e.getMessage(), e);
+            return Result.error("Query failed: " + e.getMessage());
         }
     }
 
     /**
-     * 删除情绪日记
+     * Delete emotion diary
      */
-    @Operation(summary = "删除情绪日记", description = "删除指定的情绪日记记录")
+    @Operation(summary = "Delete emotion diary", description = "Delete specified emotion diary record")
     @DeleteMapping("/{id}")
-    public Result<Void> deleteDiary(@Parameter(description = "日记ID") @PathVariable Long id) {
-        log.info("收到删除情绪日记请求，ID: {}", id);
+    public Result<Void> deleteDiary(@Parameter(description = "Diary ID") @PathVariable Long id) {
+        log.info("Received delete emotion diary request, ID: {}", id);
 
         Long userId = getCurrentUserInfo().getId();
         if (userId == null) {
-            return Result.error("用户未登录");
+            return Result.error("User not logged in");
         }
 
         try {
             emotionDiaryService.deleteDiary(userId, id);
             return Result.success();
         } catch (Exception e) {
-            log.error("删除情绪日记失败: {}", e.getMessage(), e);
-            return Result.error("删除失败: " + e.getMessage());
+            log.error("Failed to delete emotion diary: {}", e.getMessage(), e);
+            return Result.error("Delete failed: " + e.getMessage());
         }
     }
 
     /**
-     * 获取情绪日记统计数据
+     * Get emotion diary statistics
      */
-    @Operation(summary = "获取情绪统计数据", description = "获取用户的情绪日记统计分析数据")
+    @Operation(summary = "Get emotion statistics", description = "Get user emotion diary statistical analysis data")
     @GetMapping("/statistics")
     public Result<EmotionDiaryStatisticsDTO> getStatistics(
-            @Parameter(description = "统计天数") @RequestParam(defaultValue = "7") Integer days) {
-        log.info("收到获取情绪统计数据请求，统计天数: {}", days);
+            @Parameter(description = "Statistics days") @RequestParam(defaultValue = "7") Integer days) {
+        log.info("Received get emotion statistics request, statistics days: {}", days);
 
         Long userId = getCurrentUserInfo().getId();
         if (userId == null) {
-            return Result.error("用户未登录");
+            return Result.error("User not logged in");
         }
 
         try {
             EmotionDiaryStatisticsDTO statistics = emotionDiaryService.getStatistics(userId, days);
             return Result.success(statistics);
         } catch (Exception e) {
-            log.error("获取情绪统计数据失败: {}", e.getMessage(), e);
-            return Result.error("获取统计数据失败: " + e.getMessage());
+            log.error("Failed to get emotion statistics: {}", e.getMessage(), e);
+            return Result.error("Get statistics failed: " + e.getMessage());
         }
     }
 
     /**
-     * 获取今日情绪日记
+     * Get today's emotion diary
      */
-    @Operation(summary = "获取今日情绪日记", description = "获取当前用户今天的情绪日记记录")
+    @Operation(summary = "Get today's emotion diary", description = "Get current user's today emotion diary record")
     @GetMapping("/today")
     public Result<EmotionDiaryResponseDTO> getTodayDiary() {
-        log.info("收到获取今日情绪日记请求");
+        log.info("Received get today's emotion diary request");
 
         Long userId = getCurrentUserInfo().getId();
         if (userId == null) {
-            return Result.error("用户未登录");
+            return Result.error("User not logged in");
         }
 
         try {
@@ -282,232 +279,232 @@ public class EmotionDiaryController {
             EmotionDiaryResponseDTO responseDTO = emotionDiaryService.getDiaryByDate(userId, today);
             
             if (responseDTO == null) {
-                return Result.error("今日还没有记录情绪日记");
+                return Result.error("No emotion diary recorded today");
             }
             
             return Result.success(responseDTO);
         } catch (Exception e) {
-            log.error("获取今日情绪日记失败: {}", e.getMessage(), e);
-            return Result.error("获取失败: " + e.getMessage());
+            log.error("Failed to get today's emotion diary: {}", e.getMessage(), e);
+            return Result.error("Get failed: " + e.getMessage());
         }
     }
 
     /**
-     * 获取指定日记的AI情绪分析结果
+     * Get AI emotion analysis result for specified diary
      */
-    @Operation(summary = "获取AI情绪分析结果", description = "获取指定日记的AI情绪分析结果")
+    @Operation(summary = "Get AI emotion analysis result", description = "Get AI emotion analysis result for specified diary")
     @GetMapping("/{id}/ai-analysis")
     public Result<StructOutPut.EmotionAnalysisResult> getAiEmotionAnalysis(
-            @Parameter(description = "日记ID") @PathVariable Long id) {
-        log.info("收到获取AI情绪分析请求，日记ID: {}", id);
+            @Parameter(description = "Diary ID") @PathVariable Long id) {
+        log.info("Received get AI emotion analysis request, diary ID: {}", id);
 
         Long userId = getCurrentUserInfo().getId();
         if (userId == null) {
-            return Result.error("用户未登录");
+            return Result.error("User not logged in");
         }
 
         try {
-            // 先验证用户是否有权限访问该日记
+            // First verify if user has permission to access this diary
             EmotionDiaryResponseDTO diary = emotionDiaryService.getDiaryById(userId, id);
             if (diary == null) {
-                return Result.error("日记不存在或无权限访问");
+                return Result.error("Diary not found or no permission to access");
             }
 
-            // 获取AI分析结果
+            // Get AI analysis result
             StructOutPut.EmotionAnalysisResult analysisResult = emotionDiaryService.getAiEmotionAnalysis(id);
             if (analysisResult == null) {
-                return Result.error("AI情绪分析结果尚未生成，请稍后再试");
+                return Result.error("AI emotion analysis result not yet generated, please try again later");
             }
 
             return Result.success(analysisResult);
         } catch (Exception e) {
-            log.error("获取AI情绪分析失败: {}", e.getMessage(), e);
-            return Result.error("获取分析结果失败: " + e.getMessage());
+            log.error("Failed to get AI emotion analysis: {}", e.getMessage(), e);
+            return Result.error("Get analysis result failed: " + e.getMessage());
         }
     }
 
     /**
-     * 手动触发AI情绪分析
+     * Manually trigger AI emotion analysis
      */
-    @Operation(summary = "手动触发AI情绪分析", description = "手动触发指定日记的AI情绪分析")
+    @Operation(summary = "Manually trigger AI emotion analysis", description = "Manually trigger AI emotion analysis for specified diary")
     @PostMapping("/{id}/ai-analysis")
     public Result<Void> triggerAiEmotionAnalysis(
-            @Parameter(description = "日记ID") @PathVariable Long id) {
-        log.info("收到手动触发AI情绪分析请求，日记ID: {}", id);
+            @Parameter(description = "Diary ID") @PathVariable Long id) {
+        log.info("Received manually trigger AI emotion analysis request, diary ID: {}", id);
 
         Long userId = getCurrentUserInfo().getId();
         if (userId == null) {
-            return Result.error("用户未登录");
+            return Result.error("User not logged in");
         }
 
         try {
-            // 先验证用户是否有权限访问该日记
+            // First verify if user has permission to access this diary
             EmotionDiaryResponseDTO diary = emotionDiaryService.getDiaryById(userId, id);
             if (diary == null) {
-                return Result.error("日记不存在或无权限访问");
+                return Result.error("Diary not found or no permission to access");
             }
 
-            // 手动触发AI分析（异步处理）
+            // Manually trigger AI analysis (asynchronous processing)
             if (diary.getDiaryContent() != null && !diary.getDiaryContent().trim().isEmpty()) {
                 emotionDiaryService.performAiEmotionAnalysisAsync(id, diary.getDiaryContent());
-                log.info("已手动提交AI情绪分析任务到队列，日记ID: {}", id);
+                log.info("Manually submitted AI emotion analysis task to queue, diary ID: {}", id);
                 return Result.success();
             } else {
-                return Result.error("日记内容为空，无法进行AI分析");
+                return Result.error("Diary content is empty, cannot perform AI analysis");
             }
         } catch (Exception e) {
-            log.error("触发AI情绪分析失败: {}", e.getMessage(), e);
-            return Result.error("触发分析失败: " + e.getMessage());
+            log.error("Failed to trigger AI emotion analysis: {}", e.getMessage(), e);
+            return Result.error("Trigger analysis failed: " + e.getMessage());
         }
     }
 
-    // ========== 管理员接口 ==========
+    // ========== Admin APIs ==========
 
     /**
-     * 管理员分页查询所有用户情绪日记
+     * Admin paginated query all users' emotion diaries
      */
-    @Operation(summary = "管理员分页查询情绪日记", description = "管理员查看所有用户的情绪日记记录")
-    @GetMapping("/admin/page")
-    public Result<PageResult<EmotionDiaryResponseDTO>> getAdminDiaryPage(
-            @Parameter(description = "页码") @RequestParam(defaultValue = "1") Long current,
-            @Parameter(description = "每页大小") @RequestParam(defaultValue = "10") Long size,
-            @Parameter(description = "用户ID") @RequestParam(required = false) Long userId,
-            @Parameter(description = "用户名") @RequestParam(required = false) String username,
-            @Parameter(description = "开始日期") @RequestParam(required = false) String startDate,
-            @Parameter(description = "结束日期") @RequestParam(required = false) String endDate,
-            @Parameter(description = "最低情绪评分") @RequestParam(required = false) Integer minMoodScore,
-            @Parameter(description = "最高情绪评分") @RequestParam(required = false) Integer maxMoodScore,
-            @Parameter(description = "主要情绪") @RequestParam(required = false) String dominantEmotion) {
-        
-        log.info("管理员收到分页查询情绪日记请求，页码: {}, 大小: {}", current, size);
-
-        try {
-            EmotionDiaryQueryDTO queryDTO = new EmotionDiaryQueryDTO();
-            queryDTO.setCurrent(current);
-            queryDTO.setSize(size);
-            queryDTO.setUserId(userId);
-            queryDTO.setUsername(username);
-            
-            // 设置查询条件
-            if (startDate != null) {
-                queryDTO.setStartDate(LocalDate.parse(startDate));
-            }
-            if (endDate != null) {
-                queryDTO.setEndDate(LocalDate.parse(endDate));
-            }
-            queryDTO.setMinMoodScore(minMoodScore);
-            queryDTO.setMaxMoodScore(maxMoodScore);
-            queryDTO.setDominantEmotion(dominantEmotion);
-
-            PageResult<EmotionDiaryResponseDTO> page = emotionDiaryService.selectAdminPage(queryDTO);
-            return Result.success(page);
-        } catch (Exception e) {
-            log.error("管理员分页查询情绪日记失败: {}", e.getMessage(), e);
-            return Result.error("查询失败: " + e.getMessage());
-        }
-    }
+    // @Operation(summary = "Admin paginated query emotion diaries", description = "Admin view all users' emotion diary records")
+    // @GetMapping("/admin/page")
+    // public Result<PageResult<EmotionDiaryResponseDTO>> getAdminDiaryPage(
+    //         @Parameter(description = "Page number") @RequestParam(defaultValue = "1") Integer current,
+    //         @Parameter(description = "Page size") @RequestParam(defaultValue = "10") Integer size,
+    //         @Parameter(description = "User ID") @RequestParam(required = false) Long userId,
+    //         @Parameter(description = "Username") @RequestParam(required = false) String username,
+    //         @Parameter(description = "Start date") @RequestParam(required = false) String startDate,
+    //         @Parameter(description = "End date") @RequestParam(required = false) String endDate,
+    //         @Parameter(description = "Minimum mood score") @RequestParam(required = false) Integer minMoodScore,
+    //         @Parameter(description = "Maximum mood score") @RequestParam(required = false) Integer maxMoodScore,
+    //         @Parameter(description = "Dominant emotion") @RequestParam(required = false) String dominantEmotion) {
+    //
+    //     log.info("Admin received paginated query emotion diary request, page: {}, size: {}", current, size);
+    //
+    //     try {
+    //         EmotionDiaryQueryDTO queryDTO = new EmotionDiaryQueryDTO();
+    //         queryDTO.setCurrent(current);
+    //         queryDTO.setSize(size);
+    //         queryDTO.setUserId(userId);
+    //         queryDTO.setUsername(username);
+    //
+    //         // Set query conditions
+    //         if (startDate != null) {
+    //             queryDTO.setStartDate(LocalDate.parse(startDate));
+    //         }
+    //         if (endDate != null) {
+    //             queryDTO.setEndDate(LocalDate.parse(endDate));
+    //         }
+    //         queryDTO.setMinMoodScore(minMoodScore);
+    //         queryDTO.setMaxMoodScore(maxMoodScore);
+    //         queryDTO.setDominantEmotion(dominantEmotion);
+    //
+    //         PageResult<EmotionDiaryResponseDTO> page = emotionDiaryService.selectAdminPage(queryDTO);
+    //         return Result.success(page);
+    //     } catch (Exception e) {
+    //         log.error("Admin paginated query emotion diary failed: {}", e.getMessage(), e);
+    //         return Result.error("Query failed: " + e.getMessage());
+    //     }
+    // }
 
     /**
-     * 管理员获取情绪日记统计数据
+     * Admin get emotion diary statistics
      */
-    @Operation(summary = "管理员获取情绪统计数据", description = "获取全局情绪日记统计分析数据")
+    @Operation(summary = "Admin get emotion statistics", description = "Get global emotion diary statistical analysis data")
     @GetMapping("/admin/statistics")
     public Result<EmotionDiaryStatisticsDTO> getAdminStatistics(
-            @Parameter(description = "统计天数") @RequestParam(defaultValue = "30") Integer days,
+            @Parameter(description = "Statistics days") @RequestParam(defaultValue = "30") Integer days,
             @Parameter(description = "用户ID") @RequestParam(required = false) Long userId) {
-        log.info("管理员收到获取情绪统计数据请求，统计天数: {}, 用户ID: {}", days, userId);
+        log.info("Admin received get emotion statistics request, statistics days: {}, user ID: {}", days, userId);
 
         try {
             EmotionDiaryStatisticsDTO statistics = emotionDiaryService.getAdminStatistics(userId, days);
             return Result.success(statistics);
         } catch (Exception e) {
-            log.error("管理员获取情绪统计数据失败: {}", e.getMessage(), e);
-            return Result.error("获取统计数据失败: " + e.getMessage());
+            log.error("Admin failed to get emotion statistics: {}", e.getMessage(), e);
+            return Result.error("Get statistics failed: " + e.getMessage());
         }
     }
 
     /**
-     * 管理员删除情绪日记
+     * Admin delete emotion diary
      */
-    @Operation(summary = "管理员删除情绪日记", description = "管理员删除指定的情绪日记记录")
+    @Operation(summary = "Admin delete emotion diary", description = "Admin delete specified emotion diary record")
     @DeleteMapping("/admin/{id}")
-    public Result<Void> adminDeleteDiary(@Parameter(description = "日记ID") @PathVariable Long id) {
-        log.info("管理员收到删除情绪日记请求，ID: {}", id);
+    public Result<Void> adminDeleteDiary(@Parameter(description = "Diary ID") @PathVariable Long id) {
+        log.info("Admin received delete emotion diary request, ID: {}", id);
 
         try {
             emotionDiaryService.adminDeleteDiary(id);
             return Result.success();
         } catch (Exception e) {
-            log.error("管理员删除情绪日记失败: {}", e.getMessage(), e);
-            return Result.error("删除失败: " + e.getMessage());
+            log.error("Admin failed to delete emotion diary: {}", e.getMessage(), e);
+            return Result.error("Delete failed: " + e.getMessage());
         }
     }
 
     /**
-     * 管理员获取系统概览统计
+     * Admin get system overview statistics
      */
-    @Operation(summary = "管理员获取系统概览", description = "获取情绪日记模块的系统概览数据")
+    @Operation(summary = "Admin get system overview", description = "Get system overview data for emotion diary module")
     @GetMapping("/admin/overview")
     public Result<EmotionDiaryStatisticsDTO> getAdminOverview() {
-        log.info("管理员收到获取系统概览请求");
+        log.info("Admin received get system overview request");
 
         try {
             EmotionDiaryStatisticsDTO overview = emotionDiaryService.getSystemOverview();
             return Result.success(overview);
         } catch (Exception e) {
-            log.error("管理员获取系统概览失败: {}", e.getMessage(), e);
-            return Result.error("获取概览数据失败: " + e.getMessage());
+            log.error("Admin failed to get system overview: {}", e.getMessage(), e);
+            return Result.error("Get overview data failed: " + e.getMessage());
         }
     }
 
     /**
-     * 管理员手动触发AI情绪分析
+     * Admin manually trigger AI emotion analysis
      */
-    @Operation(summary = "管理员手动触发AI情绪分析", description = "管理员手动触发指定日记的AI情绪分析，支持重复分析")
+    @Operation(summary = "Admin manually trigger AI emotion analysis", description = "Admin manually trigger AI emotion analysis for specified diary, supports repeated analysis")
     @PostMapping("/admin/{id}/ai-analysis")
     public Result<Void> adminTriggerAiEmotionAnalysis(
-            @Parameter(description = "日记ID") @PathVariable Long id) {
-        log.info("管理员手动触发AI情绪分析，日记ID: {}", id);
+            @Parameter(description = "Diary ID") @PathVariable Long id) {
+        log.info("Admin manually trigger AI emotion analysis, diary ID: {}", id);
 
         try {
-            // 管理员可以触发任何日记的AI分析，包括已分析过的
+            // Admin can trigger AI analysis for any diary, including previously analyzed ones
             emotionDiaryService.adminTriggerAiAnalysis(id);
-            log.info("管理员已提交AI情绪分析任务到队列，日记ID: {}", id);
+            log.info("Admin submitted AI emotion analysis task to queue, diary ID: {}", id);
             return Result.success();
         } catch (BusinessException e) {
-            log.warn("管理员触发AI情绪分析失败: {}", e.getMessage());
+            log.warn("Admin failed to trigger AI emotion analysis: {}", e.getMessage());
             return Result.error(e.getMessage());
         } catch (Exception e) {
-            log.error("管理员触发AI情绪分析异常: {}", e.getMessage(), e);
-            return Result.error("触发分析失败: " + e.getMessage());
+            log.error("Admin trigger AI emotion analysis exception: {}", e.getMessage(), e);
+            return Result.error("Trigger analysis failed: " + e.getMessage());
         }
     }
 
     /**
-     * 管理员批量触发AI情绪分析
+     * Admin batch trigger AI emotion analysis
      */
-    @Operation(summary = "管理员批量触发AI情绪分析", description = "管理员批量触发多个日记的AI情绪分析")
+    @Operation(summary = "Admin batch trigger AI emotion analysis", description = "Admin batch trigger AI emotion analysis for multiple diaries")
     @PostMapping("/admin/batch-ai-analysis")
     public Result<Map<String, Object>> adminBatchTriggerAiEmotionAnalysis(
-            @Parameter(description = "日记ID列表") @RequestBody List<Long> diaryIds) {
-        log.info("管理员批量触发AI情绪分析，日记数量: {}", diaryIds.size());
+            @Parameter(description = "Diary ID list") @RequestBody List<Long> diaryIds) {
+        log.info("Admin batch trigger AI emotion analysis, diary count: {}", diaryIds.size());
 
         if (diaryIds == null || diaryIds.isEmpty()) {
-            return Result.error("日记ID列表不能为空");
+            return Result.error("Diary ID list cannot be empty");
         }
 
         if (diaryIds.size() > 100) {
-            return Result.error("单次批量处理不能超过100条记录");
+            return Result.error("Single batch processing cannot exceed 100 records");
         }
 
         try {
             Map<String, Object> result = emotionDiaryService.adminBatchTriggerAiAnalysis(diaryIds);
-            log.info("管理员批量AI分析任务已提交，成功: {}, 失败: {}", 
+            log.info("Admin batch AI analysis tasks submitted, success: {}, failed: {}", 
                     result.get("successCount"), result.get("failCount"));
             return Result.success(result);
         } catch (Exception e) {
-            log.error("管理员批量触发AI情绪分析异常: {}", e.getMessage(), e);
-            return Result.error("批量触发分析失败: " + e.getMessage());
+            log.error("Admin batch trigger AI emotion analysis exception: {}", e.getMessage(), e);
+            return Result.error("Batch trigger analysis failed: " + e.getMessage());
         }
     }
 }

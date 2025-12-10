@@ -1,7 +1,9 @@
 package com.emosync.DTO.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -12,6 +14,8 @@ import java.util.Map;
  * @author system
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Schema(description = "情绪日记统计响应DTO")
 public class EmotionDiaryStatisticsDTO {
 

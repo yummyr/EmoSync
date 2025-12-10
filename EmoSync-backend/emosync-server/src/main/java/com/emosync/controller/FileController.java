@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * 文件管理控制器
  * 提供简单文件上传和完整业务文件管理功能
- * @author system
+ * @author Yuan
  */
 @Tag(name = "文件管理", description = "文件上传、下载、删除、信息查询接口")
 @RequestMapping("/file")

@@ -12,7 +12,6 @@ import com.emosync.Result.Result;
 import com.emosync.service.DataAnalyticsService;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,10 +19,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 数据分析控制器
- * @author system
+ * Data Analytics Controller
+ * @author Yuan
  */
-@Tag(name = "数据分析管理")
+@Tag(name = "Data Analytics Management")
 @RestController
 @RequestMapping("/data-analytics")
 @Slf4j
@@ -45,26 +44,17 @@ public class DataAnalyticsController {
 
     /** Check if current user has administrator role type */
     private boolean isAdmin() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null) return false;
-
-        for (GrantedAuthority authority : auth.getAuthorities()) {
-            log.info("permission:{}",authority.getAuthority());
-            // role type: 1 = regular user, 2= administrator
-            if ("ROLE_2".equals(authority.getAuthority())) {
-                return true;
-            }
-        }
-        return false;
+        UserDetailsImpl userDetails = getCurrentUserInfo();
+        return userDetails != null && userDetails.isAdmin();
     }
-    @Operation(summary = "获取综合数据分析")
+    @Operation(summary = "Get comprehensive data analytics")
     @GetMapping("/overview")
     public Result<DataAnalyticsResponseDTO> getDataAnalytics(
-            @Parameter(description = "分析天数") @RequestParam(defaultValue = "30") Integer days) {
+            @Parameter(description = "Analysis days") @RequestParam(defaultValue = "30") Integer days) {
         
-        log.info("获取数据分析，分析天数: {}", days);
-        
-        // 权限检查：需要管理员权限
+        log.info("Get data analytics, analysis days: {}", days);
+
+        // Permission check: requires admin privileges
         if (!isAdmin()) {
             return Result.error("Permission denied — Admin only");
         }
@@ -73,14 +63,14 @@ public class DataAnalyticsController {
         return Result.success(analytics);
     }
 
-    @Operation(summary = "获取情绪热力图数据")
+    @Operation(summary = "Get emotion heatmap data")
     @GetMapping("/emotion-heatmap")
     public Result<DataAnalyticsResponseDTO.EmotionHeatmapData> getEmotionHeatmap(
-            @Parameter(description = "分析天数") @RequestParam(defaultValue = "30") Integer days) {
+            @Parameter(description = "Analysis days") @RequestParam(defaultValue = "30") Integer days) {
         
-        log.info("获取情绪热力图数据，分析天数: {}", days);
-        
-        // 权限检查：需要管理员权限
+        log.info("Get emotion heatmap data, analysis days: {}", days);
+
+        // Permission check: requires admin privileges
         if (!isAdmin()) {
             return Result.error("Permission denied — Admin only");
         }
@@ -89,14 +79,14 @@ public class DataAnalyticsController {
         return Result.success(analytics.getEmotionHeatmap());
     }
 
-    @Operation(summary = "获取系统概览数据")
+    @Operation(summary = "Get system overview data")
     @GetMapping("/system-overview")
     public Result<DataAnalyticsResponseDTO.SystemOverview> getSystemOverview(
-            @Parameter(description = "分析天数") @RequestParam(defaultValue = "30") Integer days) {
+            @Parameter(description = "Analysis days") @RequestParam(defaultValue = "30") Integer days) {
         
-        log.info("获取系统概览数据，分析天数: {}", days);
-        
-        // 权限检查：需要管理员权限
+        log.info("Get system overview data, analysis days: {}", days);
+
+        // Permission check: requires admin privileges
         if (!isAdmin()) {
             return Result.error("Permission denied — Admin only");
         }
@@ -105,14 +95,14 @@ public class DataAnalyticsController {
         return Result.success(analytics.getSystemOverview());
     }
 
-    @Operation(summary = "获取情绪趋势数据")
+    @Operation(summary = "Get emotion trend data")
     @GetMapping("/emotion-trend")
     public Result<java.util.List<DataAnalyticsResponseDTO.EmotionTrendData>> getEmotionTrend(
-            @Parameter(description = "分析天数") @RequestParam(defaultValue = "30") Integer days) {
+            @Parameter(description = "Analysis days") @RequestParam(defaultValue = "30") Integer days) {
         
-        log.info("获取情绪趋势数据，分析天数: {}", days);
-        
-        // 权限检查：需要管理员权限
+        log.info("Get emotion trend data, analysis days: {}", days);
+
+        // Permission check: requires admin privileges
         if (!isAdmin()) {
             return Result.error("Permission denied — Admin only");
         }
@@ -120,14 +110,14 @@ public class DataAnalyticsController {
         return Result.success(analytics.getEmotionTrend());
     }
 
-    @Operation(summary = "获取咨询会话统计")
+    @Operation(summary = "Get consultation session statistics")
     @GetMapping("/consultation-stats")
     public Result<DataAnalyticsResponseDTO.ConsultationStatistics> getConsultationStats(
-            @Parameter(description = "分析天数") @RequestParam(defaultValue = "30") Integer days) {
+            @Parameter(description = "Analysis days") @RequestParam(defaultValue = "30") Integer days) {
         
-        log.info("获取咨询会话统计，分析天数: {}", days);
-        
-        // 权限检查：需要管理员权限
+        log.info("Get consultation session statistics, analysis days: {}", days);
+
+        // Permission check: requires admin privileges
         if (!isAdmin()) {
             return Result.error("Permission denied — Admin only");
         }
@@ -136,14 +126,14 @@ public class DataAnalyticsController {
         return Result.success(analytics.getConsultationStats());
     }
 
-    @Operation(summary = "获取用户活跃度数据")
+    @Operation(summary = "Get user activity data")
     @GetMapping("/user-activity")
     public Result<java.util.List<DataAnalyticsResponseDTO.UserActivityData>> getUserActivity(
-            @Parameter(description = "分析天数") @RequestParam(defaultValue = "30") Integer days) {
+            @Parameter(description = "Analysis days") @RequestParam(defaultValue = "30") Integer days) {
         
-        log.info("获取用户活跃度数据，分析天数: {}", days);
-        
-        // 权限检查：需要管理员权限
+        log.info("Get user activity data, analysis days: {}", days);
+
+        // Permission check: requires admin privileges
         if (!isAdmin()) {
             return Result.error("Permission denied — Admin only");
         }

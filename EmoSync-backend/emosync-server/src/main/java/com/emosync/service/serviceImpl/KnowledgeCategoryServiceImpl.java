@@ -36,9 +36,9 @@ public class KnowledgeCategoryServiceImpl implements KnowledgeCategoryService {
 
     @Override
     public CategoryResponseDTO createCategory(CategoryCreateDTO createDTO) {
-        // 分类重名检查
+        // Category name duplication check
         if (knowledgeCategoryRepository.existsByCategoryName(createDTO.getCategoryName())) {
-            throw new BusinessException("分类名称已存在");
+            throw new BusinessException("Category name already exists");
         }
 
         KnowledgeCategory category = KnowledgeCategory.builder()
@@ -50,7 +50,7 @@ public class KnowledgeCategoryServiceImpl implements KnowledgeCategoryService {
 
         knowledgeCategoryRepository.save(category);
 
-        log.info("创建分类成功: {}", category.getCategoryName());
+        log.info("Category created successfully: {}", category.getCategoryName());
 
         return toResponse(category, 0);
     }
@@ -58,12 +58,12 @@ public class KnowledgeCategoryServiceImpl implements KnowledgeCategoryService {
     @Override
     public CategoryResponseDTO updateCategory(Long categoryId, CategoryUpdateDTO updateDTO) {
         KnowledgeCategory existing = knowledgeCategoryRepository.findById(categoryId)
-                .orElseThrow(() -> new BusinessException("分类不存在"));
+                .orElseThrow(() -> new BusinessException("Category not found"));
 
-        // 新名称是否被其他分类使用
+        // Check if new name is used by other categories
         if (updateDTO.getCategoryName() != null &&
                 knowledgeCategoryRepository.existsByCategoryNameAndIdNot(updateDTO.getCategoryName(), categoryId)) {
-            throw new BusinessException("分类名称已被其他分类使用");
+            throw new BusinessException("Category name is already used by other categories");
         }
 
         if (updateDTO.getCategoryName() != null)
@@ -83,7 +83,7 @@ public class KnowledgeCategoryServiceImpl implements KnowledgeCategoryService {
 
         Integer articleCount = Math.toIntExact(articleRepository.countByCategory_Id(existing.getId()));
 
-        log.info("更新分类成功: {}", existing.getCategoryName());
+        log.info("Category updated successfully: {}", existing.getCategoryName());
 
         return toResponse(existing, articleCount);
     }
@@ -91,27 +91,27 @@ public class KnowledgeCategoryServiceImpl implements KnowledgeCategoryService {
     @Override
     public void deleteCategory(Long categoryId) {
         KnowledgeCategory category = knowledgeCategoryRepository.findById(categoryId)
-                .orElseThrow(() -> new BusinessException("分类不存在"));
+                .orElseThrow(() -> new BusinessException("Category not found"));
 
         Long articleCount = articleRepository.countByCategory_Id(categoryId);
 
         if (articleCount > 0) {
-            throw new BusinessException("该分类下存在文章，无法删除");
+            throw new BusinessException("Cannot delete category with existing articles");
         }
 
         knowledgeCategoryRepository.delete(category);
 
-        log.info("删除分类成功 ID={}", categoryId);
+        log.info("Category deleted successfully ID={}", categoryId);
     }
 
     /**
-     * 根据ID获取分类
+     * Get category by ID
      */
     @Override
     public CategoryResponseDTO getCategoryById(Long id) {
 
         KnowledgeCategory category = knowledgeCategoryRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("分类不存在"));
+                .orElseThrow(() -> new BusinessException("Category not found"));
 
         Integer articleCount = Math.toIntExact(articleRepository.countByCategory_Id(id));
 
@@ -126,7 +126,7 @@ public class KnowledgeCategoryServiceImpl implements KnowledgeCategoryService {
                 Sort.by("sortOrder").ascending().and(Sort.by("createdAt").descending())
         );
 
-        // 动态查询：Specification 方式
+        // Dynamic query: Specification approach
         Specification<KnowledgeCategory> spec = (root, query, cb) -> {
             List<Predicate> predicates = new java.util.ArrayList<>();
 
@@ -181,7 +181,7 @@ public class KnowledgeCategoryServiceImpl implements KnowledgeCategoryService {
 
 
     /**
-     * 工具方法：将 Entity 映射为 DTO
+     * Utility method: Map Entity to DTO
      */
     private CategoryResponseDTO toResponse(KnowledgeCategory entity, Integer articleCount) {
         return CategoryResponseDTO.builder()

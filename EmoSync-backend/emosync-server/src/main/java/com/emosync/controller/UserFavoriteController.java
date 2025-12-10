@@ -16,7 +16,6 @@ import com.emosync.Result.Result;
 import com.emosync.service.UserFavoriteService;
 import com.emosync.util.JwtTokenUtils;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,15 +45,8 @@ public class UserFavoriteController {
 
     /** Check if current user has ROLE_ADMIN */
     private boolean isAdmin() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null) return false;
-
-        for (GrantedAuthority authority : auth.getAuthorities()) {
-            if ("ROLE_admin".equals(authority.getAuthority())) {
-                return true;
-            }
-        }
-        return false;
+        UserDetailsImpl userDetails = getCurrentUserInfo();
+        return userDetails != null && userDetails.isAdmin();
     }
 
     /**

@@ -49,6 +49,5 @@ public interface ConsultationSessionRepository extends JpaRepository<Consultatio
     @Query("SELECT cs FROM ConsultationSession cs ORDER BY cs.startedAt DESC")
     List<ConsultationSession> findRecentSessions(@Param("limit") int limit);
 
-
     Page<ConsultationSession> findAll(Specification<ConsultationSession> spec, Pageable pageable);
 }

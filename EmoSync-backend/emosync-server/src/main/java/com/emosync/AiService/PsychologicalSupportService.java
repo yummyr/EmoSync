@@ -166,7 +166,7 @@ public class PsychologicalSupportService {
                 Prompt prompt = new Prompt(allMessages,
                         OpenAiChatOptions.builder()
                                 .withModel("gpt-3.5-turbo")  // 或你配置的模型
-                                .withTemperature(0.7F)
+                                .withTemperature(0.7)
                                 .build()
                 );
 

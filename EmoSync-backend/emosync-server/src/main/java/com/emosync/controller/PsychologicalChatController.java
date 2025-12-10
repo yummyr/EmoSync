@@ -22,7 +22,6 @@ import com.emosync.service.ConsultationSessionService;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -72,15 +71,8 @@ public class PsychologicalChatController {
     }
     /** Check if current user has ROLE_ADMIN */
     private boolean isAdmin() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null) return false;
-
-        for (GrantedAuthority authority : auth.getAuthorities()) {
-            if ("ROLE_2".equals(authority.getAuthority())) {
-                return true;
-            }
-        }
-        return false;
+        UserDetailsImpl userDetails = getCurrentUserInfo();
+        return userDetails != null && userDetails.isAdmin();
     }
     // /**
     //  * Convert object to SSE data format (JSON string)

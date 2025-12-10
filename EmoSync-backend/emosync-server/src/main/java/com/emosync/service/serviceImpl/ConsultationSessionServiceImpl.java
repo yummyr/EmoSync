@@ -40,10 +40,10 @@ public class ConsultationSessionServiceImpl implements ConsultationSessionServic
     @Override
     @Transactional
     public ConsultationSession createSession(Long userId, ConsultationSessionCreateDTO createDTO) {
-        log.info("创建咨询会话，用户ID: {}", userId);
+        log.info("Create consultation session, user ID: {}", userId);
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException("用户不存在"));
+                .orElseThrow(() -> new BusinessException("User not found"));
 
         ConsultationSession session = new ConsultationSession();
         session.setUser(user);
@@ -57,7 +57,7 @@ public class ConsultationSessionServiceImpl implements ConsultationSessionServic
         }
 
         ConsultationSession saved = consultationSessionRepository.save(session);
-        log.info("咨询会话创建成功，会话ID: {}", saved.getId());
+        log.info("Consultation session created successfully, session ID: {}", saved.getId());
         return saved;
     }
 
@@ -69,27 +69,27 @@ public class ConsultationSessionServiceImpl implements ConsultationSessionServic
     @Override
     @Transactional
     public void updateLastEmotionAnalysis(Long sessionId, String emotionAnalysisJson) {
-        log.info("更新会话情绪分析，会话ID: {}", sessionId);
+        log.info("Update session emotion analysis, session ID: {}", sessionId);
 
         ConsultationSession session = consultationSessionRepository.findById(sessionId)
-                .orElseThrow(() -> new BusinessException("会话不存在"));
+                .orElseThrow(() -> new BusinessException("Session not found"));
 
         session.setLastEmotionAnalysis(emotionAnalysisJson);
         session.setLastEmotionUpdatedAt(LocalDateTime.now());
 
         consultationSessionRepository.save(session);
-        log.info("会话情绪分析更新成功，会话ID: {}", sessionId);
+        log.info("Session emotion analysis updated successfully, session ID: {}", sessionId);
     }
 
     @Override
     public PageResult<ConsultationSessionResponseDTO> selectPage(ConsultationSessionQueryDTO queryDTO) {
-        log.info("分页查询咨询会话，查询条件: {}", queryDTO);
+        log.info("Paginated query consultation sessions, query conditions: {}", queryDTO);
 
-        // 构造 Specification
+        // Build Specification
         Specification<ConsultationSession> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            // 按用户过滤（普通用户只能看自己的，会在 Controller 中设置 userId）
+            // Filter by user (regular users can only see their own, userId will be set in Controller)
             if (queryDTO.getUserId() != null) {
                 predicates.add(cb.equal(root.get("user").get("id"), queryDTO.getUserId()));
             }
@@ -127,7 +127,7 @@ public class ConsultationSessionServiceImpl implements ConsultationSessionServic
         List<ConsultationSessionResponseDTO> records = page.getContent().stream()
                 .map(this::convertToResponseDTO)
                 .toList();
-        log.info("分页查询结果:{}", records);
+        log.info("Paginated query result:{}", records);
         return new PageResult<>(page.getTotalElements(), records);
     }
 
@@ -135,7 +135,7 @@ public class ConsultationSessionServiceImpl implements ConsultationSessionServic
     public ConsultationSessionResponseDTO getSessionDetail(Long sessionId) {
 
         ConsultationSession session = consultationSessionRepository.findById(sessionId)
-                .orElseThrow(() -> new BusinessException("会话不存在"));
+                .orElseThrow(() -> new BusinessException("Session not found"));
         log.info("session detail:{}",convertToResponseDTO(session));
         return convertToResponseDTO(session);
     }
@@ -143,36 +143,36 @@ public class ConsultationSessionServiceImpl implements ConsultationSessionServic
     @Override
     @Transactional
     public boolean deleteSession(Long sessionId) {
-        log.info("删除咨询会话，会话ID: {}", sessionId);
+        log.info("Delete consultation session, session ID: {}", sessionId);
 
         ConsultationSession session = consultationSessionRepository.findById(sessionId)
-                .orElseThrow(() -> new BusinessException("会话不存在"));
+                .orElseThrow(() -> new BusinessException("Session not found"));
 
         try {
-            // 先删消息
+            // First delete messages
             consultationMessageService.deleteMessagesBySessionId(sessionId);
 
-            // 再删会话
+            // Then delete session
             consultationSessionRepository.delete(session);
 
-            log.info("咨询会话删除成功，会话ID: {}", sessionId);
+            log.info("Consultation session deleted successfully, session ID: {}", sessionId);
             return true;
         } catch (Exception e) {
-            log.error("删除咨询会话异常，会话ID: {}, 错误: {}", sessionId, e.getMessage(), e);
-            throw new BusinessException("删除会话失败: " + e.getMessage());
+            log.error("Exception when deleting consultation session, session ID: {}, error: {}", sessionId, e.getMessage(), e);
+            throw new BusinessException("Failed to delete session: " + e.getMessage());
         }
     }
 
     @Override
     public boolean updateSessionTitle(Long sessionId, Long userId, String newTitle) {
-        log.info("更新会话标题，会话ID: {}, 用户ID: {}, 新标题: {}", sessionId, userId, newTitle);
+        log.info("Update session title, session ID: {}, user ID: {}, new title: {}", sessionId, userId, newTitle);
 
         ConsultationSession session = consultationSessionRepository.findById(sessionId)
-                .orElseThrow(() -> new BusinessException("会话不存在"));
+                .orElseThrow(() -> new BusinessException("Session not found"));
 
-        // 只有会话所有者可以修改
+        // Only session owner can modify
         if (session.getUser() == null || !session.getUser().getId().equals(userId)) {
-            throw new BusinessException("无权修改此会话");
+            throw new BusinessException("No permission to modify this session");
         }
 
         String finalTitle = newTitle;
@@ -185,14 +185,14 @@ public class ConsultationSessionServiceImpl implements ConsultationSessionServic
         session.setSessionTitle(finalTitle);
         consultationSessionRepository.save(session);
 
-        log.info("会话标题更新成功，会话ID: {}, 新标题: {}", sessionId, finalTitle);
+        log.info("Session title updated successfully, session ID: {}, new title: {}", sessionId, finalTitle);
         return true;
     }
 
-    // ==================== 私有工具方法 ====================
+    // ==================== Private utility methods ====================
 
     /**
-     * 实体 -> 响应 DTO
+     * Entity -> Response DTO
      */
     private ConsultationSessionResponseDTO convertToResponseDTO(ConsultationSession session) {
         ConsultationSessionResponseDTO dto = new ConsultationSessionResponseDTO();
@@ -209,26 +209,26 @@ public class ConsultationSessionServiceImpl implements ConsultationSessionServic
         dto.setDurationMinutes(session.getDurationMinutes());
 
 
-        // 补充消息统计信息
+        // Add message statistics
         enrichWithMessageInfo(dto, session.getId());
-        log.info("返回dto:{}", dto.toString());
+        log.info("Return dto:{}", dto.toString());
 
         return dto;
     }
 
     private void enrichWithMessageInfo(ConsultationSessionResponseDTO dto, Long sessionId) {
         try {
-            // 消息总数
+            // Total messages count
             dto.setMessageCount(consultationMessageService.getMessageCountBySessionId(sessionId));
 
-            // 最后一条消息
+            // Last message
             var lastMsg = consultationMessageService.getLastMessageBySessionId(sessionId);
             if (lastMsg != null) {
                 dto.setLastMessageContent(lastMsg.getContentPreview());
                 dto.setLastMessageTime(lastMsg.getCreatedAt());
             }
 
-            // 情绪标签
+            // Emotion tags
             var emotionTags = consultationMessageService.getEmotionTagsBySessionId(sessionId);
             dto.setEmotionTags(emotionTags);
 
@@ -236,7 +236,7 @@ public class ConsultationSessionServiceImpl implements ConsultationSessionServic
                 dto.setPrimaryEmotion(emotionTags.get(0));
             }
         } catch (Exception e) {
-            log.warn("丰富消息信息失败，会话ID: {}, 错误: {}", sessionId, e.getMessage());
+            log.warn("Failed to enrich message information, session ID: {}, error: {}", sessionId, e.getMessage());
         }
     }
 }

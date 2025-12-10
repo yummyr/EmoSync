@@ -22,15 +22,14 @@ import com.emosync.Result.Result;
 import com.emosync.service.KnowledgeArticleService;
 import com.emosync.util.JwtTokenUtils;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 知识文章管理控制器
+ * Knowledge Article Management Controller
  * @author system
  */
-@Tag(name = "知识文章管理")
+@Tag(name = "Knowledge Article Management")
 @RestController
 @Slf4j
 @RequiredArgsConstructor
@@ -53,180 +52,173 @@ public class KnowledgeArticleController {
 
     /** Check if current user has ROLE_ADMIN */
     private boolean isAdmin() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null) return false;
-
-        for (GrantedAuthority authority : auth.getAuthorities()) {
-            if ("ROLE_2".equals(authority.getAuthority())) {
-                return true;
-            }
-        }
-        return false;
+        UserDetailsImpl userDetails = getCurrentUserInfo();
+        return userDetails != null && userDetails.isAdmin();
     }
 
     /**
-     * 创建文章
+     * Create article
      */
-    @Operation(summary = "创建知识文章")
+    @Operation(summary = "Create knowledge article")
     @PostMapping
     public Result<ArticleResponseDTO> createArticle(
             @Valid @RequestBody ArticleCreateDTO createDTO,
             HttpServletRequest request) {
         
-        // 获取当前用户ID
+        // Get current user ID
         Long currentUserId = getCurrentUserInfo().getId();
         if (currentUserId == null) {
-            return Result.error("用户未登录");
+            return Result.error("User not logged in");
         }
 
-        // 添加详细日志
-        log.info("📝 用户创建知识文章: userId={}, title={}, contentLength={}, summary={}", 
-            currentUserId, createDTO.getTitle(), 
+        // Add detailed logs
+        log.info("📝 User creates knowledge article: userId={}, title={}, contentLength={}, summary={}",
+            currentUserId, createDTO.getTitle(),
             createDTO.getContent() != null ? createDTO.getContent().length() : 0,
             createDTO.getSummary());
-        
+
         if (createDTO.getContent() == null || createDTO.getContent().trim().isEmpty()) {
-            log.warn("⚠️ Controller层检测到内容为空: {}", createDTO);
-            return Result.error("文章内容不能为空");
+            log.warn("⚠️ Controller layer detects empty content: {}", createDTO);
+            return Result.error("Article content cannot be empty");
         }
-        
+
         ArticleResponseDTO response = knowledgeArticleService.createArticle(createDTO, currentUserId);
-        return Result.success("创建文章成功", response);
+        return Result.success("Article created successfully", response);
     }
 
     /**
-     * 更新文章
+     * Update article
      */
-    @Operation(summary = "更新知识文章")
+    @Operation(summary = "Update knowledge article")
     @PutMapping("/{id}")
     public Result<ArticleResponseDTO> updateArticle(
-            @Parameter(description = "文章ID") @PathVariable String id,
+            @Parameter(description = "Article ID") @PathVariable String id,
             @Valid @RequestBody ArticleUpdateDTO updateDTO,
             HttpServletRequest request) {
         
-        // 获取当前用户ID
+        // Get current user ID
         Long currentUserId = getCurrentUserInfo().getId();
         if (currentUserId == null) {
-            return Result.error("用户未登录");
+            return Result.error("User not logged in");
         }
 
-        log.info("用户更新知识文章: userId={}, articleId={}", currentUserId, id);
+        log.info("User updates knowledge article: userId={}, articleId={}", currentUserId, id);
         ArticleResponseDTO response = knowledgeArticleService.updateArticle(id, updateDTO, currentUserId);
-        return Result.success("更新文章成功", response);
+        return Result.success("Article updated successfully", response);
     }
 
     /**
-     * 删除文章
+     * Delete article
      */
-    @Operation(summary = "删除知识文章")
+    @Operation(summary = "Delete knowledge article")
     @DeleteMapping("/{id}")
     public Result<Void> deleteArticle(
-            @Parameter(description = "文章ID") @PathVariable String id,
+            @Parameter(description = "Article ID") @PathVariable String id,
             HttpServletRequest request) {
         
-        // 获取当前用户ID
+        // Get current user ID
         Long currentUserId = getCurrentUserInfo().getId();
         if (currentUserId == null) {
-            return Result.error("用户未登录");
+            return Result.error("User not logged in");
         }
 
-        log.info("用户删除知识文章: userId={}, articleId={}", currentUserId, id);
+        log.info("User deletes knowledge article: userId={}, articleId={}", currentUserId, id);
         knowledgeArticleService.deleteArticle(id, currentUserId);
         return Result.success();
     }
 
     /**
-     * 根据ID获取文章详情
+     * Get article details by ID
      */
-    @Operation(summary = "获取知识文章详情")
+    @Operation(summary = "Get knowledge article details")
     @GetMapping("/{id}")
     public Result<ArticleResponseDTO> getArticleById(
-            @Parameter(description = "文章ID") @PathVariable String id,
+            @Parameter(description = "Article ID") @PathVariable String id,
             HttpServletRequest request) {
         
-        // 获取当前用户ID（可为空，用于判断收藏状态）
+        // Get current user ID (can be null, used to determine favorite status)
         Long currentUserId = getCurrentUserInfo().getId();
-        
-        log.info("获取知识文章详情: articleId={}, userId={}", id, currentUserId);
+
+        log.info("Get knowledge article details: articleId={}, userId={}", id, currentUserId);
         ArticleResponseDTO response = knowledgeArticleService.getArticleById(id, currentUserId);
         return Result.success(response);
     }
 
     /**
-     * 阅读文章（增加阅读次数）
+     * Read article (increase read count)
      */
-    @Operation(summary = "阅读知识文章")
+    @Operation(summary = "Read knowledge article")
     @PostMapping("/{id}/read")
     public Result<ArticleResponseDTO> readArticle(
-            @Parameter(description = "文章ID") @PathVariable String id,
+            @Parameter(description = "Article ID") @PathVariable String id,
             HttpServletRequest request) {
         
-        // 获取当前用户ID（可为空）
+        // Get current user ID (can be null)
         Long currentUserId = getCurrentUserInfo().getId();
-        
-        log.info("阅读知识文章: articleId={}, userId={}", id, currentUserId);
+
+        log.info("Read knowledge article: articleId={}, userId={}", id, currentUserId);
         ArticleResponseDTO response = knowledgeArticleService.readArticle(id, currentUserId);
         return Result.success(response);
     }
 
     /**
-     * 发布文章
+     * Publish article
      */
-    @Operation(summary = "发布知识文章")
+    @Operation(summary = "Publish knowledge article")
     @PostMapping("/{id}/publish")
     public Result<ArticleResponseDTO> publishArticle(
-            @Parameter(description = "文章ID") @PathVariable String id,
+            @Parameter(description = "Article ID") @PathVariable String id,
             HttpServletRequest request) {
         
-        // 获取当前用户ID
+        // Get current user ID
         Long currentUserId = getCurrentUserInfo().getId();
         if (currentUserId == null) {
-            return Result.error("用户未登录");
+            return Result.error("User not logged in");
         }
 
-        log.info("用户发布知识文章: userId={}, articleId={}", currentUserId, id);
+        log.info("User publishes knowledge article: userId={}, articleId={}", currentUserId, id);
         ArticleResponseDTO response = knowledgeArticleService.publishArticle(id, currentUserId);
-        return Result.success("发布文章成功", response);
+        return Result.success("Article published successfully", response);
     }
 
     /**
-     * 下线文章
+     * Take article offline
      */
-    @Operation(summary = "下线知识文章")
+    @Operation(summary = "Take knowledge article offline")
     @PostMapping("/{id}/offline")
     public Result<ArticleResponseDTO> offlineArticle(
-            @Parameter(description = "文章ID") @PathVariable String id,
+            @Parameter(description = "Article ID") @PathVariable String id,
             HttpServletRequest request) {
         
-        // 获取当前用户ID
+        // Get current user ID
         Long currentUserId = getCurrentUserInfo().getId();
         if (currentUserId == null) {
-            return Result.error("用户未登录");
+            return Result.error("User not logged in");
         }
 
-        log.info("用户下线知识文章: userId={}, articleId={}", currentUserId, id);
+        log.info("User takes knowledge article offline: userId={}, articleId={}", currentUserId, id);
         ArticleResponseDTO response = knowledgeArticleService.offlineArticle(id, currentUserId);
-        return Result.success("下线文章成功", response);
+        return Result.success("Article taken offline successfully", response);
     }
 
     /**
-     * 分页查询文章列表
+     * Paginated article list query
      */
-    @Operation(summary = "分页查询知识文章列表")
+    @Operation(summary = "Get paginated knowledge article list")
     @GetMapping("/page")
     public Result<PageResult<ArticleSimpleResponseDTO>> getArticlePage(
-            @Parameter(description = "关键词搜索（标题+内容+标签）") @RequestParam(required = false) String keyword,
-            @Parameter(description = "分类ID") @RequestParam(required = false) Long categoryId,
-            @Parameter(description = "文章标题") @RequestParam(required = false) String title,
-            @Parameter(description = "标签") @RequestParam(required = false) String tags,
-            @Parameter(description = "作者ID") @RequestParam(required = false) Long authorId,
-            @Parameter(description = "状态") @RequestParam(required = false) Integer status,
-            @Parameter(description = "开始日期") @RequestParam(required = false) String startDate,
-            @Parameter(description = "结束日期") @RequestParam(required = false) String endDate,
-            @Parameter(description = "排序字段") @RequestParam(defaultValue = "publishedAt") String sortField,
-            @Parameter(description = "排序方向") @RequestParam(defaultValue = "desc") String sortDirection,
-            @Parameter(description = "当前页码") @RequestParam(defaultValue = "1") Long currentPage,
-            @Parameter(description = "每页大小") @RequestParam(defaultValue = "10") Long size,
+            @Parameter(description = "Keyword search (title+content+tags)") @RequestParam(required = false) String keyword,
+            @Parameter(description = "Category ID") @RequestParam(required = false) Long categoryId,
+            @Parameter(description = "Article title") @RequestParam(required = false) String title,
+            @Parameter(description = "Tags") @RequestParam(required = false) String tags,
+            @Parameter(description = "Author ID") @RequestParam(required = false) Long authorId,
+            @Parameter(description = "Status") @RequestParam(required = false) Integer status,
+            @Parameter(description = "Start date") @RequestParam(required = false) String startDate,
+            @Parameter(description = "End date") @RequestParam(required = false) String endDate,
+            @Parameter(description = "Sort field") @RequestParam(defaultValue = "publishedAt") String sortField,
+            @Parameter(description = "Sort direction") @RequestParam(defaultValue = "desc") String sortDirection,
+            @Parameter(description = "Current page") @RequestParam(defaultValue = "1") Long currentPage,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "10") Long size,
             HttpServletRequest request) {
 
         // 获取当前用户ID（可为空，用于判断收藏状态和权限）
@@ -246,66 +238,66 @@ public class KnowledgeArticleController {
         queryDTO.setCurrentPage(currentPage);
         queryDTO.setSize(size);
 
-        log.info("分页查询知识文章列表: keyword={}, page={}, size={}, userId={}", keyword, currentPage, size, currentUserId);
+        log.info("Get paginated knowledge article list: keyword={}, page={}, size={}, userId={}", keyword, currentPage, size, currentUserId);
         PageResult<ArticleSimpleResponseDTO> response = knowledgeArticleService.getArticlePage(queryDTO, currentUserId);
         return Result.success(response);
     }
 
     /**
-     * 更新文章状态
+     * Update article status
      */
-    @Operation(summary = "更新文章状态")
+    @Operation(summary = "Update article status")
     @PutMapping("/{id}/status")
     public Result<ArticleResponseDTO> updateArticleStatus(
-            @Parameter(description = "文章ID") @PathVariable String id,
+            @Parameter(description = "Article ID") @PathVariable String id,
             @Valid @RequestBody ArticleStatusUpdateDTO statusUpdateDTO,
             HttpServletRequest request) {
         
-        // 获取当前用户ID
+        // Get current user ID
         Long currentUserId = getCurrentUserInfo().getId();
         if (currentUserId == null) {
-            return Result.error("用户未登录");
+            return Result.error("User not logged in");
         }
 
-        log.info("用户更新文章状态: userId={}, articleId={}, status={}", currentUserId, id, statusUpdateDTO.getStatus());
+        log.info("User updates article status: userId={}, articleId={}, status={}", currentUserId, id, statusUpdateDTO.getStatus());
         ArticleResponseDTO response = knowledgeArticleService.updateArticleStatus(id, statusUpdateDTO.getStatus(), currentUserId);
-        return Result.success("状态更新成功", response);
+        return Result.success("Status updated successfully", response);
     }
 
     /**
-     * 批量删除文章
+     * Batch delete articles
      */
-    @Operation(summary = "批量删除文章")
+    @Operation(summary = "Batch delete articles")
     @DeleteMapping("/batch")
     public Result<Void> batchDeleteArticles(
             @Valid @RequestBody ArticleBatchDeleteDTO batchDeleteDTO,
             HttpServletRequest request) {
         
-        // 获取当前用户ID
+        // Get current user ID
         Long currentUserId = getCurrentUserInfo().getId();
         if (currentUserId == null) {
-            return Result.error("用户未登录");
+            return Result.error("User not logged in");
         }
 
-        log.info("用户批量删除文章: userId={}, articleIds={}", currentUserId, batchDeleteDTO.getIds());
+        log.info("User batch deletes articles: userId={}, articleIds={}", currentUserId, batchDeleteDTO.getIds());
         knowledgeArticleService.batchDeleteArticles(batchDeleteDTO.getIds(), currentUserId);
         return Result.success();
     }
 
     /**
-     * 获取文章统计信息
+     * Get article statistics
      */
-    @Operation(summary = "获取文章统计信息")
+    @Operation(summary = "Get article statistics")
     @GetMapping("/statistics")
     public Result<ArticleStatisticsResponseDTO> getArticleStatistics(HttpServletRequest request) {
         
-        // 获取当前用户ID（用于权限控制）
+        // Get current user ID (for permission control)
         Long currentUserId =getCurrentUserInfo().getId();
         if (currentUserId == null) {
-            return Result.error("用户未登录");
+            return Result.error("User not logged in");
         }
 
-        log.info("获取文章统计信息: userId={}", currentUserId);
+        log.info("Get article statistics: userId={}", currentUserId);
         ArticleStatisticsResponseDTO response = knowledgeArticleService.getArticleStatistics(currentUserId);
         return Result.success(response);
     }

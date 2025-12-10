@@ -71,6 +71,8 @@ public class EmotionDiaryConvert {
         responseDTO.setId(diary.getId());
 
         responseDTO.setUserId(diary.getUser() != null ? diary.getUser().getId() : null);
+        responseDTO.setUsername(diary.getUser() != null ? diary.getUser().getUsername() :null);
+        responseDTO.setNickname(diary.getUser() != null ? diary.getUser().getNickname() :null);
 
         responseDTO.setDiaryDate(diary.getDiaryDate());
         responseDTO.setMoodScore(diary.getMoodScore());

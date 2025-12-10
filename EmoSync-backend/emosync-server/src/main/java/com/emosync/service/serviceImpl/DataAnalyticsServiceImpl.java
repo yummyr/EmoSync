@@ -33,7 +33,7 @@ public class DataAnalyticsServiceImpl implements DataAnalyticsService {
     @Override
     public DataAnalyticsResponseDTO getDataAnalytics(Integer days) {
         try {
-            log.info("开始获取数据分析，分析天数: {}", days);
+            log.info("Start getting data analytics, analysis days: {}", days);
             if (days == null || days <= 0) days = 30;
 
             LocalDate end = LocalDate.now();
@@ -46,19 +46,19 @@ public class DataAnalyticsServiceImpl implements DataAnalyticsService {
                     .consultationStats(getConsultationStats(start, end))
                     .userActivity(getActivity(start, end))
                     .build();
-            log.info("数据分析获取完成");
+            log.info("Data analytics retrieval completed");
             return analytics;
 
         } catch (Exception e) {
-            log.error("获取数据分析失败", e);
-            throw new ServiceException("获取数据分析失败，请稍后重试");
+            log.error("Failed to get data analytics", e);
+            throw new ServiceException("Failed to get data analytics, please try again later");
         }
     }
 
     private DataAnalyticsResponseDTO.SystemOverview getSystemOverview(LocalDate start, LocalDate end) {
         long totalUsers = userRepository.count();
 
-        // 活跃用户数(在时间范围内有记录的用户)
+        // Active users count (users with records within time range)
         List<Long> activeDiaryUserIds = emotionDiaryRepository
                 .findDistinctUserIdsByDiaryDateBetween(start, end);
         List<Long> activeSessionUserIds = consultationSessionRepository
@@ -70,10 +70,10 @@ public class DataAnalyticsServiceImpl implements DataAnalyticsService {
         activeUserIds.addAll(activeSessionUserIds);
         Long activeUsers = (long) activeUserIds.size();
 
-        // 情绪日记总数
+        // Total emotion diaries count
         Long totalDiaries = emotionDiaryRepository.count();
 
-        // 咨询会话总数
+        // Total consultation sessions count
         Long totalSessions = consultationSessionRepository.count();
 
         List<EmotionDiary> allDiaries = emotionDiaryRepository
@@ -85,19 +85,19 @@ public class DataAnalyticsServiceImpl implements DataAnalyticsService {
                                 .average()
                                 .orElse(0.0))
                         .setScale(1, RoundingMode.HALF_UP);
-        // 今日统计
+        // Today's statistics
         LocalDate today = LocalDate.now();
-        // 今日新增用户
+        // Today's new users
         Long todayNewUsers = userRepository.countByCreatedAtBetween(
                 today.atStartOfDay(),
                 today.atTime(23, 59, 59)
         );
 
-        // 今日新增日记
+        // Today's new diaries
         Long todayNewDiaries = (long) emotionDiaryRepository
                 .findByDiaryDate(today).size();
 
-        // 今日新增会话
+        // Today's new sessions
         Long todayNewSessions = consultationSessionRepository.countByStartedAtBetween(
                 today.atStartOfDay(),
                 today.atTime(23, 59, 59)
@@ -254,7 +254,7 @@ public class DataAnalyticsServiceImpl implements DataAnalyticsService {
         return list;
     }
     private DataAnalyticsResponseDTO.ConsultationStatistics getConsultationStats(LocalDate start, LocalDate end) {
-        // 查询时间范围内的会话
+        // Query sessions within time range
         LocalDateTime startDateTime = start.atStartOfDay();
         LocalDateTime endDateTime = end.atTime(23, 59, 59);
         List<ConsultationSession> sessions = consultationSessionRepository
@@ -316,18 +316,18 @@ public class DataAnalyticsServiceImpl implements DataAnalyticsService {
 
             Long newUsers = userRepository.countByCreatedAtBetween(date.atStartOfDay(), date.atTime(23, 59, 59));
 
-            // 日记记录用户数
+            // Diary recording users count
             List<Long> diaryUserIds = emotionDiaryRepository
                     .findDistinctUserIdsByDiaryDate(date);
 
-            // 咨询用户数
+            // Consultation users count
             List<Long> consultationUserIds = consultationSessionRepository
                     .findDistinctUserIdsByStartedAtBetween(
                             date.atStartOfDay(),
                             date.atTime(23, 59, 59)
                     );
 
-            // 活跃用户数(日记或咨询任一活动)
+            // Active users count (diary or consultation activities)
             Set<Long> allActiveUserIds = new HashSet<>(diaryUserIds);
             allActiveUserIds.addAll(consultationUserIds);
 

@@ -30,7 +30,18 @@ public class UserDetailsImpl implements UserDetails {
         this.authorities = authorities;
     }
 
+    public boolean isAdmin(){
+        if (authorities == null) {
+            return false;
+        }
 
+        for (GrantedAuthority authority : authorities) {
+            if ("ROLE_2".equals(authority.getAuthority())) {
+                return true;
+            }
+        }
+        return false;
+    }
     @Override
     public String getPassword() {
         return password;

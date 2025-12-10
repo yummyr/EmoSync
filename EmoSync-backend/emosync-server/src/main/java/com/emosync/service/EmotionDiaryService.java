@@ -42,7 +42,7 @@ public interface EmotionDiaryService {
 
     void adminDeleteDiary(Long id);
 
-    PageResult<EmotionDiaryResponseDTO> selectAdminPage(EmotionDiaryQueryDTO queryDTO);
+    // PageResult<EmotionDiaryResponseDTO> selectAdminPage(EmotionDiaryQueryDTO queryDTO);
 
     EmotionDiaryStatisticsDTO getSystemOverview();
 

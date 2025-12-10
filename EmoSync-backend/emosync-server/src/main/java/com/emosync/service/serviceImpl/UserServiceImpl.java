@@ -60,10 +60,10 @@ public class UserServiceImpl implements UserService {
         String token = jwtTokenUtils.generateToken(user.getId(), user.getUsername(), user.getUserType());
 
 
-        // 使用 UserConvert 转换用户信息
+        // Use UserConvert to convert user information
         UserDetailResponseDTO userInfo = UserConvert.entityToDetailResponse(user);
 
-        // 使用 UserConvert 构建登录响应
+        // Use UserConvert to build login response
         return UserConvert.buildLoginResponse(token, userInfo);
     }
 
@@ -80,14 +80,14 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException("Email already registered");
         }
 
-        // 使用 UserConvert 创建用户实体
+        // Use UserConvert to create user entity
         String encodedPassword = passwordEncoder.encode(dto.getPassword());
         User user = UserConvert.registerCommandToEntity(dto, encodedPassword);
 
         userRepository.save(user);
         log.info("User registration successful: userId={}, username={}", user.getId(), user.getUsername());
 
-        // 使用 UserConvert 返回用户详情
+        // Use UserConvert to return user details
         return UserConvert.entityToDetailResponse(user);
     }
 
@@ -95,7 +95,7 @@ public class UserServiceImpl implements UserService {
     public UserDetailResponseDTO getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        // 使用 UserConvert 转换用户信息
+        // Use UserConvert to convert user information
         return UserConvert.entityToDetailResponse(user);
     }
 
@@ -104,16 +104,16 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 使用 UserConvert 更新用户实体
+        // Use UserConvert to update user entity
         User updatedUser = UserConvert.updateCommandToEntity(dto);
-        updatedUser.setId(id); // 确保ID不变
-        updatedUser.setUsername(user.getUsername()); // 保留用户名
-        updatedUser.setPassword(user.getPassword()); // 保留密码
-        updatedUser.setCreatedAt(user.getCreatedAt()); // 保留创建时间
+        updatedUser.setId(id); // Ensure ID remains unchanged
+        updatedUser.setUsername(user.getUsername()); // Keep username
+        updatedUser.setPassword(user.getPassword()); // Keep password
+        updatedUser.setCreatedAt(user.getCreatedAt()); // Keep creation time
 
         userRepository.save(updatedUser);
 
-        // 使用 UserConvert 返回更新后的用户信息
+        // Use UserConvert to return updated user information
         return UserConvert.entityToDetailResponse(updatedUser);
     }
 
@@ -149,7 +149,7 @@ public class UserServiceImpl implements UserService {
                     query.getSize(),
                     Sort.by(Sort.Direction.DESC, "createdAt")
             );
-            // 构建查询条件
+            // Build query conditions
             Specification<User> specification = buildUserSpecification(query);
 
             // 执行分页查询
@@ -163,20 +163,20 @@ public class UserServiceImpl implements UserService {
             // 直接返回自定义的PageResult
             return new PageResult<>(userPage.getTotalElements(), records);}
         catch (Exception e){
-            log.error("查询用户列表失败", e);
-            throw new BusinessException("查询失败，请稍后重试");
+            log.error("Failed to query user list", e);
+            throw new BusinessException("Query failed, please try again later");
         }
 
     }
 
     /**
-     * 构建用户查询条件
+     * Build user query conditions
      */
     private Specification<User> buildUserSpecification(UserListQueryDTO queryDTO) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            // 处理模糊搜索
+            // Handle fuzzy search
             boolean hasKeywordSearch = StringUtils.hasText(queryDTO.getUsername()) &&
                     StringUtils.hasText(queryDTO.getEmail()) &&
                     StringUtils.hasText(queryDTO.getNickname()) &&
@@ -186,7 +186,7 @@ public class UserServiceImpl implements UserService {
                     queryDTO.getNickname().equals(queryDTO.getPhone());
 
             if (hasKeywordSearch) {
-                // 全局搜索：在所有字段中搜索关键词
+                // Global search: search keyword in all fields
                 String keyword = "%" + queryDTO.getUsername() + "%";
                 Predicate usernamePredicate = criteriaBuilder.like(root.get("username"), keyword);
                 Predicate emailPredicate = criteriaBuilder.like(root.get("email"), keyword);
@@ -195,7 +195,7 @@ public class UserServiceImpl implements UserService {
 
                 predicates.add(criteriaBuilder.or(usernamePredicate, emailPredicate, nicknamePredicate, phonePredicate));
             } else {
-                // 分别处理各个字段的搜索
+                // Handle search for each field separately
                 if (StringUtils.hasText(queryDTO.getUsername())) {
                     predicates.add(criteriaBuilder.like(root.get("username"), "%" + queryDTO.getUsername() + "%"));
                 }
@@ -210,12 +210,12 @@ public class UserServiceImpl implements UserService {
                 }
             }
 
-            // 用户类型筛选
+            // User type filter
             if (queryDTO.getUserType() != null) {
                 predicates.add(criteriaBuilder.equal(root.get("userType"), queryDTO.getUserType()));
             }
 
-            // 状态筛选
+            // Status filter
             if (queryDTO.getStatus() != null) {
                 predicates.add(criteriaBuilder.equal(root.get("status"), queryDTO.getStatus()));
             }

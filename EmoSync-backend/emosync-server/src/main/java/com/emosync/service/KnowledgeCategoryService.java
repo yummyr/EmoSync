@@ -14,15 +14,18 @@ import java.util.Map;
 @Service
 public interface KnowledgeCategoryService {
     CategoryResponseDTO createCategory(CategoryCreateDTO createDTO);
-    CategoryResponseDTO updateCategory(Long categoryId, CategoryUpdateDTO updateDTO) ;
 
-     void deleteCategory(Long categoryId);
-    PageResult<CategoryResponseDTO> getCategoryPage(CategoryListQueryDTO queryDTO) ;
+    CategoryResponseDTO updateCategory(Long categoryId, CategoryUpdateDTO updateDTO);
+
+    void deleteCategory(Long categoryId);
+
+    PageResult<CategoryResponseDTO> getCategoryPage(CategoryListQueryDTO queryDTO);
+
     List<CategoryResponseDTO> getCategoryTree();
 
     CategoryResponseDTO getCategoryById(Long id);
 
-    Map<Long,String> getEnabledCategory();
+    Map<Long, String> getEnabledCategory();
 
     void updateStatus(Long id);
 }
