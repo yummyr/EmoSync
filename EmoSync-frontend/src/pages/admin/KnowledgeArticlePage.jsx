@@ -223,13 +223,6 @@ const KnowledgeArticlePage = () => {
 
   return (
     <div className="p-6">
-      {/* Title */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Knowledge Articles</h1>
-        <p className="text-gray-600 mt-2">
-          Manage and review knowledge article content
-        </p>
-      </div>
 
       {/* Search Filters */}
       <div className="bg-white p-4 rounded-xl shadow mb-6">
@@ -308,8 +301,8 @@ const KnowledgeArticlePage = () => {
       </div>
 
       {/* Article Table */}
-      <div className="bg-white rounded-xl shadow overflow-hidden">
-        <table className="w-full text-left">
+      <div className="bg-white rounded-xl shadow overflow-x-auto">
+        <table className="w-full min-w-[1200px] text-left">
           <thead className="bg-gray-50">
             <tr>
               <th className="p-3">
@@ -322,22 +315,22 @@ const KnowledgeArticlePage = () => {
                   }
                 />
               </th>
-              <th className="p-3">ID</th>
-              <th className="p-3">Title</th>
-              <th className="p-3">Category</th>
-              <th className="p-3">Author</th>
-              <th className="p-3">Views</th>
+              <th className="p-3 text-center min-w-[60px]">ID</th>
+              <th className="p-3 text-center min-w-[200px]">Title</th>
+              <th className="p-3 text-center min-w-[200px]">Category</th>
+              <th className="p-3 text-center min-w-[160px]">Author</th>
+              <th className="p-3 text-center min-w-[60px]">Views</th>
 
-              <th className="p-3">Published</th>
-              <th className="p-3">Created</th>
-              <th className="p-3">Actions</th>
+              <th className="p-3 text-center min-w-[160px]">Published</th>
+              <th className="p-3 text-center min-w-[160px]">Created</th>
+              <th className="p-3 text-center min-w-[160px]">Actions</th>
             </tr>
           </thead>
 
           <tbody>
             {articles.map((article) => (
               <tr key={article.id} className="border-b hover:bg-gray-50">
-                <td className="p-3">
+                <td className="p-3 text-center">
                   <input
                     type="checkbox"
                     checked={selectedIds.includes(article.id)}
@@ -353,11 +346,11 @@ const KnowledgeArticlePage = () => {
                   />
                 </td>
 
-                <td className="p-3 text-gray-500">
+                <td className="p-3 text-center text-gray-500">
                   {article.id.slice(0, 6)}...
                 </td>
 
-                <td className="p-3 font-medium">
+                <td className="p-3 text-center font-medium">
                   <div>
                     <div className="text-gray-900 font-semibold">
                       {article.title || "UnTitled"}
@@ -366,24 +359,24 @@ const KnowledgeArticlePage = () => {
                   </div>
                 </td>
 
-                <td className="p-3">
+                <td className="p-3 text-center">
                   <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded-lg">
                     {article.categoryName || "Unknown"}
                   </span>
                 </td>
 
-                <td className="p-3">{article.authorName || "Unknown"}</td>
+                <td className="p-3 text-center">{article.authorName || "Unknown"}</td>
 
-                <td className="p-3 text-green-600 font-semibold">
+                <td className="p-3 text-center text-green-600 font-semibold">
                   {article.readCount > 1000
                     ? (article.readCount / 1000).toFixed(1) + "k"
                     : article.readCount}
                 </td>
 
-                <td className="p-3 text-gray-600">{article.publishedAt}</td>
-                <td className="p-3 text-gray-600">{article.createdAt}</td>
+                <td className="p-3 text-center text-gray-600">{article.publishedAt}</td>
+                <td className="p-3 text-center text-gray-600">{article.createdAt}</td>
 
-                <td className="p-3 flex gap-3 text-sm hover:underline items-center">
+                <td className="p-3 text-center flex gap-3 text-sm hover:underline items-center">
                   <button onClick={() => editArticle(article.id)}>
                     <FontAwesomeIcon icon={faEdit} className="w-4 h-4" /> Edit
                   </button>
@@ -397,9 +390,9 @@ const KnowledgeArticlePage = () => {
                     }
                   >
                     {article.status === 1 ? (
-                      <div className="flex items-center p-1 gap-1">Published</div>
+                      <div className="flex text-center p-1 gap-1">Published</div>
                     ) : (
-                      <div className="flex items-center p-1 gap-1">Offline</div>
+                      <div className="flex text-center p-1 gap-1">Offline</div>
                     )}
                   </button>
 

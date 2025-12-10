@@ -400,7 +400,7 @@ const AdminLayout = () => {
     const titles = {
       "/back/dashboard": "Analytics Dashboard",
       "/back/users": "User Management",
-      "/back/knowledge": "Knowledge Base",
+      "/back/knowledge": "Knowledge Articles",
       "/back/categories": "Category Management",
       "/back/consultations": "Consultation Records",
       "/back/emotions": "Emotion Diary",

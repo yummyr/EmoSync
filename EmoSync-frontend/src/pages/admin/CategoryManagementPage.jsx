@@ -229,18 +229,18 @@ const CategoryManagementPage = () => {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="w-full text-left">
+      <div className="bg-white rounded-lg shadow overflow-x-auto">
+        <table className="w-full text-center min-w-[1200px]">
           <thead className="bg-gray-50 text-gray-600 text-sm">
             <tr>
-              <th className="p-4">ID</th>
-              <th className="p-4">Category Name</th>
-              <th className="p-4 w-1/4">Description</th>
-              <th className="p-4">Order</th>
-              <th className="p-4">Status</th>
-              <th className="p-4">Article Count</th>
-              <th className="p-4">Created At</th>
-              <th className="p-4">Actions</th>
+              <th className="p-4 text-center">ID</th>
+              <th className="p-4 text-center">Category Name</th>
+              <th className="p-4 text-center">Description</th>
+              <th className="p-4 text-center">Order</th>
+              <th className="p-4 text-center">Status</th>
+              <th className="p-4 text-center">Article Count</th>
+              <th className="p-4 text-center">Created At</th>
+              <th className="p-4 text-center">Actions</th>
             </tr>
           </thead>
 

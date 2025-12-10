@@ -542,7 +542,7 @@ function UserManagementPage() {
 
   return (
     <div className="p-6 relative">
-      <h1 className="text-3xl font-bold mb-6">User Management</h1>
+   
 
       {/* Filter Bar */}
       <div className="bg-white p-4 mb-4 rounded shadow flex flex-wrap gap-4 items-center">
