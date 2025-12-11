@@ -12,6 +12,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 import api from "@/api";
+import Pagination from "@/components/Pagination";
 
 const EmotionDiaryPage = () => {
   const [loading, setLoading] = useState(false);
@@ -182,15 +183,13 @@ const EmotionDiaryPage = () => {
   const handlePageChange = (page) => {
     setPagination((prev) => ({ ...prev, current: page }));
   };
+
+  const handlePageSizeChange = (size) => {
+    setPagination((prev) => ({ ...prev, size, current: 1 }));
+  };
   return (
     <div className="py-8 px-4 mb-8">
-      {/* Page Header */}
-      <h3 className="text-2xl font-bold text-gray-900">
-        Emotion Diary Management
-      </h3>
-      <p className="text-gray-600 mt-2">
-        View and manage user emotion diary entries
-      </p>
+    
 
       {/* Search Filters */}
       <div className="bg-white p-5 rounded-lg shadow mt-6">
@@ -334,7 +333,7 @@ const EmotionDiaryPage = () => {
       </div>
 
       {/* Table Section */}
-      <div className="bg-white rounded-lg shadow mt-6 overflow-hidden">
+      <div className="bg-white rounded-lg shadow p-4 overflow-hidden">
         <div className="flex justify-between lg:col-span-2 sm:col-span-1 p-2">
           <h2 className="text-xl font-semibold text-pink-500 p-5 border-b">
             <FontAwesomeIcon icon={faList} className="mr-2 text-pink-500" />
@@ -470,31 +469,17 @@ const EmotionDiaryPage = () => {
           </tbody>
         </table>
       </div>
-      {/* 分页控件 */}
-      {total > 0 && (
-        <div className="flex justify-between items-center mt-4">
-          <div className="text-gray-600">
-            Showing {records.length} of {total} records
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => handlePageChange(pagination.current - 1)}
-              disabled={pagination.current === 1}
-              className="px-3 py-1 border rounded disabled:opacity-50"
-            >
-              Previous
-            </button>
-            <span className="px-3 py-1">Page {pagination.current}</span>
-            <button
-              onClick={() => handlePageChange(pagination.current + 1)}
-              disabled={records.length < pagination.size}
-              className="px-3 py-1 border rounded disabled:opacity-50"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      )}
+
+      {/* Pagination Component */}
+      <Pagination
+        totalItems={total}
+        pageSize={pagination.size}
+        currentPage={pagination.current}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
+        pageSizeOptions={[5, 10, 20, 50]}
+        showInfo={true}
+      />
 
       {/* Diary Detail Modal */}
       {showDiaryDetail && diaryDetail && (

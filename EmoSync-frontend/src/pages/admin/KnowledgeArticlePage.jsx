@@ -10,6 +10,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import ReactQuill from "react-quill";
 import api from "@/api";
+import Pagination from "@/components/Pagination";
 
 const KnowledgeArticlePage = () => {
   // Filters
@@ -104,6 +105,11 @@ const KnowledgeArticlePage = () => {
   // Pagination
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(10);
+
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setPage(1);
+  };
 
   // Batch selection
   const [selectedIds, setSelectedIds] = useState([]);
@@ -292,7 +298,7 @@ const KnowledgeArticlePage = () => {
           </button>
           <button
             onClick={() => loadArticles()}
-            className="px-5 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg flex items-center gap-2"
+            className="px-5 py-2 bg-gradient-to-r from-orange-200 via-pink-200 to-pink-300 text-gray-700 border border-gray-300 rounded-lg flex items-center gap-2"
           >
             <FontAwesomeIcon icon={faArrowsRotate} className="w-5 h-5" />{" "}
             Refresh
@@ -301,7 +307,7 @@ const KnowledgeArticlePage = () => {
       </div>
 
       {/* Article Table */}
-      <div className="bg-white rounded-xl shadow overflow-x-auto">
+      <div className="bg-white rounded-xl shadow overflow-x-auto p-4">
         <table className="w-full min-w-[1200px] text-left">
           <thead className="bg-gray-50">
             <tr>
@@ -413,40 +419,16 @@ const KnowledgeArticlePage = () => {
           </tbody>
         </table>
 
-        {/* Pagination */}
-        <div className="p-4 flex items-center justify-between bg-gray-50">
-          <div className="text-gray-600">Total {total} articles</div>
-
-          <div className="flex items-center gap-2">
-            <button
-              disabled={page <= 1}
-              onClick={() => setPage(page - 1)}
-              className="px-3 py-1 border rounded disabled:opacity-40"
-            >
-              Prev
-            </button>
-
-            <span className="px-3">{page}</span>
-
-            <button
-              disabled={page * size >= total}
-              onClick={() => setPage(page + 1)}
-              className="px-3 py-1 border rounded disabled:opacity-40"
-            >
-              Next
-            </button>
-
-            <select
-              value={size}
-              onChange={(e) => setSize(Number(e.target.value))}
-              className="border rounded px-2 py-1"
-            >
-              <option value="10">10 / page</option>
-              <option value="20">20 / page</option>
-              <option value="50">50 / page</option>
-            </select>
-          </div>
-        </div>
+        {/* Pagination Component */}
+        <Pagination
+          totalItems={total}
+          pageSize={size}
+          currentPage={page}
+          onPageChange={setPage}
+          onPageSizeChange={handlePageSizeChange}
+          pageSizeOptions={[10, 20, 50]}
+          showInfo={true}
+        />
       </div>
 
       {openEditForm && (

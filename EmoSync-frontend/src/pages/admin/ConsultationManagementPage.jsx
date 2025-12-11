@@ -8,6 +8,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import api from "@/api";
+import Pagination from "@/components/Pagination";
 
 const emotionOptions = [
   { label: "Anxiety", value: "anxiety" },
@@ -43,17 +44,22 @@ const ConsultationManagementPage = () => {
     lastMessageContent: "",
     lastMessageTime: "",
     primaryEmotion: "",
-  }
+  };
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 20;
+  const [pageSize, setPageSize] = useState(20);
+
+  const handlePageSizeChange = (size) => {
+    setPageSize(size);
+    setCurrentPage(1);
+  };
 
   const [sessionDetail, setSessionDetail] = useState(INITIAL_SESSION_DETAIL);
   const [showSessionDetail, setShowSessionDetail] = useState(false);
   const handleCloseDetail = () => {
     setShowSessionDetail(false);
     setSessionDetail(INITIAL_SESSION_DETAIL);
-  }
+  };
 
   const getSessionDetail = async (sessionId) => {
     try {
@@ -133,7 +139,7 @@ const ConsultationManagementPage = () => {
 
   useEffect(() => {
     loadData();
-  }, [currentPage]);
+  }, [currentPage, pageSize]);
 
   const handleSearch = () => {
     setCurrentPage(1);
@@ -152,23 +158,6 @@ const ConsultationManagementPage = () => {
   return (
     <div className="w-full px-6 py-8">
       {/* Page Header */}
-      <div className="mb-8 flex justify-between items-center">
-        <div>
-          <h3 className="text-2xl font-bold text-gray-900">
-            Consultation Records
-          </h3>
-          <p className="text-gray-600 mt-2">
-            View and manage all AI consultation chat sessions
-          </p>
-        </div>
-        <button
-          className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg flex items-center gap-2"
-          onClick={loadData}
-        >
-          <FontAwesomeIcon icon={faRotateRight} className="h-5 w-5" />
-          Refresh
-        </button>
-      </div>
 
       {/* Search Filters */}
       <div className="bg-white p-5 rounded-lg shadow mb-6">
@@ -235,6 +224,15 @@ const ConsultationManagementPage = () => {
             onClick={handleReset}
           >
             Reset
+          </button>
+        </div>
+        <div className="mb-8 flex justify-end items-center">
+          <button
+            className="px-4 py-2 bg-gradient-to-r from-orange-200 via-pink-200 to-pink-300 hover:bg-gray-200 text-gray-900 rounded-lg flex items-center gap-2"
+            onClick={loadData}
+          >
+            <FontAwesomeIcon icon={faRotateRight} className="h-5 w-5" />
+            Refresh
           </button>
         </div>
       </div>
@@ -315,42 +313,16 @@ const ConsultationManagementPage = () => {
           </tbody>
         </table>
 
-        {/* Pagination */}
-        <div className="flex justify-between items-center px-6 py-4 text-gray-600 text-sm">
-          <div>
-            {total} records, {pageSize} per page
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              className="px-2"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage(currentPage - 1)}
-            >
-              {"<"}
-            </button>
-
-            <span className="text-indigo-600 font-semibold">{currentPage}</span>
-
-            <button
-              className="px-2"
-              disabled={currentPage * pageSize >= total}
-              onClick={() => setCurrentPage(currentPage + 1)}
-            >
-              {">"}
-            </button>
-
-            <span>Go to</span>
-            <input
-              type="number"
-              min="1"
-              value={currentPage}
-              onChange={(e) => setCurrentPage(Number(e.target.value))}
-              className="w-16 border rounded px-2 py-1"
-            />
-            <span>page</span>
-          </div>
-        </div>
+        {/* Pagination Component */}
+        <Pagination
+          totalItems={total}
+          pageSize={pageSize}
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={handlePageSizeChange}
+          pageSizeOptions={[10, 20, 50]}
+          showInfo={true}
+        />
       </div>
       {showSessionDetail && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
@@ -361,7 +333,9 @@ const ConsultationManagementPage = () => {
             >
               Close
             </button>
-            <h2 className="text-2xl font-bold mb-4 text-blue-600">Session Detail</h2>
+            <h2 className="text-2xl font-bold mb-4 text-blue-600">
+              Session Detail
+            </h2>
             <div>
               <h3 className="text-xl font-semibold mb-2 text-pink-500">
                 {sessionDetail.sessionTitle}

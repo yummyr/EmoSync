@@ -17,6 +17,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import api from "@/api";
+import Pagination from "@/components/Pagination";
 
 // Simple notification system
 const notifications = {
@@ -131,6 +132,11 @@ function UserManagementPage() {
 
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(10);
+
+  const handlePageSizeChange = (newSize) => {
+    setSize(newSize);
+    setPage(1);
+  };
 
   /** Fetch user list */
   const fetchUserPage = async () => {
@@ -475,10 +481,10 @@ function UserManagementPage() {
     {
       title: "Actions",
       render: (_, r) => (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 text-center">
           <button
             onClick={() => openUserDetail(r.id, false)}
-            className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors flex items-center gap-1"
+            className="px-3 py-1 w-30 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors flex items-center gap-1"
           >
             <FontAwesomeIcon icon={faEye} />
             View
@@ -486,7 +492,7 @@ function UserManagementPage() {
 
           <button
             onClick={() => openUserDetail(r.id, true)}
-            className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors flex items-center gap-1"
+            className="px-3 py-1 w-30 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors flex items-center gap-1"
           >
             <FontAwesomeIcon icon={faEdit} />
             Edit
@@ -495,7 +501,7 @@ function UserManagementPage() {
           {r.status === 1 ? (
             <button
               onClick={() => updateUserStatus(r.id, 0)}
-              className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors flex items-center gap-1"
+              className="px-3 py-1 w-30 bg-orange-500 text-white text-sm rounded hover:bg-red-600 transition-colors flex items-center gap-1"
             >
               <FontAwesomeIcon icon={faStop} />
               Disable
@@ -503,7 +509,7 @@ function UserManagementPage() {
           ) : (
             <button
               onClick={() => updateUserStatus(r.id, 1)}
-              className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors flex items-center gap-1"
+              className="px-3 py-1 w-30 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors flex items-center gap-1"
             >
               <FontAwesomeIcon icon={faCheck} />
               Enable
@@ -512,7 +518,7 @@ function UserManagementPage() {
 
           <button
             onClick={() => deleteUser(r.id)}
-            className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors flex items-center gap-1"
+            className="px-3 py-1 w-30 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors flex items-center gap-1"
           >
             <FontAwesomeIcon icon={faTrash} />
             Delete
@@ -542,8 +548,6 @@ function UserManagementPage() {
 
   return (
     <div className="p-6 relative">
-   
-
       {/* Filter Bar */}
       <div className="bg-white p-4 mb-4 rounded shadow flex flex-wrap gap-4 items-center">
         <input
@@ -589,7 +593,7 @@ function UserManagementPage() {
               e.target.value === "" ? undefined : parseInt(e.target.value)
             )
           }
-          className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-40"
+          className="px-3 py-2 text-center border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-40"
         >
           <option value="">Status</option>
           <option value="1">Active</option>
@@ -635,24 +639,27 @@ function UserManagementPage() {
 
       <div className="bg-white rounded shadow overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full ">
             <thead className="bg-gray-50">
               <tr>
                 {columns.map((col, index) => (
                   <th
                     key={index}
-                    className="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b"
+                    className="px-4 py-3 text-center min-w-[160px] text-sm font-medium text-gray-700 border-b"
                   >
                     {col.title}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y  text-center divide-gray-200">
               {userPage.map((record) => (
                 <tr key={record.id} className="hover:bg-gray-50">
                   {columns.map((col, index) => (
-                    <td key={index} className="px-4 py-3 border-b text-sm">
+                    <td
+                      key={index}
+                      className="px-4 py-3  text-center border-b text-sm"
+                    >
                       {col.render
                         ? col.render(record[col.dataIndex], record)
                         : record[col.dataIndex]}
@@ -664,44 +671,16 @@ function UserManagementPage() {
           </table>
         </div>
 
-        {/* Pagination */}
-        <div className="px-4 py-3 bg-gray-50 border-t flex items-center justify-between">
-          <div className="text-sm text-gray-700">
-            Showing {(page - 1) * size + 1} to {Math.min(page * size, total)} of{" "}
-            {total} results
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setPage(page - 1)}
-              disabled={page === 1}
-              className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Previous
-            </button>
-            <span className="text-sm text-gray-700">
-              Page {page} of {Math.ceil(total / size)}
-            </span>
-            <button
-              onClick={() => setPage(page + 1)}
-              disabled={page >= Math.ceil(total / size)}
-              className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Next
-            </button>
-            <select
-              value={size}
-              onChange={(e) => {
-                setSize(parseInt(e.target.value));
-                setPage(1);
-              }}
-              className="ml-4 px-3 py-1 border border-gray-300 rounded text-sm"
-            >
-              <option value={10}>10 per page</option>
-              <option value={20}>20 per page</option>
-              <option value={50}>50 per page</option>
-            </select>
-          </div>
-        </div>
+        {/* Pagination Component */}
+        <Pagination
+          totalItems={total}
+          pageSize={size}
+          currentPage={page}
+          onPageChange={setPage}
+          onPageSizeChange={handlePageSizeChange}
+          pageSizeOptions={[10, 20, 50]}
+          showInfo={true}
+        />
       </div>
 
       {/* User Detail Slide-in Panel */}
@@ -1063,167 +1042,191 @@ function UserManagementPage() {
               </button>
             </div>
             <form onSubmit={handleRegisterFormSubmit}>
-                <div className="space-y-4">
-                  <div>
-                    <label htmlFor="username" className="block text-gray-700">
-                      Username *
-                    </label>
-                    <input
-                      id="username"
-                      name="username"
-                      type="text"
-                      required
-                      value={registerFormData.username}
-                      onChange={(e) => handleRegisterInputChange("username", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Input username"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="email" className="block text-gray-700">
-                      Email *
-                    </label>
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      required
-                      value={registerFormData.email}
-                      onChange={(e) => handleRegisterInputChange("email", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Input your email"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="password" className="block text-gray-700">
-                      Password *
-                    </label>
-                    <input
-                      id="password"
-                      name="password"
-                      type="password"
-                      required
-                      value={registerFormData.password}
-                      onChange={(e) => handleRegisterInputChange("password", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Input your password"
-                    />
-                  </div>
-                   <div>
-                    <label htmlFor="confirmPassword" className="block text-gray-700">
-                      Confirm Password *
-                    </label>
-                    <input
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      type="password"
-                      required
-                      value={registerFormData.confirmPassword}
-                      onChange={(e) => handleRegisterInputChange("confirmPassword", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Confirm your password"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="nickname" className="block text-gray-700">
-                      Nickname
-                    </label>
-                    <input
-                      id="nickname"
-                      name="nickname"
-                      value={registerFormData.nickname}
-                      onChange={(e) => handleRegisterInputChange("nickname", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Input your nickname (optional)"
-                    />
-                  </div>
-                   <div>
-                    <label htmlFor="phone" className="block text-gray-700">
-                     Phone Number
-                    </label>
-                    <input
-                      id="phone"
-                      name="phone"
-                      value={registerFormData.phone}
-                      onChange={(e) => handleRegisterInputChange("phone", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Input your phone number (optional)"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="birthday" className="block text-gray-700">
-                     Birthday
-                    </label>
-                    <input
-                      id="birthday"
-                      name="birthday"
-                      type="date"
-                      value={registerFormData.birthday}
-                      onChange={(e) => handleRegisterInputChange("birthday", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                    <div>
-                    <label htmlFor="gender" className="block text-gray-700">
-                      Gender
-                    </label>
-                    <select
-                      id="gender"
-                      name="gender"
-                      value={registerFormData.gender}
-                      onChange={(e) => handleRegisterInputChange("gender", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="0">Unknown</option>
-                      <option value="1">Male</option>
-                      <option value="2">Female</option>
-                    </select>
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="username" className="block text-gray-700">
+                    Username *
+                  </label>
+                  <input
+                    id="username"
+                    name="username"
+                    type="text"
+                    required
+                    value={registerFormData.username}
+                    onChange={(e) =>
+                      handleRegisterInputChange("username", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Input username"
+                  />
                 </div>
-                    <div>
-                    <label htmlFor="role" className="block text-gray-700">
-                      Role Type
-                    </label>
-                    <select
-                      id="roleType"
-                      name="roleType"
-                      value={registerFormData.userType}
-                      onChange={(e) => handleRegisterInputChange("roleType", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="1">Regular User</option>
-                      <option value="2">Administrator</option>
-                    </select>
+                <div>
+                  <label htmlFor="email" className="block text-gray-700">
+                    Email *
+                  </label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    required
+                    value={registerFormData.email}
+                    onChange={(e) =>
+                      handleRegisterInputChange("email", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Input your email"
+                  />
                 </div>
-                 </div>
-                <div className="flex gap-3 mt-6">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setOpenRegisterForm(false);
-                      // Reset form data
-                      setRegisterFormData({
-                        username: "",
-                        email: "",
-                        password: "",
-                        confirmPassword: "",
-                        nickname: "",
-                        phone: "",
-                        gender: "0",
-                        birthday: "",
-                        userType: "1",
-                      });
-                    }}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                <div>
+                  <label htmlFor="password" className="block text-gray-700">
+                    Password *
+                  </label>
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    required
+                    value={registerFormData.password}
+                    onChange={(e) =>
+                      handleRegisterInputChange("password", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Input your password"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="confirmPassword"
+                    className="block text-gray-700"
                   >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                  >
-                    Register
-                  </button>
+                    Confirm Password *
+                  </label>
+                  <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type="password"
+                    required
+                    value={registerFormData.confirmPassword}
+                    onChange={(e) =>
+                      handleRegisterInputChange(
+                        "confirmPassword",
+                        e.target.value
+                      )
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Confirm your password"
+                  />
                 </div>
+                <div>
+                  <label htmlFor="nickname" className="block text-gray-700">
+                    Nickname
+                  </label>
+                  <input
+                    id="nickname"
+                    name="nickname"
+                    value={registerFormData.nickname}
+                    onChange={(e) =>
+                      handleRegisterInputChange("nickname", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Input your nickname (optional)"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="phone" className="block text-gray-700">
+                    Phone Number
+                  </label>
+                  <input
+                    id="phone"
+                    name="phone"
+                    value={registerFormData.phone}
+                    onChange={(e) =>
+                      handleRegisterInputChange("phone", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Input your phone number (optional)"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="birthday" className="block text-gray-700">
+                    Birthday
+                  </label>
+                  <input
+                    id="birthday"
+                    name="birthday"
+                    type="date"
+                    value={registerFormData.birthday}
+                    onChange={(e) =>
+                      handleRegisterInputChange("birthday", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="gender" className="block text-gray-700">
+                    Gender
+                  </label>
+                  <select
+                    id="gender"
+                    name="gender"
+                    value={registerFormData.gender}
+                    onChange={(e) =>
+                      handleRegisterInputChange("gender", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="0">Unknown</option>
+                    <option value="1">Male</option>
+                    <option value="2">Female</option>
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="role" className="block text-gray-700">
+                    Role Type
+                  </label>
+                  <select
+                    id="roleType"
+                    name="roleType"
+                    value={registerFormData.userType}
+                    onChange={(e) =>
+                      handleRegisterInputChange("roleType", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="1">Regular User</option>
+                    <option value="2">Administrator</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpenRegisterForm(false);
+                    // Reset form data
+                    setRegisterFormData({
+                      username: "",
+                      email: "",
+                      password: "",
+                      confirmPassword: "",
+                      nickname: "",
+                      phone: "",
+                      gender: "0",
+                      birthday: "",
+                      userType: "1",
+                    });
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                  Register
+                </button>
+              </div>
             </form>
           </div>
         </div>

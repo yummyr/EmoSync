@@ -71,7 +71,7 @@ function Pagination({
   };
 
   return (
-    <div className="flex flex-col md:flex-row justify-between items-center mt-6 gap-4 text-sm">
+    <div className="flex flex-col md:flex-row justify-between items-center m-6 gap-4 text-sm">
       {/* === Info Section === */}
       {showInfo && (
         <div className="text-gray-600">
@@ -108,7 +108,7 @@ function Pagination({
               onClick={() => onPageChange(num)}
               className={`px-3 py-1 rounded-md ${
                 currentPage === num
-                  ? "bg-[#b08968] text-white"
+                  ? "bg-blue-500 text-white"
                   : "bg-gray-100 hover:bg-gray-300"
               }`}
             >
@@ -160,7 +160,7 @@ function Pagination({
           />
           <button
             onClick={handleGoToPage}
-            className="px-3 py-1 bg-[#b08968] text-white rounded hover:bg-[#8d6e52]"
+            className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-[#8d6e52]"
           >
             Go
           </button>

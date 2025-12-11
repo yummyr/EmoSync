@@ -21,84 +21,28 @@ import {
   faQuestionCircle,
   faSearch,
 } from "@fortawesome/free-solid-svg-icons";
+import api from "@/api";
+import Pagination from "@/components/Pagination";
 
-// If you have an API base, set it here or via env var
-const API_BASE = import.meta?.env?.VITE_API_BASE_URL || "";
-
-// ---------------------
-// Small Fetch Helpers
-// ---------------------
-async function apiGet(path, params) {
-  let url = API_BASE + path;
-
-  if (params && Object.keys(params).length > 0) {
-    const searchParams = new URLSearchParams();
-    Object.entries(params).forEach(([key, value]) => {
-      if (
-        value !== undefined &&
-        value !== null &&
-        value !== "" &&
-        !(typeof value === "number" && Number.isNaN(value))
-      ) {
-        searchParams.append(key, String(value));
-      }
-    });
-    const qs = searchParams.toString();
-    if (qs) {
-      url += (url.includes("?") ? "&" : "?") + qs;
-    }
-  }
-
-  const resp = await fetch(url, { method: "GET" });
-  if (!resp.ok) {
-    throw new Error(`GET ${path} failed: ${resp.status} ${resp.statusText}`);
-  }
-  const json = await resp.json();
-  // Unwrap { code, data } style if backend uses Result wrapper
-  return json?.data ?? json;
-}
-
-async function apiPost(path, body) {
-  const options = {
-    method: "POST",
-    headers: {},
-  };
-
-  if (body !== null && body !== undefined) {
-    options.headers["Content-Type"] = "application/json";
-    options.body = JSON.stringify(body);
-  }
-
-  const resp = await fetch(API_BASE + path, options);
-  if (!resp.ok) {
-    throw new Error(`POST ${path} failed: ${resp.status} ${resp.statusText}`);
-  }
-  const json = await resp.json();
-  return json?.data ?? json;
-}
-
-// ---------------------
-// API wrappers (same as Vue aiAnalysisTask.js but in fetch style)
-// ---------------------
 async function getAiAnalysisTaskPage(params) {
   // Expected return: { records, total, current, size, pages }
-  return apiGet("/ai-analysis-task/page", params);
+  return api.get("/ai-analysis-task/page", params);
 }
 
 async function getAiAnalysisTaskStatistics() {
   // Expected return:
   // { totalTasks, pendingTasks, processingTasks, completedTasks, failedTasks, retryableTasks, taskTypeStats }
-  return apiGet("/ai-analysis-task/statistics");
+  return api.get("/ai-analysis-task/statistics");
 }
 
 async function retryAiAnalysisTask(taskId) {
-  return apiPost(`/ai-analysis-task/${taskId}/retry`, null);
+  return api.post(`/ai-analysis-task/${taskId}/retry`, null);
 }
 
 async function batchRetryAiAnalysisTasks(taskIds) {
   // Expected return:
   // { totalCount, successCount, failCount, failReasons }
-  return apiPost("/ai-analysis-task/batch-retry", taskIds);
+  return api.post("/ai-analysis-task/batch-retry", taskIds);
 }
 
 // ---------------------
@@ -147,9 +91,6 @@ const AiAnalysisPage = () => {
     taskTypeStats: {},
   });
 
-  // ---------------------
-  // Helper: date formatting
-  // ---------------------
   const toBackendDateTime = (value) => {
     // HTML datetime-local returns "YYYY-MM-DDTHH:mm"
     if (!value) return "";
@@ -176,16 +117,12 @@ const AiAnalysisPage = () => {
     return `${(ms / 60000).toFixed(1)}min`;
   };
 
-  // ---------------------
-  // Tag helpers
-  // ---------------------
   const getStatusConfig = (statusValue, description) => {
     switch (statusValue) {
       case "PENDING":
         return {
           label: description || "Pending",
-          className:
-            "bg-amber-100 text-amber-800 border border-amber-200",
+          className: "bg-amber-100 text-amber-800 border border-amber-200",
           icon: faClock,
         };
       case "PROCESSING":
@@ -205,15 +142,13 @@ const AiAnalysisPage = () => {
       case "FAILED":
         return {
           label: description || "Failed",
-          className:
-            "bg-rose-100 text-rose-800 border border-rose-200",
+          className: "bg-rose-100 text-rose-800 border border-rose-200",
           icon: faTimesCircle,
         };
       default:
         return {
           label: description || statusValue || "Unknown",
-          className:
-            "bg-slate-100 text-slate-700 border border-slate-200",
+          className: "bg-slate-100 text-slate-700 border border-slate-200",
           icon: faQuestionCircle,
         };
     }
@@ -224,22 +159,19 @@ const AiAnalysisPage = () => {
       case "AUTO":
         return {
           label: description || "Auto",
-          className:
-            "bg-slate-100 text-slate-800 border border-slate-200",
+          className: "bg-slate-100 text-slate-800 border border-slate-200",
           icon: faRobot,
         };
       case "MANUAL":
         return {
           label: description || "Manual",
-          className:
-            "bg-indigo-100 text-indigo-800 border border-indigo-200",
+          className: "bg-indigo-100 text-indigo-800 border border-indigo-200",
           icon: faHandPointer,
         };
       case "ADMIN":
         return {
           label: description || "Admin",
-          className:
-            "bg-amber-100 text-amber-800 border border-amber-200",
+          className: "bg-amber-100 text-amber-800 border border-amber-200",
           icon: faUserShield,
         };
       case "BATCH":
@@ -252,8 +184,7 @@ const AiAnalysisPage = () => {
       default:
         return {
           label: description || typeValue || "Unknown",
-          className:
-            "bg-slate-100 text-slate-700 border border-slate-200",
+          className: "bg-slate-100 text-slate-700 border border-slate-200",
           icon: faQuestionCircle,
         };
     }
@@ -264,44 +195,36 @@ const AiAnalysisPage = () => {
       case 1:
         return {
           label: description || "Low",
-          className:
-            "bg-slate-100 text-slate-800 border border-slate-200",
+          className: "bg-slate-100 text-slate-800 border border-slate-200",
           icon: faArrowDown,
         };
       case 2:
         return {
           label: description || "Normal",
-          className:
-            "bg-sky-100 text-sky-800 border border-sky-200",
+          className: "bg-sky-100 text-sky-800 border border-sky-200",
           icon: faMinus,
         };
       case 3:
         return {
           label: description || "High",
-          className:
-            "bg-amber-100 text-amber-800 border border-amber-200",
+          className: "bg-amber-100 text-amber-800 border border-amber-200",
           icon: faArrowUp,
         };
       case 4:
         return {
           label: description || "Urgent",
-          className:
-            "bg-rose-100 text-rose-800 border border-rose-200",
+          className: "bg-rose-100 text-rose-800 border border-rose-200",
           icon: faExclamation,
         };
       default:
         return {
           label: description || "Unknown",
-          className:
-            "bg-slate-100 text-slate-700 border border-slate-200",
+          className: "bg-slate-100 text-slate-700 border border-slate-200",
           icon: faQuestionCircle,
         };
     }
   };
 
-  // ---------------------
-  // Fetch functions
-  // ---------------------
   const fetchQueueStatistics = useCallback(async () => {
     try {
       const stats = await getAiAnalysisTaskStatistics();
@@ -329,7 +252,8 @@ const AiAnalysisPage = () => {
         if (!Number.isNaN(p)) params.priority = p;
       }
       if (username.trim()) params.username = username.trim();
-      if (dateRange.start) params.startTime = toBackendDateTime(dateRange.start);
+      if (dateRange.start)
+        params.startTime = toBackendDateTime(dateRange.start);
       if (dateRange.end) params.endTime = toBackendDateTime(dateRange.end);
       if (failedOnly) params.failedOnly = true;
       if (retryableOnly) params.retryableOnly = true;
@@ -401,9 +325,6 @@ const AiAnalysisPage = () => {
     }
   };
 
-  // ---------------------
-  // Search & filter handlers
-  // ---------------------
   const handleSearch = (e) => {
     e?.preventDefault?.();
     setCurrentPage(1);
@@ -433,8 +354,7 @@ const AiAnalysisPage = () => {
     setCurrentPage(newPage);
   };
 
-  const handlePageSizeChange = (e) => {
-    const size = Number(e.target.value);
+  const handlePageSizeChange = (size) => {
     if (!Number.isNaN(size) && size > 0) {
       setPageSize(size);
       setCurrentPage(1);
@@ -540,28 +460,16 @@ const AiAnalysisPage = () => {
     } catch (error) {
       console.error("Batch retry failed:", error);
       window.alert("Batch retry failed. Please check console for details.");
+    } finally {
+      fetchQueueStatistics();
     }
   };
 
-  // ---------------------
-  // JSX
-  // ---------------------
   return (
     <div className="ai-analysis-queue px-6 py-8 bg-slate-50 min-h-screen">
       {/* Page Header */}
       <div className="page-header mb-6">
         <div className="header-content flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-white rounded-2xl px-6 py-5 shadow-sm">
-          <div className="header-left">
-            <h2 className="page-title text-2xl md:text-3xl font-semibold text-slate-800 tracking-tight flex items-center gap-2">
-              <FontAwesomeIcon icon={faTasks} className="text-indigo-500" />
-              AI Analysis Queue Management
-            </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Monitor AI emotion-analysis tasks, view queue status and manually
-              retry failed tasks.
-            </p>
-          </div>
-
           <div className="header-actions flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
             <div className="auto-refresh-controls flex items-center gap-3 px-3 py-2 bg-sky-50 border border-sky-100 rounded-lg">
               <span className="refresh-label flex items-center text-xs sm:text-sm text-slate-600 font-medium whitespace-nowrap">
@@ -610,7 +518,7 @@ const AiAnalysisPage = () => {
 
       {/* Stats */}
       <div className="stats-grid grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
-        <div className="stat-card bg-white rounded-2xl px-5 py-4 shadow-sm flex items-center justify-between">
+        <div className="stat-card group bg-white rounded-2xl px-5 py-4 shadow-sm flex items-center justify-between">
           <div className="stat-info">
             <p className="text-xs text-slate-500 uppercase tracking-wide">
               Total Tasks
@@ -619,27 +527,47 @@ const AiAnalysisPage = () => {
               {queueStats.totalTasks ?? 0}
             </p>
           </div>
-          <div className="stat-icon w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center text-white">
-            <FontAwesomeIcon icon={faTasks} />
+
+          <div className="relative">
+            <div className="relative w-12 h-12 rounded-full bg-white flex items-center justify-center z-10 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-b from-indigo-200 via-indigo-400 to-indigo-600 animate-gradient-flow bg-[length:100%_200%]"></div>
+              <FontAwesomeIcon
+                icon={faTasks}
+                className="text-indigo-700 relative z-10 animate-icon-bounce"
+              />
+              <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/30 to-transparent"></div>
+            </div>
           </div>
         </div>
 
-        <div className="stat-card bg-white rounded-2xl px-5 py-4 shadow-sm flex items-center justify-between">
-          <div className="stat-info">
-            <p className="text-xs text-slate-500 uppercase tracking-wide">
-              Pending / Processing
-            </p>
-            <p className="stat-value text-2xl font-semibold text-sky-700 mt-1">
-              {(queueStats.pendingTasks ?? 0) +
-                (queueStats.processingTasks ?? 0)}
-            </p>
-          </div>
-          <div className="stat-icon w-12 h-12 rounded-full bg-sky-500 flex items-center justify-center text-white">
-            <FontAwesomeIcon icon={faCog} />
+        {/* Pending/Processing */}
+        <div className="stat-card group bg-white rounded-2xl px-5 py-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="stat-info">
+              <p className="text-xs text-slate-500 uppercase tracking-wide">
+                Pending / Processing
+              </p>
+              <p className="stat-value text-2xl font-semibold text-sky-700 mt-1">
+                {(queueStats.pendingTasks ?? 0) +
+                  (queueStats.processingTasks ?? 0)}
+              </p>
+            </div>
+            <div className="relative">
+              <div className="w-12 h-12 rounded-full bg-sky-500 flex items-center justify-center">
+                <FontAwesomeIcon
+                  icon={faCog}
+                  className="w-6 h-6 text-white"
+                  style={{ animation: "spin 2s linear infinite" }}
+                />
+              </div>
+              {queueStats.processingTasks > 0 && (
+                <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 animate-pulse"></div>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="stat-card bg-white rounded-2xl px-5 py-4 shadow-sm flex items-center justify-between">
+        <div className="stat-card group bg-white rounded-2xl px-5 py-4 shadow-sm flex items-center justify-between">
           <div className="stat-info">
             <p className="text-xs text-slate-500 uppercase tracking-wide">
               Completed
@@ -649,25 +577,31 @@ const AiAnalysisPage = () => {
             </p>
           </div>
           <div className="stat-icon w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center text-white">
-            <FontAwesomeIcon icon={faCheckCircle} />
+            <FontAwesomeIcon
+              icon={faCheckCircle}
+              className="group-hover:scale-125 transition-transform duration-300"
+            />
           </div>
         </div>
 
-        <div className="stat-card bg-white rounded-2xl px-5 py-4 shadow-sm flex items-center justify-between">
+        <div className="stat-card group bg-white rounded-2xl px-5 py-4 shadow-sm flex items-center justify-between">
           <div className="stat-info">
             <p className="text-xs text-slate-500 uppercase tracking-wide">
               Failed
             </p>
-            <p className="stat-value text-2xl font-semibold text-rose-600 mt-1">
+            <p className="stat-value text-2xl font-semibold text-pink-600 mt-1">
               {queueStats.failedTasks ?? 0}
             </p>
           </div>
-          <div className="stat-icon w-12 h-12 rounded-full bg-rose-500 flex items-center justify-center text-white">
-            <FontAwesomeIcon icon={faTimesCircle} />
+          <div className="stat-icon w-12 h-12 rounded-full bg-pink-400 flex items-center justify-center text-white">
+            <FontAwesomeIcon
+              icon={faTimesCircle}
+              className="group-hover:animate-ping-slow transition-all duration-300"
+            />
           </div>
         </div>
 
-        <div className="stat-card bg-white rounded-2xl px-5 py-4 shadow-sm flex items-center justify-between">
+        <div className="stat-card group bg-white rounded-2xl px-5 py-4 shadow-sm flex items-center justify-between">
           <div className="stat-info">
             <p className="text-xs text-slate-500 uppercase tracking-wide">
               Retryable
@@ -676,8 +610,16 @@ const AiAnalysisPage = () => {
               {queueStats.retryableTasks ?? 0}
             </p>
           </div>
-          <div className="stat-icon w-12 h-12 rounded-full bg-amber-500 flex items-center justify-center text-white">
-            <FontAwesomeIcon icon={faRedo} />
+          <div
+            className="stat-icon w-12 h-12 rounded-full bg-amber-500 flex items-center justify-center text-white
+            group-hover:bg-amber-600 group-hover:scale-110 group-hover:shadow-lg transition-all duration-300"
+          >
+            <FontAwesomeIcon
+              icon={faRedo}
+              className={`group-hover:animate-spin-slow ${
+                queueStats.retryableTasks > 0 ? "animate-pulse" : ""
+              }`}
+            />
           </div>
         </div>
       </div>
@@ -853,7 +795,7 @@ const AiAnalysisPage = () => {
               type="button"
               onClick={handleBatchRetry}
               disabled={selectedIds.length === 0}
-              className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md bg-emerald-500 text-white hover:bg-emerald-600 disabled:bg-emerald-200"
+              className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md bg-emerald-500 text-white hover:bg-emerald-600 disabled:bg-emerald-300"
             >
               <FontAwesomeIcon icon={faRedo} />
               <span>Batch Retry ({selectedIds.length})</span>
@@ -1078,75 +1020,16 @@ const AiAnalysisPage = () => {
           </table>
         </div>
 
-        {/* Pagination */}
-        <div className="pagination-container flex flex-col md:flex-row items-center justify-between gap-3 px-5 py-3 border-t border-slate-100 text-xs text-slate-600">
-          <div>
-            Total{" "}
-            <span className="font-semibold text-slate-800">{total}</span>{" "}
-            task{total === 1 ? "" : "s"}. Page{" "}
-            <span className="font-semibold text-slate-800">
-              {currentPage}
-            </span>{" "}
-            of{" "}
-            <span className="font-semibold text-slate-800">
-              {totalPages}
-            </span>
-            .
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1">
-              <span>Rows per page:</span>
-              <select
-                value={pageSize}
-                onChange={handlePageSizeChange}
-                className="border border-slate-200 rounded-md px-2 py-1 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              >
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-              </select>
-            </div>
-
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage <= 1}
-                className="px-2 py-1 rounded-md border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-50"
-              >
-                {"<"}
-              </button>
-              <span className="px-2 py-1 rounded-md bg-indigo-50 text-indigo-600 font-semibold">
-                {currentPage}
-              </span>
-              <button
-                type="button"
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage >= totalPages}
-                className="px-2 py-1 rounded-md border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-50"
-              >
-                {">"}
-              </button>
-            </div>
-
-            <div className="flex items-center gap-1">
-              <span>Go to</span>
-              <input
-                type="number"
-                min={1}
-                max={totalPages}
-                value={currentPage}
-                onChange={(e) =>
-                  handlePageChange(Number(e.target.value) || 1)
-                }
-                className="w-16 border border-slate-200 rounded-md px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              />
-              <span>page</span>
-            </div>
-          </div>
-        </div>
+        {/* Pagination Component */}
+        <Pagination
+          totalItems={total}
+          pageSize={pageSize}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+          pageSizeOptions={[10, 20, 50, 100]}
+          showInfo={true}
+        />
       </div>
     </div>
   );
