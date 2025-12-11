@@ -56,8 +56,15 @@ const Login = () => {
 
       const { roleType } = result;
 
-      // Redirect rules - prioritize dashboard over profile for fresh login
-      let redirectPath = "/back/dashboard"; // Always go to dashboard after successful login
+      // Redirect rules based on user role
+      let redirectPath;
+      if (roleType === 2) {
+        // Admin user - go to admin dashboard
+        redirectPath = "/back/dashboard";
+      } else {
+        // Regular user - go to user emotion diary page
+        redirectPath = "/user/emotion-diary";
+      }
       navigate(redirectPath, { replace: true });
     } catch (err) {
       console.error("登录失败:", err);

@@ -24,33 +24,8 @@ import {
 import api from "@/api";
 import Pagination from "@/components/Pagination";
 
-async function getAiAnalysisTaskPage(params) {
-  // Expected return: { records, total, current, size, pages }
-  return api.get("/ai-analysis-task/page", params);
-}
-
-async function getAiAnalysisTaskStatistics() {
-  // Expected return:
-  // { totalTasks, pendingTasks, processingTasks, completedTasks, failedTasks, retryableTasks, taskTypeStats }
-  return api.get("/ai-analysis-task/statistics");
-}
-
-async function retryAiAnalysisTask(taskId) {
-  return api.post(`/ai-analysis-task/${taskId}/retry`, null);
-}
-
-async function batchRetryAiAnalysisTasks(taskIds) {
-  // Expected return:
-  // { totalCount, successCount, failCount, failReasons }
-  return api.post("/ai-analysis-task/batch-retry", taskIds);
-}
-
-// ---------------------
-// Main Page Component
-// ---------------------
-const REFRESH_INTERVAL_KEY = "ai_analysis_queue_refresh_interval";
-
 const AiAnalysisPage = () => {
+  const REFRESH_INTERVAL_KEY = "ai_analysis_queue_refresh_interval";
   // Loading & table
   const [loading, setLoading] = useState(false);
   const [tasks, setTasks] = useState([]);
@@ -159,26 +134,26 @@ const AiAnalysisPage = () => {
       case "AUTO":
         return {
           label: description || "Auto",
-          className: "bg-slate-100 text-slate-800 border border-slate-200",
+          className: "bg-gradient-to-r from-blue-200 via-indigo-200 to-blue-400 text-blue-800 border border-slate-200",
           icon: faRobot,
         };
       case "MANUAL":
         return {
           label: description || "Manual",
-          className: "bg-indigo-100 text-indigo-800 border border-indigo-200",
+          className: "bg-gradient-to-r from-indigo-200 via-indigo-400 to-indigo-600 text-indigo-800 border border-indigo-200",
           icon: faHandPointer,
         };
       case "ADMIN":
         return {
           label: description || "Admin",
-          className: "bg-amber-100 text-amber-800 border border-amber-200",
+          className: "bg-gradient-to-r from-orange-200 via-pink-200 to-pink-400 text-amber-800 border border-amber-200",
           icon: faUserShield,
         };
       case "BATCH":
         return {
           label: description || "Batch",
           className:
-            "bg-emerald-100 text-emerald-800 border border-emerald-200",
+            "bg-gradient-to-r from-emerald-100 via-emerald-400 to-emerald-600  text-emerald-800 border border-emerald-200",
           icon: faLayerGroup,
         };
       default:
@@ -194,20 +169,20 @@ const AiAnalysisPage = () => {
     switch (priorityValue) {
       case 1:
         return {
-          label: description || "Low",
-          className: "bg-slate-100 text-slate-800 border border-slate-200",
+          label: priority || "Low",
+          className: "bg-pink-100 text-slate-800 border border-slate-200",
           icon: faArrowDown,
         };
       case 2:
         return {
-          label: description || "Normal",
+          label: priority || "Normal",
           className: "bg-sky-100 text-sky-800 border border-sky-200",
           icon: faMinus,
         };
       case 3:
         return {
-          label: description || "High",
-          className: "bg-amber-100 text-amber-800 border border-amber-200",
+          label: priority || "High",
+          className: "bg-red-100 text-amber-800 border border-amber-200",
           icon: faArrowUp,
         };
       case 4:
@@ -227,7 +202,9 @@ const AiAnalysisPage = () => {
 
   const fetchQueueStatistics = useCallback(async () => {
     try {
-      const stats = await getAiAnalysisTaskStatistics();
+      const res = await api.get("/ai-analysis-task/statistics", { params: {} });
+      const stats= res.data.data || {};
+      console.log("Fetched queue statistics:", stats);
       setQueueStats((prev) => ({
         ...prev,
         ...stats,
@@ -251,16 +228,18 @@ const AiAnalysisPage = () => {
         const p = Number(priority);
         if (!Number.isNaN(p)) params.priority = p;
       }
+      console.log("priority :", priority);
       if (username.trim()) params.username = username.trim();
       if (dateRange.start)
         params.startTime = toBackendDateTime(dateRange.start);
       if (dateRange.end) params.endTime = toBackendDateTime(dateRange.end);
       if (failedOnly) params.failedOnly = true;
       if (retryableOnly) params.retryableOnly = true;
-
-      const page = await getAiAnalysisTaskPage(params);
-      setTasks(page.records || []);
-      setTotal(page.total || 0);
+      console.log("Fetching AI analysis tasks with params:", params);
+      const res = await api.get("/ai-analysis-task/page", { params });
+      console.log("Fetched AI analysis tasks:", res.data);
+      setTasks(res.data.data.records || []);
+      setTotal(res.data.data.total || 0);
     } catch (error) {
       console.error("Failed to fetch AI analysis tasks:", error);
     } finally {
@@ -278,9 +257,7 @@ const AiAnalysisPage = () => {
     retryableOnly,
   ]);
 
-  // ---------------------
-  // Auto-refresh & countdown
-  // ---------------------
+
   useEffect(() => {
     // On mount + whenever dependencies change, fetch immediately
     fetchQueueStatistics();
@@ -344,9 +321,6 @@ const AiAnalysisPage = () => {
     fetchTasks();
   };
 
-  // ---------------------
-  // Pagination handlers
-  // ---------------------
   const handlePageChange = (newPage) => {
     if (newPage < 1) return;
     const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -361,11 +335,6 @@ const AiAnalysisPage = () => {
     }
   };
 
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
-
-  // ---------------------
-  // Selection handlers
-  // ---------------------
   const isSelected = (id) => selectedIds.includes(id);
 
   const handleToggleRow = (id) => {
@@ -391,16 +360,13 @@ const AiAnalysisPage = () => {
   const allCurrentSelected =
     tasks.length > 0 && tasks.every((t) => selectedIds.includes(t.id));
 
-  // ---------------------
-  // Retry handlers
-  // ---------------------
   const handleRetryTask = async (task) => {
     const ok = window.confirm(
       `Are you sure you want to retry task #${task.id}?`
     );
     if (!ok) return;
     try {
-      await retryAiAnalysisTask(task.id);
+      await api.post(`/ai-analysis-task/${task.id}/retry`, null);
       window.alert("Task retry has been triggered.");
       fetchTasks();
       fetchQueueStatistics();
@@ -432,7 +398,7 @@ const AiAnalysisPage = () => {
     const taskIds = retryableTasks.map((t) => t.id);
 
     try {
-      const result = await batchRetryAiAnalysisTasks(taskIds);
+      const result = await api.post("/ai-analysis-task/batch-retry", taskIds);
       const {
         totalCount = taskIds.length,
         successCount = 0,
@@ -795,7 +761,8 @@ const AiAnalysisPage = () => {
               type="button"
               onClick={handleBatchRetry}
               disabled={selectedIds.length === 0}
-              className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md bg-emerald-500 text-white hover:bg-emerald-600 disabled:bg-emerald-300"
+              className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium 
+              rounded-md bg-emerald-500 text-white hover:bg-emerald-600 disabled:bg-emerald-300"
             >
               <FontAwesomeIcon icon={faRedo} />
               <span>Batch Retry ({selectedIds.length})</span>
@@ -805,7 +772,7 @@ const AiAnalysisPage = () => {
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
+          <table className="min-w-full text-sm overflow-x-auto">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
                 <th className="px-4 py-3 text-left w-10">
@@ -816,17 +783,17 @@ const AiAnalysisPage = () => {
                     className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                   />
                 </th>
-                <th className="px-4 py-3 text-left w-20">Task ID</th>
-                <th className="px-4 py-3 text-left w-56">Diary Info</th>
-                <th className="px-4 py-3 text-left w-32">Status</th>
-                <th className="px-4 py-3 text-left w-32">Type</th>
-                <th className="px-4 py-3 text-left w-32">Priority</th>
-                <th className="px-4 py-3 text-left w-32">Retry Info</th>
+                <th className="px-4 py-3 text-center   min-w-[100px]">Task ID</th>
+                <th className="px-4 py-3 text-center min-w-[120px]">Diary Info</th>
+                <th className="px-4 py-3 text-center min-w-[120px]">Status</th>
+                <th className="px-4 py-3 text-center min-w-[120px]">Type</th>
+                <th className="px-4 py-3 text-center min-w-[120px]">Priority</th>
+                <th className="px-4 py-3 text-center min-w-[120px]">Retry Info</th>
                 <th className="px-4 py-3 text-left min-w-[200px]">
                   Error Message
                 </th>
-                <th className="px-4 py-3 text-left w-56">Time Info</th>
-                <th className="px-4 py-3 text-left w-32">Actions</th>
+                <th className="px-4 py-3 text-left w-56 min-w-[220px]">Time Info</th>
+                <th className="px-4 py-3 text-center min-w-[120px]">Actions</th>
               </tr>
             </thead>
 
@@ -875,29 +842,27 @@ const AiAnalysisPage = () => {
                       className="hover:bg-slate-50 transition-colors"
                     >
                       {/* Selection */}
-                      <td className="px-4 py-3 align-top">
+                      <td className="px-4 py-3 text-center align-top">
                         <input
                           type="checkbox"
                           checked={isSelected(row.id)}
                           onChange={() => handleToggleRow(row.id)}
-                          className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                          className="text-center rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                         />
                       </td>
 
                       {/* Task ID */}
-                      <td className="px-4 py-3 align-top text-slate-800 font-medium">
+                      <td className="px-4 py-3  text-center text-slate-800 font-medium">
                         #{row.id}
                       </td>
 
                       {/* Diary Info */}
-                      <td className="px-4 py-3 align-top">
+                      <td className="px-4 py-3 text-center min-w-[100px] ">
                         <div className="diary-info text-xs">
                           <p className="diary-id font-semibold text-slate-800">
                             Diary ID: {row.diaryId ?? "-"}
                           </p>
-                          <p className="diary-date text-slate-500 mt-0.5">
-                            {row.diaryDate || "-"}
-                          </p>
+                         
                           <p className="user-info text-slate-500 mt-0.5 flex items-center gap-1">
                             <FontAwesomeIcon icon={faUser} />
                             <span>
@@ -909,7 +874,7 @@ const AiAnalysisPage = () => {
                       </td>
 
                       {/* Status */}
-                      <td className="px-4 py-3 align-top">
+                      <td className="px-4 py-3 text-center">
                         <span
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium ${statusCfg.className}`}
                         >
@@ -926,7 +891,7 @@ const AiAnalysisPage = () => {
                       </td>
 
                       {/* Task Type */}
-                      <td className="px-4 py-3 align-top">
+                      <td className="px-4 py-3 text-center">
                         <span
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium ${typeCfg.className}`}
                         >
@@ -936,7 +901,7 @@ const AiAnalysisPage = () => {
                       </td>
 
                       {/* Priority */}
-                      <td className="px-4 py-3 align-top">
+                      <td className="px-4 py-3 text-center">
                         <span
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium ${prioCfg.className}`}
                         >
@@ -946,13 +911,13 @@ const AiAnalysisPage = () => {
                       </td>
 
                       {/* Retry Info */}
-                      <td className="px-4 py-3 align-top">
+                      <td className="px-4 py-3 text-center min-w-[100px]:">
                         <div className="retry-info text-xs text-slate-600">
                           <p className="retry-count">
                             {row.retryCount ?? 0}/{row.maxRetryCount ?? 0}
                           </p>
                           {row.canRetry && (
-                            <span className="inline-flex mt-1 items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-100 text-amber-800 border border-amber-200">
+                            <span className="inline-flex mt-1 items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-green-400 text-amber-800 border border-amber-200">
                               Retryable
                             </span>
                           )}
@@ -994,11 +959,12 @@ const AiAnalysisPage = () => {
                       </td>
 
                       {/* Actions */}
-                      <td className="px-4 py-3 align-top">
-                        {row.canRetry ? (
+                      <td className="px-4 py-3 text-center">
+                        {row.canRetry && row.status !== "COMPLETED" ? (
                           <button
                             type="button"
                             onClick={() => handleRetryTask(row)}
+                           
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-amber-500 text-white hover:bg-amber-600"
                           >
                             <FontAwesomeIcon icon={faRedo} />
