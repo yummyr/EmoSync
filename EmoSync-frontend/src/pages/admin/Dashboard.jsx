@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import EmotionHeatmap from "@/components/EmotionHeatmap";
-import EmotionVisualizationHub from "@/components/EmotionVisualizationHub";
+import EmotionHeatmap from "@/pages/admin/components/EmotionHeatmap";
+import EmotionVisualizationHub from "@/pages/admin/components/EmotionVisualizationHub";
 import api from "@/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {

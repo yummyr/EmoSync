@@ -32,6 +32,12 @@ api.interceptors.request.use(
         config.data
       )}`;
 
+      // 如果是 GET 请求且有 data，将其作为请求体发送
+      if (config.method === "get" && config.data) {
+        config.headers["Content-Type"] = "application/json";
+        // 将 data 转换为 JSON 字符串
+        config.data = JSON.stringify(config.data);
+      }
       // if same request exists, cancel pre request
       if (pendingRequests.has(requestKey)) {
         const cancelToken = pendingRequests.get(requestKey);
@@ -73,7 +79,7 @@ api.interceptors.response.use(
       localStorage.removeItem("roleType");
 
       // Only redirect if not already on login page to avoid redirect loops
-      if (!window.location.pathname.includes('/login')) {
+      if (!window.location.pathname.includes("/login")) {
         window.location.href = "/auth/login";
       }
     }

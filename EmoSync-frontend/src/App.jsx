@@ -7,7 +7,7 @@ import ConsulationPage from "./pages/user/ConsulationPage";
 import UserEmotionDiaryPage from "./pages/user/EmotionDiaryPage";
 import Dashboard from "./pages/admin/Dashboard"; // 登录后才能看
 import AiAnalysisPage from "./pages/admin/AiAnalysisPage";
-import Profile from "./pages/auth/ProfilePage";
+import ProfilePage from "./pages/auth/ProfilePage";
 import HomeLayout from "./layouts/HomeLayout";
 import AuthLayout from "./layouts/AuthLayout";
 import AdminLayout from "./layouts/AdminLayout";
@@ -16,7 +16,6 @@ import Register from "./pages/auth/Register";
 
 // 错误页面
 import NotFound from "./pages/NotFound";
-import ProfilePage from "./pages/auth/ProfilePage";
 import ConsultationManagementPage from "./pages/admin/ConsultationManagementPage";
 import CategoryManagementPage from "./pages/admin/CategoryManagementPage";
 import KnowledgeBasePage from "./pages/admin/KnowledgeArticlePage";
@@ -32,14 +31,6 @@ function App() {
         {/* 前台路由 */}
         <Route path="/" element={<HomeLayout />}>
           <Route index element={<Home />} />
-          <Route
-            path="profile"
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
         </Route>
         {/* 认证路由 */}
         <Route path="/auth" element={<AuthLayout />}>
@@ -53,18 +44,19 @@ function App() {
 
         {/* 普通用户路由 */}
         <Route
+          path="/user"
           element={
             <ProtectedRoute>
               <UserLayout />
             </ProtectedRoute>
           }
         >
-          <Route index element={<Navigate to="/consultation" replace />} />
+          <Route index element={<Navigate to="/user/consultation" replace />} />
           <Route path="consultation" element={<ConsulationPage />} />
           <Route path="emotion-diary" element={<UserEmotionDiaryPage />} />
           <Route path="favorites" element={<FavoritesPage />} />
           <Route path="knowledge" element={<KnowledgeArticlePage />} />
-          <Route path="profile" element={<Profile />} />
+          <Route path="profile" element={<ProfilePage />} />
         </Route>
 
         {/* 管理员路由 */}

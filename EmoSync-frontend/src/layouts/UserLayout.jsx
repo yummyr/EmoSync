@@ -31,11 +31,11 @@ export default function UserLayout() {
 
   // Main Navigation Menu Items
   const menuItems = [
-    { name: "AI Consultation", icon: faComments, path: "/consultation", id: "consultation" },
-    { name: "Emotion Diary", icon: faFaceGrinWink, path: "/emotion-diary", id: "emotion-diary" },
-    { name: "My Favorites", icon: faHeart, path: "/favorites", id: "favorites" },
-    { name: "Knowledge Articles", icon: faBook, path: "/knowledge", id: "knowledge" },
-    { name: "Profile", icon: faIdCard, path: "/profile", id: "profile" },
+    { name: "AI Consultation", icon: faComments, path: "/user/consultation", id: "consultation" },
+    { name: "Emotion Diary", icon: faFaceGrinWink, path: "/user/emotion-diary", id: "emotion-diary" },
+    { name: "My Favorites", icon: faHeart, path: "/user/favorites", id: "favorites" },
+    { name: "Knowledge Articles", icon: faBook, path: "/user/knowledge", id: "knowledge" },
+    { name: "Profile", icon: faIdCard, path: "/user/profile", id: "profile" },
   ];
 
   
@@ -119,7 +119,7 @@ export default function UserLayout() {
       </main>
       {/* FOOTER */}
       <footer className="bg-white border-t border-gray-200 px-6 py-4">
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-center text-gray-500">
           &copy; 2025 EmoSync. All rights reserved.
         </p>
       </footer>

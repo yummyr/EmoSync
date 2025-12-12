@@ -41,8 +41,8 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      console.log("开始登录，表单数据:", formData);
-      console.log("当前from路径:", from);
+      console.log("Starting login, form data:", formData);
+      console.log("Current from path:", from);
 
       // Clear any existing token before login to avoid conflicts
       localStorage.removeItem("token");
@@ -63,11 +63,11 @@ const Login = () => {
         redirectPath = "/back/dashboard";
       } else {
         // Regular user - go to user emotion diary page
-        redirectPath = "/user/emotion-diary";
+        redirectPath = "/user/consultation";
       }
       navigate(redirectPath, { replace: true });
     } catch (err) {
-      console.error("登录失败:", err);
+      console.error("Login failed:", err);
       // error is already stored in Redux
     }
   };

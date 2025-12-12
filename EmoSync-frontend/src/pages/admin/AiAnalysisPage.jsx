@@ -23,6 +23,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import api from "@/api";
 import Pagination from "@/components/Pagination";
+import { formatDateTime } from "@/utils/date";
 
 const AiAnalysisPage = () => {
   const REFRESH_INTERVAL_KEY = "ai_analysis_queue_refresh_interval";
@@ -78,13 +79,7 @@ const AiAnalysisPage = () => {
     return value;
   };
 
-  const formatDateTime = (dateTimeStr) => {
-    if (!dateTimeStr) return "-";
-    const date = new Date(dateTimeStr);
-    if (Number.isNaN(date.getTime())) return dateTimeStr;
-    return date.toLocaleString("en-US");
-  };
-
+  
   const formatDuration = (ms) => {
     if (!ms) return "-";
     if (ms < 1000) return `${ms}ms`;
