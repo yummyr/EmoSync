@@ -68,7 +68,8 @@ public class EmotionDiaryController {
             @Parameter(description = "Whether in edit mode") @RequestParam(required = false) Boolean isEditMode) {
         log.info("Received create or update emotion diary request: {}, edit mode: {}", createDTO, isEditMode);
 
-        Long userId = getCurrentUserInfo().getId();
+        UserDetailsImpl currentUser = getCurrentUserInfo();
+        Long userId = currentUser != null ? currentUser.getId() : null;
         if (userId == null) {
             return Result.error("User not logged in");
         }
@@ -118,7 +119,8 @@ public class EmotionDiaryController {
             @Parameter(description = "Diary ID") @PathVariable Long id) {
         log.info("Received get emotion diary request, ID: {}", id);
 
-        Long userId = getCurrentUserInfo().getId();
+        UserDetailsImpl currentUser = getCurrentUserInfo();
+        Long userId = currentUser != null ? currentUser.getId() : null;
         if (userId == null) {
             return Result.error("User not logged in");
         }
@@ -141,7 +143,8 @@ public class EmotionDiaryController {
             @Parameter(description = "Date (format: yyyy-MM-dd)") @PathVariable String date) {
         log.info("Received get emotion diary by date request, date: {}", date);
 
-        Long userId = getCurrentUserInfo().getId();
+        UserDetailsImpl currentUser = getCurrentUserInfo();
+        Long userId = currentUser != null ? currentUser.getId() : null;
         if (userId == null) {
             return Result.error("User not logged in");
         }
@@ -179,7 +182,8 @@ public class EmotionDiaryController {
         
         log.info("Received paginated query emotion diary request, page: {}, size: {}", current, size);
 
-        Long userId = getCurrentUserInfo().getId();
+        UserDetailsImpl currentUser = getCurrentUserInfo();
+        Long userId = currentUser != null ? currentUser.getId() : null;
         if (userId == null) {
             return Result.error("User not logged in");
         }
@@ -224,7 +228,8 @@ public class EmotionDiaryController {
     public Result<Void> deleteDiary(@Parameter(description = "Diary ID") @PathVariable Long id) {
         log.info("Received delete emotion diary request, ID: {}", id);
 
-        Long userId = getCurrentUserInfo().getId();
+        UserDetailsImpl currentUser = getCurrentUserInfo();
+        Long userId = currentUser != null ? currentUser.getId() : null;
         if (userId == null) {
             return Result.error("User not logged in");
         }
@@ -247,7 +252,8 @@ public class EmotionDiaryController {
             @Parameter(description = "Statistics days") @RequestParam(defaultValue = "7") Integer days) {
         log.info("Received get emotion statistics request, statistics days: {}", days);
 
-        Long userId = getCurrentUserInfo().getId();
+        UserDetailsImpl currentUser = getCurrentUserInfo();
+        Long userId = currentUser != null ? currentUser.getId() : null;
         if (userId == null) {
             return Result.error("User not logged in");
         }
@@ -269,7 +275,8 @@ public class EmotionDiaryController {
     public Result<EmotionDiaryResponseDTO> getTodayDiary() {
         log.info("Received get today's emotion diary request");
 
-        Long userId = getCurrentUserInfo().getId();
+        UserDetailsImpl currentUser = getCurrentUserInfo();
+        Long userId = currentUser != null ? currentUser.getId() : null;
         if (userId == null) {
             return Result.error("User not logged in");
         }
@@ -298,7 +305,8 @@ public class EmotionDiaryController {
             @Parameter(description = "Diary ID") @PathVariable Long id) {
         log.info("Received get AI emotion analysis request, diary ID: {}", id);
 
-        Long userId = getCurrentUserInfo().getId();
+        UserDetailsImpl currentUser = getCurrentUserInfo();
+        Long userId = currentUser != null ? currentUser.getId() : null;
         if (userId == null) {
             return Result.error("User not logged in");
         }
@@ -332,7 +340,8 @@ public class EmotionDiaryController {
             @Parameter(description = "Diary ID") @PathVariable Long id) {
         log.info("Received manually trigger AI emotion analysis request, diary ID: {}", id);
 
-        Long userId = getCurrentUserInfo().getId();
+        UserDetailsImpl currentUser = getCurrentUserInfo();
+        Long userId = currentUser != null ? currentUser.getId() : null;
         if (userId == null) {
             return Result.error("User not logged in");
         }

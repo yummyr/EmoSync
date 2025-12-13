@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * Knowledge Article Management Controller
- * @author system
+ * @author Yuan
  */
 @Tag(name = "Knowledge Article Management")
 @RestController
@@ -66,7 +66,8 @@ public class KnowledgeArticleController {
             HttpServletRequest request) {
         
         // Get current user ID
-        Long currentUserId = getCurrentUserInfo().getId();
+        UserDetailsImpl currentUser = getCurrentUserInfo();
+        Long currentUserId = currentUser != null ? currentUser.getId() : null;
         if (currentUserId == null) {
             return Result.error("User not logged in");
         }
@@ -97,7 +98,8 @@ public class KnowledgeArticleController {
             HttpServletRequest request) {
         
         // Get current user ID
-        Long currentUserId = getCurrentUserInfo().getId();
+        UserDetailsImpl currentUser = getCurrentUserInfo();
+        Long currentUserId = currentUser != null ? currentUser.getId() : null;
         if (currentUserId == null) {
             return Result.error("User not logged in");
         }
@@ -117,7 +119,8 @@ public class KnowledgeArticleController {
             HttpServletRequest request) {
         
         // Get current user ID
-        Long currentUserId = getCurrentUserInfo().getId();
+        UserDetailsImpl currentUser = getCurrentUserInfo();
+        Long currentUserId = currentUser != null ? currentUser.getId() : null;
         if (currentUserId == null) {
             return Result.error("User not logged in");
         }
@@ -137,7 +140,8 @@ public class KnowledgeArticleController {
             HttpServletRequest request) {
         
         // Get current user ID (can be null, used to determine favorite status)
-        Long currentUserId = getCurrentUserInfo().getId();
+        UserDetailsImpl currentUser = getCurrentUserInfo();
+        Long currentUserId = currentUser != null ? currentUser.getId() : null;
 
         log.info("Get knowledge article details: articleId={}, userId={}", id, currentUserId);
         ArticleResponseDTO response = knowledgeArticleService.getArticleById(id, currentUserId);
@@ -154,7 +158,8 @@ public class KnowledgeArticleController {
             HttpServletRequest request) {
         
         // Get current user ID (can be null)
-        Long currentUserId = getCurrentUserInfo().getId();
+        UserDetailsImpl currentUser = getCurrentUserInfo();
+        Long currentUserId = currentUser != null ? currentUser.getId() : null;
 
         log.info("Read knowledge article: articleId={}, userId={}", id, currentUserId);
         ArticleResponseDTO response = knowledgeArticleService.readArticle(id, currentUserId);
@@ -171,7 +176,8 @@ public class KnowledgeArticleController {
             HttpServletRequest request) {
         
         // Get current user ID
-        Long currentUserId = getCurrentUserInfo().getId();
+        UserDetailsImpl currentUser = getCurrentUserInfo();
+        Long currentUserId = currentUser != null ? currentUser.getId() : null;
         if (currentUserId == null) {
             return Result.error("User not logged in");
         }
@@ -191,7 +197,8 @@ public class KnowledgeArticleController {
             HttpServletRequest request) {
         
         // Get current user ID
-        Long currentUserId = getCurrentUserInfo().getId();
+        UserDetailsImpl currentUser = getCurrentUserInfo();
+        Long currentUserId = currentUser != null ? currentUser.getId() : null;
         if (currentUserId == null) {
             return Result.error("User not logged in");
         }
@@ -222,7 +229,8 @@ public class KnowledgeArticleController {
             HttpServletRequest request) {
 
         // 获取当前用户ID（可为空，用于判断收藏状态和权限）
-        Long currentUserId = getCurrentUserInfo().getId();
+        UserDetailsImpl currentUser = getCurrentUserInfo();
+        Long currentUserId = currentUser != null ? currentUser.getId() : null;
 
         ArticleListQueryDTO queryDTO = new ArticleListQueryDTO();
         queryDTO.setKeyword(keyword);
@@ -254,7 +262,8 @@ public class KnowledgeArticleController {
             HttpServletRequest request) {
         
         // Get current user ID
-        Long currentUserId = getCurrentUserInfo().getId();
+        UserDetailsImpl currentUser = getCurrentUserInfo();
+        Long currentUserId = currentUser != null ? currentUser.getId() : null;
         if (currentUserId == null) {
             return Result.error("User not logged in");
         }
@@ -274,7 +283,8 @@ public class KnowledgeArticleController {
             HttpServletRequest request) {
         
         // Get current user ID
-        Long currentUserId = getCurrentUserInfo().getId();
+        UserDetailsImpl currentUser = getCurrentUserInfo();
+        Long currentUserId = currentUser != null ? currentUser.getId() : null;
         if (currentUserId == null) {
             return Result.error("User not logged in");
         }
@@ -292,7 +302,8 @@ public class KnowledgeArticleController {
     public Result<ArticleStatisticsResponseDTO> getArticleStatistics(HttpServletRequest request) {
         
         // Get current user ID (for permission control)
-        Long currentUserId =getCurrentUserInfo().getId();
+        UserDetailsImpl currentUser = getCurrentUserInfo();
+        Long currentUserId = currentUser != null ? currentUser.getId() : null;
         if (currentUserId == null) {
             return Result.error("User not logged in");
         }

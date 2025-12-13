@@ -58,7 +58,8 @@ public class UserFavoriteController {
             @Parameter(description = "Article ID") @PathVariable String articleId) {
         
         // Get current user ID
-        Long currentUserId = getCurrentUserInfo().getId();
+        UserDetailsImpl currentUser = getCurrentUserInfo();
+        Long currentUserId = currentUser != null ? currentUser.getId() : null;
         if (currentUserId == null) {
             return Result.error("User not logged in");
         }
@@ -78,7 +79,8 @@ public class UserFavoriteController {
             HttpServletRequest request) {
         
         // Get current user ID
-        Long currentUserId = getCurrentUserInfo().getId();
+        UserDetailsImpl currentUser = getCurrentUserInfo();
+        Long currentUserId = currentUser != null ? currentUser.getId() : null;
         if (currentUserId == null) {
             return Result.error("User not logged in");
         }
@@ -98,7 +100,8 @@ public class UserFavoriteController {
             HttpServletRequest request) {
         
         // Get current user ID
-        Long currentUserId = getCurrentUserInfo().getId();
+        UserDetailsImpl currentUser = getCurrentUserInfo();
+        Long currentUserId = currentUser != null ? currentUser.getId() : null;
         if (currentUserId == null) {
             return Result.success(false);
         }
@@ -123,7 +126,8 @@ public class UserFavoriteController {
             HttpServletRequest request) {
 
         // Get current user ID
-        Long currentUserId = getCurrentUserInfo().getId();
+        UserDetailsImpl currentUser = getCurrentUserInfo();
+        Long currentUserId = currentUser != null ? currentUser.getId() : null;
         if (currentUserId == null) {
             return Result.error("User not logged in");
         }
@@ -150,7 +154,8 @@ public class UserFavoriteController {
     public Result<Long> getUserFavoriteCount(HttpServletRequest request) {
         
         // Get current user ID
-        Long currentUserId = getCurrentUserInfo().getId();
+        UserDetailsImpl currentUser = getCurrentUserInfo();
+        Long currentUserId = currentUser != null ? currentUser.getId() : null;
         if (currentUserId == null) {
             return Result.error("User not logged in");
         }
