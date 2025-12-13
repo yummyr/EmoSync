@@ -269,19 +269,34 @@ public class PsychologicalChatController {
     @Operation(summary = "Get Sessions Page", description = "Get paginated list of consultation sessions")
     @GetMapping("/sessions")
     public Result<PageResult<ConsultationSessionResponseDTO>> getSessionsPage(
-            ConsultationSessionQueryDTO queryDTO) {
+            @Parameter(description = "当前页") @RequestParam(defaultValue = "1") Integer currentPage,
+            @Parameter(description = "每页条数") @RequestParam(defaultValue = "10") Integer size,
+            @Parameter(description = "用户ID") @RequestParam(required = false) Long userId,
+            @Parameter(description = "情绪标签") @RequestParam(required = false) String emotionTag,
+            @Parameter(description = "开始时间起") @RequestParam(required = false) String startDate,
+            @Parameter(description = "开始时间止") @RequestParam(required = false) String endDate,
+            @Parameter(description = "关键词搜索") @RequestParam(required = false) String keyword) {
+
+        // 构造查询DTO
+        ConsultationSessionQueryDTO queryDTO = new ConsultationSessionQueryDTO();
+        queryDTO.setCurrentPage(currentPage);
+        queryDTO.setSize(size);
+        queryDTO.setUserId(userId);
+        queryDTO.setEmotionTag(emotionTag);
+        queryDTO.setStartDate(startDate);
+        queryDTO.setEndDate(endDate);
+        queryDTO.setKeyword(keyword);
+
         log.info("Querying sessions page, query: {}", queryDTO);
 
         try {
             Long currentUserId = getCurrentUserId();
 
             // Permission control
-            log.debug("currentUserType: {}", isAdmin());
             if (!isAdmin()) {
                 // Regular users can only view their own sessions
                 queryDTO.setUserId(currentUserId);
             }
-            // Admins can view all sessions
 
             PageResult<ConsultationSessionResponseDTO> page =
                     consultationSessionService.selectPage(queryDTO);
@@ -293,7 +308,6 @@ public class PsychologicalChatController {
             return Result.error("Failed to query sessions: " + e.getMessage());
         }
     }
-
     /**
      * Get session details
      */

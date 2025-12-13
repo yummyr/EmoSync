@@ -55,8 +55,7 @@ public class UserFavoriteController {
     @Operation(summary = "Favorite article")
     @PostMapping("/{articleId}")
     public Result<Void> favoriteArticle(
-            @Parameter(description = "Article ID") @PathVariable String articleId,
-            HttpServletRequest request) {
+            @Parameter(description = "Article ID") @PathVariable String articleId) {
         
         // Get current user ID
         Long currentUserId = getCurrentUserInfo().getId();

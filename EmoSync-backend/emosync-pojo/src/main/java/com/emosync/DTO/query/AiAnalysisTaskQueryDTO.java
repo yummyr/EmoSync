@@ -5,7 +5,7 @@ import lombok.Data;
 
 /**
  * AI分析任务查询DTO
- * @author system
+ * @author Yuan
  */
 @Data
 @Schema(description = "AI分析任务查询DTO")

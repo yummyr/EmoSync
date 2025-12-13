@@ -18,7 +18,7 @@ import java.util.Map;
 
 /**
  * AI分析任务管理控制器
- * @author system
+ * @author Yuan
  */
 @Tag(name = "AI分析任务管理", description = "AI情绪分析任务队列管理接口")
 @Slf4j

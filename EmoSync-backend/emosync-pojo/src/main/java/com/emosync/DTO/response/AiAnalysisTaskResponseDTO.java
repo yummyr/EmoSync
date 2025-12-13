@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 /**
  * AI分析任务响应DTO
- * @author system
+ * @author Yuan
  */
 @Data
 @Schema(description = "AI分析任务响应DTO")

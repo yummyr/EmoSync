@@ -51,4 +51,32 @@ public class AiAnalysisTask extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    /**
+     * 判断任务是否可以重试
+     */
+    public boolean canRetry() {
+        return retryCount < maxRetryCount && "FAILED".equals(status);
+    }
+
+    /**
+     * 判断任务是否正在处理
+     */
+    public boolean isProcessing() {
+        return "PROCESSING".equals(status);
+    }
+
+    /**
+     * 判断任务是否已完成
+     */
+    public boolean isCompleted() {
+        return "COMPLETED".equals(status);
+    }
+
+    /**
+     * 判断任务是否失败
+     */
+    public boolean isFailed() {
+        return "FAILED".equals(status);
+    }
 }
