@@ -246,7 +246,7 @@ public class KnowledgeArticleController {
         queryDTO.setCurrentPage(currentPage);
         queryDTO.setSize(size);
 
-        log.info("Get paginated knowledge article list: keyword={}, page={}, size={}, userId={}", keyword, currentPage, size, currentUserId);
+        log.info("Get paginated knowledge article list: keyword={}, page={}, size={}, userId={}，categoryId={}", keyword, currentPage, size, currentUserId,categoryId);
         PageResult<ArticleSimpleResponseDTO> response = knowledgeArticleService.getArticlePage(queryDTO, currentUserId);
         return Result.success(response);
     }

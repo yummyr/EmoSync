@@ -22,6 +22,8 @@ import com.emosync.repository.KnowledgeArticleRepository;
 import com.emosync.repository.KnowledgeCategoryRepository;
 import com.emosync.repository.UserFavoriteRepository;
 import com.emosync.repository.UserRepository;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
@@ -247,15 +249,20 @@ public class KnowledgeArticleServiceImpl implements KnowledgeArticleService {
                     User currentUser = userRepository.findById(currentUserId).orElse(null);
                     if (currentUser != null && currentUser.getUserType()!=2) {
                         Predicate published = cb.equal(root.get("status"), ArticleStatus.PUBLISHED.getCode());
-                        Predicate own = cb.equal(root.get("authorId"), currentUserId);
+
+                        // 使用 Join 访问关联的 User 实体
+                        Join<KnowledgeArticle, User> authorJoin = root.join("author", JoinType.LEFT);
+                        Predicate own = cb.equal(authorJoin.get("id"), currentUserId);
+
                         predicates.add(cb.or(published, own));
                     }
                 }
 
                 if (queryDTO.getCategoryId() != null) {
-                    predicates.add(cb.equal(root.get("categoryId"), queryDTO.getCategoryId()));
+                    // 使用 Join 访问关联的 Category 实体
+                    Join<KnowledgeArticle, KnowledgeCategory> categoryJoin = root.join("category", JoinType.LEFT);
+                    predicates.add(cb.equal(categoryJoin.get("id"), queryDTO.getCategoryId()));
                 }
-
                 if (StringUtils.hasText(queryDTO.getKeyword())) {
                     String kw = "%" + queryDTO.getKeyword().trim() + "%";
                     Predicate p1 = cb.like(root.get("title"), kw);
@@ -271,8 +278,10 @@ public class KnowledgeArticleServiceImpl implements KnowledgeArticleService {
                     predicates.add(cb.like(root.get("tags"), "%" + queryDTO.getTags().trim() + "%"));
                 }
                 if (queryDTO.getAuthorId() != null) {
-                    predicates.add(cb.equal(root.get("authorId"), queryDTO.getAuthorId()));
+                    Join<KnowledgeArticle, User> authorJoin = root.join("author", JoinType.LEFT);
+                    predicates.add(cb.equal(authorJoin.get("id"), queryDTO.getAuthorId()));
                 }
+
                 if (queryDTO.getStatus() != null) {
                     predicates.add(cb.equal(root.get("status"), queryDTO.getStatus()));
                 }

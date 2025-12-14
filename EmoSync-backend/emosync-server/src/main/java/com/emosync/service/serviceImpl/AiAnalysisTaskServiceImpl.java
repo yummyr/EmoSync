@@ -4,6 +4,7 @@ import com.emosync.DTO.query.AiAnalysisTaskQueryDTO;
 import com.emosync.DTO.response.AiAnalysisTaskResponseDTO;
 import com.emosync.Result.PageResult;
 import com.emosync.entity.AiAnalysisTask;
+import com.emosync.entity.User;
 import com.emosync.enumClass.AiTaskStatus;
 import com.emosync.enumClass.AiTaskType;
 import com.emosync.exception.BusinessException;
@@ -12,6 +13,8 @@ import com.emosync.repository.AiAnalysisTaskRepository;
 import com.emosync.repository.EmotionDiaryRepository;
 import com.emosync.repository.UserRepository;
 import com.emosync.service.AiAnalysisTaskService;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -117,6 +120,11 @@ public class AiAnalysisTaskServiceImpl implements AiAnalysisTaskService {
             Specification<AiAnalysisTask> spec = (root, query, cb) -> {
                 List<Predicate> predicates = new ArrayList<>();
 
+                // 使用 Join 访问关联的 User 实体
+                if (queryDTO.getUserId() != null) {
+                    Join<AiAnalysisTask, User> userJoin = root.join("user", JoinType.LEFT);
+                    predicates.add(cb.equal(userJoin.get("id"), queryDTO.getUserId()));
+                }
                 // 状态
                 if (StringUtils.hasText(queryDTO.getStatus())) {
                     predicates.add(cb.equal(root.get("status"), queryDTO.getStatus()));
@@ -127,10 +135,6 @@ public class AiAnalysisTaskServiceImpl implements AiAnalysisTaskService {
                     predicates.add(cb.equal(root.get("taskType"), queryDTO.getTaskType()));
                 }
 
-                // 用户ID
-                if (queryDTO.getUserId() != null) {
-                    predicates.add(cb.equal(root.get("userId"), queryDTO.getUserId()));
-                }
 
                 // 优先级
                 if (queryDTO.getPriority() != null) {

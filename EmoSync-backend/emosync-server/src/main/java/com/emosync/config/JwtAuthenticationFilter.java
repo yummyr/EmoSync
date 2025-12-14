@@ -67,8 +67,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 log.debug("成功提取token，长度：{}", token.length());
 
                 // 检查是否为无效的placeholder token
-                if ("temp-token".equals(token) || token.length() < 10) {
-                    log.warn("检测到无效的placeholder token: {}", token);
+                if ("temp-token".equals(token)) {
+                    // 静默处理前端placeholder token，不输出警告日志
+                    log.debug("检测到前端placeholder token，静默处理: {}", token);
+                    clearSecurityContext();
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
+                if (token.length() < 10) {
+                    log.warn("检测到无效token，长度过短: {}", token);
                     clearSecurityContext();
                     filterChain.doFilter(request, response);
                     return;
