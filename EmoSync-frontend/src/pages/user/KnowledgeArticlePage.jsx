@@ -2,18 +2,19 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBookOpen, faSearch } from "@fortawesome/free-solid-svg-icons";
 import React, { useState, useEffect, useRef } from "react";
 import Pagination from "@/components/Pagination";
+import ArticleDetailPage from "./components/ArticleDetailPage";
 import api from "@/api";
-
 
 const KnowledgeArticlePage = () => {
   // State management
   const [loading, setLoading] = useState(false);
   const [articles, setArticles] = useState([]);
-  const  [totalArticleCount, setTotalArticleCount] = useState(0);
+  const [totalArticleCount, setTotalArticleCount] = useState(0);
   const [categories, setCategories] = useState([]);
   const [recommendArticles, setRecommendArticles] = useState([]);
   const [total, setTotal] = useState(0);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  const [selectedArticle, setSelectedArticle] = useState(null);
   const [searchHistory, setSearchHistory] = useState([]);
   const [showSearchHistory, setShowSearchHistory] = useState(false);
   const [searchForm, setSearchForm] = useState({
@@ -25,14 +26,29 @@ const KnowledgeArticlePage = () => {
     size: 12,
   });
 
+  const [showArticlePage, setShowArticlePage] = useState(false);
   const searchInputRef = useRef(null);
   const searchTimeoutRef = useRef(null);
   const isInitialMount = useRef(true);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const dailyTip =
     "Deep breathing is the simplest and most effective relaxation technique. When feeling stressed, try the 4-7-8 breathing method: inhale for 4 seconds, hold for 7 seconds, exhale for 8 seconds.";
 
-
+  // Utility functions
+  const getCategoryIcon = (categoryName) => {
+    const iconMap = {
+      "Emotional Management": "❤️",
+      "Anxiety & Depression": "🧠",
+      "Work Stress": "💼",
+      "Interpersonal Relationships": "👥",
+      "Sleep Health": "🛏️",
+      "Child Psychology": "👶",
+      "Trauma Recovery": "💔",
+      "Relaxation Techniques": "🍃",
+    };
+    return iconMap[categoryName] || "📖";
+  };
 
   const formatReadCount = (count) => {
     if (!count) return "0";
@@ -54,7 +70,6 @@ const KnowledgeArticlePage = () => {
       "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80";
   };
 
-  // API functions
   const fetchArticles = async () => {
     setLoading(true);
     try {
@@ -63,39 +78,42 @@ const KnowledgeArticlePage = () => {
         categoryId: selectedCategoryId,
       };
 
-      const response = await api.get("/knowledge/category/page",params);
-      console.log("API Response:", response);
-
-      // Add defensive checks for API response structure
-      const data = response?.data?.data;
-      if (data) {
-        setArticles(data.records || []);
-        setTotal(data.total || 0);
-      } else {
-        setArticles([]);
-        setTotal(0);
-        console.warn("Unexpected API response structure:", response);
-      }
+      console.log("searchForm:", searchForm || {});
+      const response = await api.get("/knowledge/article/page", {
+        params: {
+          ...params,
+        },
+      });
+    
+      setArticles(response?.data?.data?.records || []);
+      setTotal(response?.data?.data?.total || 0);
     } catch (error) {
       console.error("Failed to fetch article list:", error);
-      // Don't use alert in production - just set empty state
+
       setArticles([]);
       setTotal(0);
     } finally {
       setLoading(false);
     }
   };
+    
 
   const fetchCategories = async () => {
     try {
       const response = await api.get("/knowledge/category/tree");
       const tree = response?.data?.data;
-      console.log("Fetched categories tree:", tree);
+     
+      console.log(" Categories tree:", tree);
 
       if (tree && Array.isArray(tree)) {
+      
         const totalArticleCount = tree.reduce(
           (sum, cat) => sum + (cat.articleCount || 0),
           0
+        );
+        console.log(
+          " Total article count from categories:",
+          totalArticleCount
         );
         setCategories(tree);
         setTotalArticleCount(totalArticleCount);
@@ -113,21 +131,19 @@ const KnowledgeArticlePage = () => {
 
   const fetchRecommendArticles = async () => {
     try {
-      const response = await api.get("/knowledge/article/page", {
+      const params = {
         sortField: "readCount",
         sortDirection: "desc",
         currentPage: 1,
         size: 3,
-      });
-      console.log("Fetched recommended articles:", response);
+      };
 
+      console.log("Requesting recommended articles with params:", params);
+      const response = await api.get("/knowledge/article/page", { params : {...params} });
+   
       const data = response?.data?.data;
-      if (data && data.records) {
-        setRecommendArticles(data.records);
-      } else {
-        setRecommendArticles([]);
-        console.warn("Unexpected recommended articles response structure:", response);
-      }
+     
+      setRecommendArticles(data?.records || []);
     } catch (error) {
       console.error("Failed to fetch recommended articles:", error);
       setRecommendArticles([]);
@@ -187,8 +203,23 @@ const KnowledgeArticlePage = () => {
   };
 
   const selectCategory = (categoryId) => {
+
     setSelectedCategoryId(categoryId);
-    setSearchForm((prev) => ({ ...prev, currentPage: 1 }));
+
+    // Update both categoryId and reset to first page in a single call
+    setSearchForm((prev) => {
+      console.log("Updating searchForm from:", prev);
+      const newForm = {
+        ...prev,
+        categoryId: categoryId,
+        currentPage: 1, // Reset to first page when changing category
+      };
+      console.log("To new searchForm:", newForm);
+      return newForm;
+    });
+
+    // Trigger refresh to ensure useEffect runs
+    setRefreshTrigger((prev) => prev + 1);
   };
 
   const handleSortChange = (value) => {
@@ -203,15 +234,38 @@ const KnowledgeArticlePage = () => {
     setSearchForm((prev) => ({ ...prev, size, currentPage: 1 }));
   };
 
-  const goToArticle = (articleId) => {
+  const goToArticle = async (articleId) => {
     console.log("View article:", articleId);
-    alert(`View article ID: ${articleId}`);
+    try {
+      // 获取文章详情
+      const response = await api.get(`/knowledge/article/${articleId}`);
+      setSelectedArticle(response?.data?.data);
+      setShowArticlePage(true);
+
+      // 增加阅读量 - 添加延迟和防重复调用
+      setTimeout(async () => {
+        try {
+          await api.post(`/knowledge/article/${articleId}/read`);
+          console.log("read article:", response?.data?.data);
+        } catch (readError) {
+          console.error("Failed to update read count:", readError);
+          // 不显示错误，因为这不是关键功能
+        }
+      }, 500); // 延迟500ms执行，避免与React严格模式的重复执行冲突
+    } catch (error) {
+      console.error("Failed to load article:", error);
+      alert("Failed to load article details");
+    }
   };
 
   const toggleFavorite = async (article) => {
     const token = localStorage.getItem("token");
     if (!token) {
-      if (window.confirm("You need to login to favorite articles. Go to login page?")) {
+      if (
+        window.confirm(
+          "You need to login to favorite articles. Go to login page?"
+        )
+      ) {
         alert("Redirecting to login page");
       }
       return;
@@ -260,9 +314,10 @@ const KnowledgeArticlePage = () => {
         await Promise.all([
           loadSearchHistory(),
           fetchCategories(),
-          fetchRecommendArticles()
+          
         ]);
         // Initial fetch after categories are loaded
+        fetchRecommendArticles();
         fetchArticles();
       } catch (error) {
         console.error("Failed to initialize data:", error);
@@ -280,6 +335,10 @@ const KnowledgeArticlePage = () => {
       return;
     }
 
+    console.log("useEffect triggered due to dependencies change");
+    console.log("searchForm:", searchForm);
+    console.log("selectedCategoryId:", selectedCategoryId);
+
     // Add a small delay to prevent rapid successive calls
     const timeoutId = setTimeout(() => {
       fetchArticles();
@@ -292,6 +351,8 @@ const KnowledgeArticlePage = () => {
     searchForm.sortField,
     selectedCategoryId,
     searchForm.keyword,
+    searchForm.categoryId, // Explicitly include categoryId
+    refreshTrigger, // Include refresh trigger
   ]);
 
   return (
@@ -434,19 +495,18 @@ const KnowledgeArticlePage = () => {
                 </h3>
                 <div className="space-y-1">
                   <div
-             onClick={() => selectCategory(null)}
-                   className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-all ${
-                        selectedCategoryId === null
-                          ? "bg-gradient-to-r from-amber-500 to-purple-600 text-white shadow-md transform -translate-y-0.5"
-                          : "text-gray-600 hover:bg-gray-50"
-                      }`}>
-                      <span className="text-xl">📚</span>
-                      <span className="flex-1 font-medium">
-                      All Categories
-                      </span>
-                      <span className="text-sm opacity-70">
-                       {totalArticleCount}
-                      </span>
+                    onClick={() => selectCategory(null)}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-all ${
+                      selectedCategoryId === null
+                        ? "bg-gradient-to-r from-amber-500 to-purple-600 text-white shadow-md transform -translate-y-0.5"
+                        : "text-gray-600 hover:bg-gray-50"
+                    }`}
+                  >
+                    <span className="text-xl">📚</span>
+                    <span className="flex-1 font-medium">All Categories</span>
+                    <span className="text-sm opacity-70">
+                      {totalArticleCount}
+                    </span>
                   </div>
                   {categories.map((category) => (
                     <div
@@ -458,7 +518,9 @@ const KnowledgeArticlePage = () => {
                           : "text-gray-600 hover:bg-gray-50"
                       }`}
                     >
-                   
+                      <span className="text-xl">
+                        {getCategoryIcon(category.categoryName)}
+                      </span>
                       <span className="flex-1 font-medium">
                         {category.categoryName}
                       </span>
@@ -561,13 +623,14 @@ const KnowledgeArticlePage = () => {
                   {articles.map((article) => (
                     <div
                       key={article.id}
+                      onClick={() => goToArticle(article.id)}
                       className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow"
                     >
                       <div className="flex flex-col sm:flex-row">
                         {/* Cover Image */}
                         <div
                           className="w-full sm:w-48 h-48 sm:h-auto cursor-pointer overflow-hidden group"
-                          onClick={() => goToArticle(article.id)}
+                        
                         >
                           {article.coverImage ? (
                             <img
@@ -692,6 +755,12 @@ const KnowledgeArticlePage = () => {
           </div>
         </div>
       </div>
+      {showArticlePage && (
+        <ArticleDetailPage
+          selectedArticle={selectedArticle}
+          onClose={() => setShowArticlePage(false)}
+        />
+      )}
     </div>
   );
 };

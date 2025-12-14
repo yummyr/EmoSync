@@ -8,9 +8,6 @@ const api = axios.create({
   },
 });
 
-// add inteceptor to avoid duplicate request
-const pendingRequests = new Map();
-
 api.interceptors.request.use(
   (config) => {
     //initilize headers
@@ -23,7 +20,7 @@ api.interceptors.request.use(
       config.headers["Authorization"] = `Bearer ${token}`;
     }
 
-    // avoid duplicate request（only for POST / PUT）
+ 
     if (
       config.method?.toLowerCase() === "post" ||
       config.method?.toLowerCase() === "put"
@@ -32,12 +29,6 @@ api.interceptors.request.use(
         config.data
       )}`;
 
-      // 如果是 GET 请求且有 data，将其作为请求体发送
-      if (config.method === "get" && config.data) {
-        config.headers["Content-Type"] = "application/json";
-        // 将 data 转换为 JSON 字符串
-        config.data = JSON.stringify(config.data);
-      }
       // if same request exists, cancel pre request
       if (pendingRequests.has(requestKey)) {
         const cancelToken = pendingRequests.get(requestKey);
@@ -58,7 +49,7 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   (response) => {
-    // clear post and put request
+
     if (
       response.config.method?.toLowerCase() === "post" ||
       response.config.method?.toLowerCase() === "put"
@@ -83,6 +74,7 @@ api.interceptors.response.use(
         window.location.href = "/auth/login";
       }
     }
+
     if (axios.isCancel(error)) {
     } else if (error.config) {
       const requestKey = `${error.config.method}-${
