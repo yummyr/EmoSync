@@ -1,4 +1,5 @@
 import axios from "axios";
+import { tokenManager, handleTokenExpiration } from "@/utils/tokenManager";
 
 const api = axios.create({
   baseURL: "http://localhost:8080/api", //  backend API base URL
@@ -63,16 +64,12 @@ api.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      // if token expired, clear local storage and nav to login
+      // Use tokenManager to handle token expiration
       console.error("Unauthorized access - token invalid or expired");
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      localStorage.removeItem("roleType");
 
-      // Only redirect if not already on login page to avoid redirect loops
-      if (!window.location.pathname.includes("/login")) {
-        window.location.href = "/auth/login";
-      }
+      // Cleanup token manager and trigger logout
+      tokenManager.cleanup();
+      handleTokenExpiration();
     }
 
     if (axios.isCancel(error)) {

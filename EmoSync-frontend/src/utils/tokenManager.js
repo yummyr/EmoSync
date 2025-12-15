@@ -1,6 +1,6 @@
 import api from "../api";
 const TOKEN_REFRESH_INTERVAL = 25 * 60 * 1000; // 25 minutes (if token expires in 30 min)
-const ACTIVITY_TIMEOUT = 60 * 60 * 1000; // 60 minutes of inactivity
+const ACTIVITY_TIMEOUT =24 * 60 * 60 * 1000; // 24 hours of inactivity
 
 class TokenManager {
   constructor() {
@@ -154,5 +154,17 @@ class TokenManager {
 // Export singleton instance
 export const tokenManager = new TokenManager();
 
+// Utility function for handling token expiration (used across the app)
+export const handleTokenExpiration = () => {
+  // Clear all authentication data
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  localStorage.removeItem("roleType");
+
+  // Only redirect if not already on login page to avoid redirect loops
+  if (!window.location.pathname.includes("/login")) {
+    window.location.href = "/auth/login";
+  }
+};
 
 export default tokenManager;

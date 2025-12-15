@@ -1,11 +1,13 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import { useEffect } from "react";
 import ProtectedRoute from "./routes/ProtectedRoute";
+import { tokenManager, handleTokenExpiration } from "./utils/tokenManager";
 
 import Home from "./pages/Home";
 import EmotionDiaryPage from "./pages/admin/EmotionDiaryPage";
 import ConsulationPage from "./pages/user/ConsulationPage";
 import UserEmotionDiaryPage from "./pages/user/EmotionDiaryPage";
-import Dashboard from "./pages/admin/Dashboard"; // 登录后才能看
+import Dashboard from "./pages/admin/Dashboard"; // Requires login to view
 import AiAnalysisPage from "./pages/admin/AiAnalysisPage";
 import ProfilePage from "./pages/auth/ProfilePage";
 import HomeLayout from "./layouts/HomeLayout";
@@ -14,7 +16,7 @@ import AdminLayout from "./layouts/AdminLayout";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 
-// 错误页面
+// Error pages
 import NotFound from "./pages/NotFound";
 import ConsultationManagementPage from "./pages/admin/ConsultationManagementPage";
 import CategoryManagementPage from "./pages/admin/CategoryManagementPage";
@@ -25,24 +27,35 @@ import FavoritesPage from "./pages/user/FavoritesPage";
 import KnowledgeArticlePage from "./pages/user/KnowledgeArticlePage";
 
 function App() {
+  // Initialize tokenManager on app mount
+  useEffect(() => {
+    // Initialize tokenManager with unified logout handler
+    tokenManager.init(handleTokenExpiration);
+
+    // Cleanup tokenManager on unmount
+    return () => {
+      tokenManager.cleanup();
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Routes>
-        {/* 前台路由 */}
+        {/* Public routes */}
         <Route path="/" element={<HomeLayout />}>
           <Route index element={<Home />} />
         </Route>
-        {/* 认证路由 */}
+        {/* Authentication routes */}
         <Route path="/auth" element={<AuthLayout />}>
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
         </Route>
 
-        {/* 兼容旧路由 */}
+        {/* Legacy routes for backward compatibility */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* 普通用户路由 */}
+        {/* User routes */}
         <Route
           path="/user"
           element={
@@ -59,7 +72,7 @@ function App() {
           <Route path="profile" element={<ProfilePage />} />
         </Route>
 
-        {/* 管理员路由 */}
+        {/* Admin routes */}
         <Route
           path="/back"
           element={
@@ -82,7 +95,7 @@ function App() {
           <Route path="profile" element={<ProfilePage />} />
         </Route>
 
-        {/* 404页面 */}
+        {/* 404 page */}
         <Route path="/404" element={<NotFound />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
