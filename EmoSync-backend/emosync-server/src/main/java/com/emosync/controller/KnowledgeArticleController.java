@@ -228,7 +228,7 @@ public class KnowledgeArticleController {
             @Parameter(description = "Page size") @RequestParam(defaultValue = "10") Long size,
             HttpServletRequest request) {
 
-        // 获取当前用户ID（可为空，用于判断收藏状态和权限）
+        // Get current user ID (can be null, used to determine favorite status and permissions)
         UserDetailsImpl currentUser = getCurrentUserInfo();
         Long currentUserId = currentUser != null ? currentUser.getId() : null;
 
@@ -246,7 +246,7 @@ public class KnowledgeArticleController {
         queryDTO.setCurrentPage(currentPage);
         queryDTO.setSize(size);
 
-        log.info("Get paginated knowledge article list: keyword={}, page={}, size={}, userId={}，categoryId={}", keyword, currentPage, size, currentUserId,categoryId);
+        log.info("Get paginated knowledge article list: keyword={}, page={}, size={}, userId={}，categoryId={},sortField = {}", keyword, currentPage, size, currentUserId,categoryId,sortField);
         PageResult<ArticleSimpleResponseDTO> response = knowledgeArticleService.getArticlePage(queryDTO, currentUserId);
         return Result.success(response);
     }

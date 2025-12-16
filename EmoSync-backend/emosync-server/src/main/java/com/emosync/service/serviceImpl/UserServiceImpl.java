@@ -45,20 +45,30 @@ public class UserServiceImpl implements UserService {
         log.info("User Service get loginDTO:{}",loginDTO);
 
         User user = userRepository.findByUsername(loginDTO.getUsername());
-        log.info("User service login get user:{}",user.toString());
+        log.info("User service login get user:{}", user);
+
+        // Check if user exists
+        if (user == null) {
+            log.warn("Login failed - user not found: {}", loginDTO.getUsername());
+            throw new BusinessException("Invalid username or password");
+        }
+
         // Check user status
         if (user.getStatus() == null || user.getStatus() == 0) {
+            log.warn("Login failed - account disabled: {}", loginDTO.getUsername());
             throw new BusinessException("Account is disabled");
         }
 
         // Verify password
         if (!passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
+            log.warn("Login failed - password mismatch: {}", loginDTO.getUsername());
             throw new BusinessException("Invalid username or password");
         }
 
         // Generate JWT token
         String token = jwtTokenUtils.generateToken(user.getId(), user.getUsername(), user.getUserType());
 
+        log.info("Login successful for user: {}, token generated", loginDTO.getUsername());
 
         // Use UserConvert to convert user information
         UserDetailResponseDTO userInfo = UserConvert.entityToDetailResponse(user);

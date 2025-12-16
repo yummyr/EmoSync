@@ -16,11 +16,11 @@ public class LocalDateTimeConfig {
     @Bean
     public Jackson2ObjectMapperBuilderCustomizer jsonCustomizer() {
         return builder -> {
-            // 序列化配置
+            // Serialization configuration
             builder.serializers(new LocalDateTimeSerializer(
                 DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)));
             
-            // 反序列化配置
+            // Deserialization configuration
             builder.deserializers(new LocalDateTimeDeserializer(
                 DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)));
         };

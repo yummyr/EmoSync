@@ -70,10 +70,6 @@ public class JwtTokenUtils {
      * @param secretKey Secret key string
      * @return SecretKey
      */
-    // private static SecretKey getSecretKey(String secretKey) {
-    //     byte[] decodedKey = java.util.Base64.getDecoder().decode(secretKey);
-    //     return Keys.hmacShaKeyFor(decodedKey);
-    // }
     private static SecretKey getSecretKey(String secretKey) {
         return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     }
@@ -92,7 +88,7 @@ public class JwtTokenUtils {
     public  String generateToken(Long userId, String username, Integer roleType) {
         try {
 
-            // 创建claims
+            // Create claims
             Map<String, Object> claims = new HashMap<>();
             claims.put("userId", userId);
             claims.put("username", username);
@@ -113,7 +109,7 @@ public class JwtTokenUtils {
                     .compact();
 
             log.debug("JWT token generated successfully, User ID: {}, Username: {}, Role: {}", userId, username, roleType);
-            log.info("生成token:{}",token);
+            log.info("Generated token: {}", token);
             return token;
         } catch (Exception e) {
             log.error("Failed to generate JWT token, User ID: {}, Username: {}, Role: {}", userId, username, roleType, e);
@@ -166,18 +162,7 @@ public class JwtTokenUtils {
         }
     }
 
-    public static void main(String[] args) {
-        JwtConfig config = new JwtConfig();
-        config.setSecret("MySuperLongAndSecureSecretKey12345678901234567890");
-        config.setExpiration(86400000);
-        config.setRefreshExpiration(604800000);
-        config.setTokenPrefix("Bearer ");
-        JwtTokenUtils jwtTokenUtils = new JwtTokenUtils(config);
-        String token = jwtTokenUtils.generateToken(5L, "ad1", 2);
-        System.out.println("token: " + token);
-        TokenValidationResult result = jwtTokenUtils.validateToken(token);
-        System.out.println("validate result: " + result);
-    }
+
 
     /**
      * Get user ID from token
@@ -263,13 +248,13 @@ public class JwtTokenUtils {
      * @return Token string, returns null if not found or format incorrect
      */
     public  String extractTokenFromRequest(HttpServletRequest request) {
-        // 1. 标准 Authorization: Bearer xxx
+        // 1. Standard Authorization: Bearer xxx
         String header = request.getHeader(jwtConfig.getHeader());
         if (StringUtils.hasText(header) && header.startsWith(jwtConfig.getTokenPrefix())) {
             return header.substring(jwtConfig.getTokenPrefix().length());
         }
 
-        // 2. 备用 token 头（兼容旧前端）
+        // 2. Fallback token header (for legacy frontend compatibility)
         String tokenHeader = request.getHeader("token");
         if (StringUtils.hasText(tokenHeader)) {
             return tokenHeader;

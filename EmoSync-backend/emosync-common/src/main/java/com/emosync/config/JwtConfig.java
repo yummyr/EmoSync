@@ -5,10 +5,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
- * JWT配置类
- * 
- * @author system
- * @date 2025-01-13
+ * JWT Configuration Class
+ *
+ * @author Yuan
+ * @date 2025-11-23
  */
 @Data
 @Component
@@ -16,27 +16,27 @@ import org.springframework.stereotype.Component;
 public class JwtConfig {
     
     /**
-     * JWT密钥
+     * JWT Secret Key
      */
     private String secret;
     
     /**
-     * Token过期时间（毫秒）
+     * Token expiration time (milliseconds)
      */
     private long expiration;
     
     /**
-     * 刷新Token过期时间（毫秒）
+     * Refresh Token expiration time (milliseconds)
      */
     private long refreshExpiration;
     
     /**
-     * Token头部名称
+     * Token header name
      */
     private String header = "Authorization";
     
     /**
-     * Token前缀
+     * Token prefix
      */
     private String tokenPrefix = "Bearer ";
 }

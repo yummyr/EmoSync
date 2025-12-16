@@ -23,7 +23,7 @@ import java.nio.file.Paths;
  * Focuses on basic file operations: save, delete, check, etc.
  * File type validation uniformly uses FileTypeEnum
  *
- * @author system
+ * @author Yuan
  */
 public class FileUtil {
     private final static Logger log = LoggerFactory.getLogger(FileUtil.class);

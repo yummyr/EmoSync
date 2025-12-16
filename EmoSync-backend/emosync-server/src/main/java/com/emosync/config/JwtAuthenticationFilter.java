@@ -26,21 +26,21 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * JWT认证过滤器
- * 
- * 核心职责：
- * 1. 从HTTP请求中提取JWT token
- * 2. 验证token有效性和完整性
- * 3. 设置Spring Security认证上下文
- * 
- * 设计原则：
- * - 继承OncePerRequestFilter确保每个请求只执行一次
- * - 与Spring Security深度集成
- * - 完善的异常处理和安全验证
- * - 统一从token获取用户信息，不依赖request属性
- * 
- * @author system
- * @date 2025-01-13
+ * JWT Authentication Filter
+ *
+ * Core Responsibilities:
+ * 1. Extract JWT token from HTTP request
+ * 2. Validate token validity and integrity
+ * 3. Set Spring Security authentication context
+ *
+ * Design Principles:
+ * - Extend OncePerRequestFilter to ensure single execution per request
+ * - Deep integration with Spring Security
+ * - Comprehensive exception handling and security validation
+ * - Unified user information retrieval from token, not dependent on request attributes
+ *
+ * @author Yuan
+ * @date 2025-11-23
  */
 @Slf4j
 @AllArgsConstructor
@@ -57,45 +57,45 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String requestUri = request.getRequestURI();
         String method = request.getMethod();
-        log.debug("JWT认证过滤器处理请求：{} {}", method, requestUri);
+        log.debug("JWT auth filter processing request: {} {}", method, requestUri);
 
         try {
-            // 1. 提取JWT token
+            // 1. Extract JWT token
             String token = jwtTokenUtils.extractTokenFromRequest(request);
 
             if (StringUtils.hasText(token)) {
-                log.debug("成功提取token，长度：{}", token.length());
+                log.debug("Successfully extracted token, length: {}", token.length());
 
-                // 检查是否为无效的placeholder token
+                // Check for invalid placeholder token
                 if ("temp-token".equals(token)) {
-                    // 静默处理前端placeholder token，不输出警告日志
-                    log.debug("检测到前端placeholder token，静默处理: {}", token);
+                    // Silently handle frontend placeholder token without warning logs
+                    log.debug("Detected frontend placeholder token, handling silently: {}", token);
                     clearSecurityContext();
                     filterChain.doFilter(request, response);
                     return;
                 }
 
                 if (token.length() < 10) {
-                    log.warn("检测到无效token，长度过短: {}", token);
+                    log.warn("Detected invalid token, length too short: {}", token);
                     clearSecurityContext();
                     filterChain.doFilter(request, response);
                     return;
                 }
 
-                // 2. 验证token并获取用户信息
+                // 2. Validate token and extract user information
                 JwtTokenUtils.TokenValidationResult validationResult = jwtTokenUtils.validateToken(token);
 
                 if (validationResult != null && validationResult.isValid()) {
-                    // 3. 检查token是否过期
+                    // 3. Check if token has expired
                     if (jwtTokenUtils.isTokenExpired(token)) {
-                        log.warn("JWT token已过期，用户ID：{}，用户名：{}", 
+                        log.warn("JWT token has expired, userId: {}, username: {}",
                             validationResult.getUserId(), validationResult.getUsername());
                         clearSecurityContext();
                         filterChain.doFilter(request, response);
                         return;
                     }
 
-                    // 4. 查询用户信息验证用户状态
+                    // 4. Query user information and verify user status
                     User user = userRepository.findById(validationResult.getUserId())
                             .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -104,7 +104,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                         // Build ROLE
                         String roleCode = "ROLE_" + validationResult.getRoleType();
-                        log.info("创建角色：{}",roleCode);
+                        log.info("Creating role: {}", roleCode);
                         List<SimpleGrantedAuthority> authorities = Collections.singletonList(
                                 new SimpleGrantedAuthority(roleCode)
                         );
@@ -139,21 +139,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         } catch (JWTVerificationException e) {
-            log.warn("JWT验证失败：{}，清理认证上下文", e.getMessage());
+            log.warn("JWT verification failed: {}, clearing auth context", e.getMessage());
             clearSecurityContext();
         } catch (Exception e) {
-            log.error("JWT认证过程中发生异常，请求：{} {}，异常：{}，清理认证上下文", 
+            log.error("Exception occurred during JWT authentication, request: {} {}, error: {}, clearing auth context",
                 method, requestUri, e.getMessage(), e);
             clearSecurityContext();
         }
 
-        // 继续过滤器链
+        // Continue filter chain
         filterChain.doFilter(request, response);
     }
 
     /**
-     * 清理Spring Security认证上下文
-     * 确保在认证失败时不会保留任何认证信息
+     * Clear Spring Security authentication context
+     * Ensures no authentication information is retained on authentication failure
      */
     private void clearSecurityContext() {
         SecurityContextHolder.clearContext();
