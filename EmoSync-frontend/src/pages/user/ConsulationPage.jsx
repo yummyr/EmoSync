@@ -33,6 +33,19 @@ function getAuthToken() {
 }
 
 export default function ConsultationPage() {
+  const INIT_SESSION_EMOTION ={
+          primaryEmotion: "Neutral",
+          emotionScore: 50,
+          isNegative: false,
+          riskLevel: 0,
+          keywords: [],
+          suggestion: "Keep observing your feelings gently.",
+          icon: "😐",
+          label: "Calm",
+          riskDescription: "Stable emotional state",
+          improvementSuggestions: [],
+          timestamp: Date.now(),
+        };
   const INIT_CONSULTATION_SESSION_QUERY = {
     page: 1,
     size: 10,
@@ -134,7 +147,7 @@ export default function ConsultationPage() {
   };
   // 刷新会话列表（重置到第一页）
   const refreshSessionList = async () => {
-    setSessionQuery((prev) => ({ ...prev, currentPage: 1 }));
+    setConsultationSessionQuery((prev) => ({ ...prev, currentPage: 1 }));
     const { records, total, pages } = await loadSessionList(true);
     console.log("刷新会话列表完成:", {
       recordsCount: records.length,
@@ -147,7 +160,7 @@ export default function ConsultationPage() {
   // 加载更多会话
   const loadMoreSessions = async () => {
     if (hasMoreSessions && !loadingMore) {
-      setSessionQuery((prev) => ({
+      setConsultationSessionQuery((prev) => ({
         ...prev,
         currentPage: prev.currentPage + 1,
       }));
@@ -196,13 +209,21 @@ const loadSessionList = async (reset = true) => {
 
     console.log('发送查询参数:', params);
     const response = await api.get('/psychological-chat/sessions', {
-      params: params  
+      params: {
+        ...params
+      }
     });
 
-    const { code, data: result, message } = response.data;
+    console.log('获取会话列表响应:', response);
+
+    const { code, data } = response.data;
+
+    
 
     if (code === 200) {
-      const { records = [], total = 0 } = result;
+      // Extract data from different possible response structures
+      const responseData = result || response.data.data || response.data;
+      const { records = [], total = 0, pages = 1 } = responseData;
 
       console.log('获取会话列表成功:', {
         recordsCount: records.length,
@@ -224,9 +245,9 @@ const loadSessionList = async (reset = true) => {
       setSessionTotal(total);
       setHasMoreSessions(params.currentPage < pages);
 
-    } else {
-      throw new Error(message || '获取会话列表失败');
-    }
+      return { records, data};
+
+    } 
   } catch (error) {
     console.error('加载会话列表失败:', error);
 
@@ -386,7 +407,17 @@ const loadSessionList = async (reset = true) => {
     // 已有正式会话，直接流式对话
     await startAIResponse(currentSession.sessionId, text);
   };
-
+// const getSessionEmotion=async(sessionId, callbacks = {}) {
+//   const res = await api.get(`/psychological-chat/session/${sessionId}/emotion`, null, callbacks);
+//   console.log("Loaded session emotion detail:", res);
+//   const sessionData = res.data.data;
+//   console.log("Session data:", sessionData);
+//   if (sessionData) {
+//     setCurrentSessionEmotion({
+//       ...sessionData,
+//     });
+//   }
+// }
   const startAIResponse = async (sessionId, userText) => {
     const token = getAuthToken();
     if (!sessionId) {
@@ -474,11 +505,14 @@ const loadSessionList = async (reset = true) => {
     };
 
     try {
+      console.log("Attempting SSE connection to: /api/psychological-chat/stream");
+      console.log("Request payload:", { sessionId, userMessage: userText });
+
       await fetchEventSource("/api/psychological-chat/stream", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Token: token,
+          "Authorization": `Bearer ${token}`,
           Accept: "text/event-stream",
         },
         body: JSON.stringify({
@@ -488,10 +522,15 @@ const loadSessionList = async (reset = true) => {
         signal: abort.signal,
 
         onopen: async (response) => {
+          console.log("SSE connection opened:", response.status, response.statusText);
+
           if (!response.ok) {
             throw new Error(`HTTP ${response.status} ${response.statusText}`);
           }
+
           const ct = response.headers.get("content-type") || "";
+          console.log("SSE content-type:", ct);
+
           if (!ct.includes("text/event-stream")) {
             throw new Error("Response is not SSE: " + ct);
           }
@@ -628,19 +667,7 @@ const loadSessionList = async (reset = true) => {
     } catch (err) {
       // 初次没有结果直接给默认值
       if (!emotion) {
-        setEmotion({
-          primaryEmotion: "Neutral",
-          emotionScore: 50,
-          isNegative: false,
-          riskLevel: 0,
-          keywords: [],
-          suggestion: "Keep observing your feelings gently.",
-          icon: "😐",
-          label: "Calm",
-          riskDescription: "Stable emotional state",
-          improvementSuggestions: [],
-          timestamp: Date.now(),
-        });
+        setEmotion(INIT_SESSION_EMOTION);
       }
     }
   };
@@ -742,7 +769,7 @@ const loadSessionList = async (reset = true) => {
             </div>
 
             {/* Emotion Garden （D） */}
-            <EmotionGarden emotion={emotion} />
+            <EmotionGarden sessionId={currentSession?.sessionId} initialEmotionData={emotion} />
 
             {/* Session history */}
             <div className="flex min-h-[260px] flex-col rounded-2xl bg-white/95 p-4 shadow-lg">
@@ -760,7 +787,7 @@ const loadSessionList = async (reset = true) => {
                     New
                   </button>
                   <button
-                    className="rounded-md px-2 py-1 text-[11px] font-medium text-slate-500 hover:bg-slate-50"
+                    className="rounded-md items-center px-2 py-1 text-2xl  font-medium text-slate-500 hover:bg-slate-50"
                     onClick={() => loadSessionList(true)}
                     title="Refresh"
                   >
@@ -955,7 +982,7 @@ const loadSessionList = async (reset = true) => {
                     message={{
                       senderType: 2,
                       content:
-                        "Hi, I'm EmoSync AI Assistant - Sunny, your AI mental health companion. I'm here to listen and support you. How are you feeling today? 💛",
+                        "Hi, my name is Sunny, your AI mental health companion. I'm here to listen and support you. How are you feeling today? 💛",
                       createdAt: new Date().toISOString(),
                       isComplete: true,
                       isTyping: false,

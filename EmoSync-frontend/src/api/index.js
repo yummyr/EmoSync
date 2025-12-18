@@ -11,34 +11,14 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    //initilize headers
+    // Initialize headers
     if (!config.headers) {
       config.headers = {};
     }
-    // add Token to request headers
+    // Add Token to request headers
     const token = localStorage.getItem("token");
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
-    }
-
- 
-    if (
-      config.method?.toLowerCase() === "post" ||
-      config.method?.toLowerCase() === "put"
-    ) {
-      const requestKey = `${config.method}-${config.url}-${JSON.stringify(
-        config.data
-      )}`;
-
-      // if same request exists, cancel pre request
-      if (pendingRequests.has(requestKey)) {
-        const cancelToken = pendingRequests.get(requestKey);
-        cancelToken.cancel("Duplicate request cancelled");
-      }
-
-      const source = axios.CancelToken.source();
-      config.cancelToken = source.token;
-      pendingRequests.set(requestKey, source);
     }
 
     return config;
@@ -50,16 +30,6 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   (response) => {
-
-    if (
-      response.config.method?.toLowerCase() === "post" ||
-      response.config.method?.toLowerCase() === "put"
-    ) {
-      const requestKey = `${response.config.method}-${
-        response.config.url
-      }-${JSON.stringify(response.config.data)}`;
-      pendingRequests.delete(requestKey);
-    }
     return response;
   },
   (error) => {
@@ -72,13 +42,6 @@ api.interceptors.response.use(
       handleTokenExpiration();
     }
 
-    if (axios.isCancel(error)) {
-    } else if (error.config) {
-      const requestKey = `${error.config.method}-${
-        error.config.url
-      }-${JSON.stringify(error.config.data)}`;
-      pendingRequests.delete(requestKey);
-    }
     return Promise.reject(error);
   }
 );

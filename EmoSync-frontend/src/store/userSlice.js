@@ -84,13 +84,7 @@ export const loginUser = createAsyncThunk(
       console.log("Processed login data:", { userData, userToken, roleType, roleCode });
 
       if (!userData && !userToken) {
-        // If no user data but we have some response, try to work with it
-        console.warn("Login API returned minimal data, proceeding with basic info");
-        return {
-          user: { username: loginForm.username }, // Minimal user data
-          token: userToken || "temp-token", // Use whatever token we got
-          roleType: roleType || roleCode ? (roleCode === 'admin' ? 2 : 1) : 1
-        };
+        throw new Error("Invalid login response: missing user data and token");
       }
 
       if (!userData) {

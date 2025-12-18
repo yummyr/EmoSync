@@ -56,6 +56,22 @@ export default {
          'gradient-flow': 'gradientFlow 3s ease infinite',
         'icon-bounce': 'iconBounce 2s ease-in-out infinite',
         'shimmer': 'shimmer 2s infinite',
+        // Emotion Garden animations
+        'gentle-glow': 'gentleGlow 6s ease-in-out infinite alternate',
+        'bloom': 'bloom 2s ease-out infinite alternate',
+        'grow': 'grow 2.5s ease-out infinite alternate',
+        'bud': 'bud 3s ease-out infinite alternate',
+        'wilt': 'wilt 4s ease-out infinite alternate',
+        'sway': 'sway 3s ease-in-out infinite',
+        'heartbeat': 'heartbeat 2s ease-in-out infinite',
+        'bubble-float': 'bubbleFloat 0.6s ease-out forwards',
+        'slide-in': 'slideIn 0.5s ease-out forwards',
+        'pulse-slow-custom': 'pulseCustom 2s ease-in-out infinite',
+        // Petal animations
+        'petal-bloom': 'petalBloom 2s ease-in-out infinite alternate',
+        'petal-grow': 'petalGrow 2.5s ease-in-out infinite alternate',
+        'petal-bud': 'petalBud 3s ease-in-out infinite alternate',
+        'petal-wilt': 'petalWilt 4s ease-in-out infinite alternate',
       },
       keyframes: {
         gradientFlow: {
@@ -112,6 +128,58 @@ export default {
             opacity: 0.8,
             boxShadow: '0 0 20px 10px rgba(59, 130, 246, 0)',
           },
+        },
+        // Emotion Garden keyframes
+        gentleGlow: {
+          '0%': { opacity: '0.3', transform: 'scale(1)' },
+          '100%': { opacity: '0.6', transform: 'scale(1.05)' },
+        },
+        petalBloom: {
+          '0%': { transform: 'rotate(var(--base-rotation, 0deg)) scale(1)' },
+          '25%': { transform: 'rotate(calc(var(--base-rotation, 0deg) + 3deg)) scale(1.1)' },
+          '50%': { transform: 'rotate(calc(var(--base-rotation, 0deg) + 6deg)) scale(1.15)' },
+          '75%': { transform: 'rotate(calc(var(--base-rotation, 0deg) + 3deg)) scale(1.1)' },
+          '100%': { transform: 'rotate(calc(var(--base-rotation, 0deg) + 8deg)) scale(1.15)' },
+        },
+        petalGrow: {
+          '0%': { transform: 'rotate(var(--base-rotation, 0deg)) scale(0.8)' },
+          '25%': { transform: 'rotate(calc(var(--base-rotation, 0deg) + 2deg)) scale(0.95)' },
+          '50%': { transform: 'rotate(calc(var(--base-rotation, 0deg) + 4deg)) scale(1.05)' },
+          '75%': { transform: 'rotate(calc(var(--base-rotation, 0deg) + 3deg)) scale(1.1)' },
+          '100%': { transform: 'rotate(calc(var(--base-rotation, 0deg) + 5deg)) scale(1.1)' },
+        },
+        petalBud: {
+          '0%': { transform: 'rotate(var(--base-rotation, 0deg)) scale(0.7)', opacity: '0.6' },
+          '33%': { transform: 'rotate(calc(var(--base-rotation, 0deg) + 1deg)) scale(0.85)', opacity: '0.7' },
+          '67%': { transform: 'rotate(calc(var(--base-rotation, 0deg) + 2deg)) scale(0.95)', opacity: '0.85' },
+          '100%': { transform: 'rotate(calc(var(--base-rotation, 0deg) + 3deg)) scale(1)', opacity: '1' },
+        },
+        petalWilt: {
+          '0%': { transform: 'rotate(var(--base-rotation, 0deg)) scale(1)', opacity: '1' },
+          '25%': { transform: 'rotate(calc(var(--base-rotation, 0deg) - 2deg)) scale(0.9)', opacity: '0.9' },
+          '50%': { transform: 'rotate(calc(var(--base-rotation, 0deg) - 4deg)) scale(0.8)', opacity: '0.8' },
+          '75%': { transform: 'rotate(calc(var(--base-rotation, 0deg) - 3deg)) scale(0.75)', opacity: '0.7' },
+          '100%': { transform: 'rotate(calc(var(--base-rotation, 0deg) - 2deg)) scale(0.7)', opacity: '0.6' },
+        },
+        sway: {
+          '0%, 100%': { transform: 'rotate(-3deg)' },
+          '50%': { transform: 'rotate(3deg)' },
+        },
+        heartbeat: {
+          '0%, 100%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(1.1)' },
+        },
+        bubbleFloat: {
+          '0%': { opacity: '0', transform: 'translateY(10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        slideIn: {
+          '0%': { opacity: '0', transform: 'translateX(-10px)' },
+          '100%': { opacity: '1', transform: 'translateX(0)' },
+        },
+        pulseCustom: {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.5' },
         }
       },
       backgroundImage: {
