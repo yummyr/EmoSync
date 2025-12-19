@@ -1,5 +1,20 @@
+spring:
+  ai:
+    openai:
+      # DeepSeek API Key
+      api-key: sk-dlecrggdbznuaoefbgdyvzqqyyygjveoeaznorljmhgjunlg
+      # DeepSeek Base URL
+      base-url: https://api.siliconflow.cn
+      chat:
+        options:
+          model: deepseek-ai/DeepSeek-V3
+          temperature: 0.7
+          max-tokens: 2000
+          stream: true
+
 EmoSync:
   cloudinary:
     cloud-name: dqkoora74
     api-key: 873477743716381
     api-secret: _CHOBL4cpC1zQeBP4gACWadpAXs
+

@@ -15,8 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.web.cors.CorsConfigurationSource;
+
 
 /**
  * Spring Security 企业级配置类
@@ -34,7 +33,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
  * - 符合Spring最佳实践：避免复杂的Bean依赖关系
  *
  * @author system
- * @date 2025-01-27
+ * @date 2025-11-27
  */
 @Configuration
 @EnableWebSecurity
@@ -166,6 +165,10 @@ public class SecurityConfig {
 
                 // 配置请求授权规则
                 .authorizeHttpRequests(auth -> auth
+                        // 必须放行SSE 端点
+                        .requestMatchers("/api/psychological-chat/stream").permitAll()
+                        // 会话开始接口也需要放行
+                        .requestMatchers("/api/psychological-chat/session/start").permitAll()
                         // 公开路径，允许匿名访问
                         .requestMatchers(PUBLIC_PATHS).permitAll()
                         // 其他所有请求都需要认证

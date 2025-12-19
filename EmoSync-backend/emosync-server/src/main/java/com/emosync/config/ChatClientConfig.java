@@ -11,12 +11,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ChatClientConfig {
     public static final Integer MAX_MEMORY_MESSAGE_SIZE =30;
-    public static final String DEFAULT_SYSTEM="你是一个专业的心理疏导师，温和耐心，善于倾听，能够提供专业的心理支持和建议。";
+    public static final String DEFAULT_SYSTEM="Your name is Sunny. You are a professional psychological counselor, gentle and patient, good at listening, able to provide professional psychological support and advice.";
 
     /**
-     * 配置ChatMemory - 内存存储的会话记忆
+     * Configure ChatMemory - In-memory conversation memory
      *
-     * @return ChatMemory 内存存储的会话记忆实例
+     * @return ChatMemory In-memory conversation memory instance
      */
     @Bean
     public ChatMemory chatMemory() {
@@ -26,7 +26,7 @@ public class ChatClientConfig {
 
 
     @Bean("open-ai")
-    //硅基流动
+    //SiliconFlow
     public ChatClient openAiChatClient(OpenAiChatModel openAiChatModel){
 
         return ChatClient.builder(openAiChatModel)

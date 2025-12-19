@@ -7,41 +7,38 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * Web配置类 - 企业级统一配置
- * 
- * 🎯 统一职责：
- * 1. API前缀配置
- * 2. 静态资源映射配置  
- * 3. API文档资源配置
- * 
- * 🚀 架构优势：
- * - 统一管理所有Web相关配置
- * - 避免多个配置类冲突
- * - 职责清晰，易于维护
- * - 符合单一配置原则
- * 
- * @author system
- * @date 2025-01-27
+ * Web Configuration Class - Enterprise Unified Configuration
+ *
+ * 🎯 Unified Responsibilities:
+ * 1. API prefix configuration
+ * 2. Static resource mapping configuration
+ * 3. API documentation resource configuration
+ *
+ * 🚀 Architectural Advantages:
+ * - Unified management of all web-related configurations
+ * - Avoid conflicts between multiple configuration classes
+ * - Clear responsibilities, easy to maintain
+ * - Follows single configuration principle
  */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
     /**
-     * 配置API路径前缀
-     * 
-     * 为所有带有@RestController注解的控制器类自动添加"/api"前缀
-     * 这样可以将API接口与其他Web资源（如静态资源、文档）区分开
-     * 
-     *  工作原理：
+     * Configure API path prefix
+     *
+     * Automatically add "/api" prefix to all controller classes with @RestController annotation
+     * This distinguishes API interfaces from other web resources (such as static resources, documentation)
+     *
+     * Working Principle:
      * - UserController: /user/* → /api/user/*
-     * - FileController: /file/* → /api/file/*  
+     * - FileController: /file/* → /api/file/*
      * - EmailController: /email/* → /api/email/*
-     * 
-     * 排除规则：
-     * - Swagger/Knife4j相关接口不添加前缀
-     * - 通过包名判断排除springfox、swagger、doc相关包
-     * 
-     * @param configurer 路径匹配配置器
+     *
+     * Exclusion Rules:
+     * - Swagger/Knife4j related interfaces do not add prefix
+     * - Exclude springfox, swagger, doc related packages through package name judgment
+     *
+     * @param configurer Path matcher configurator
      */
     @Override
     public void configurePathMatch(PathMatchConfigurer configurer) {
@@ -54,37 +51,37 @@ public class WebConfig implements WebMvcConfigurer {
     }
 
     /**
-     * 统一配置静态资源映射
-     * 
-     * 🎯 配置目标：
-     * 1. 静态资源访问路径
-     * 2. 文件上传目录访问
-     * 3. API文档相关资源
-     * 4. 避免与API路径冲突
-     * 
-     * 📁 资源映射规则：
-     * - /static/** → classpath:/static/ (项目静态资源)
-     * - /files/** → file:./files/ (文件上传目录)
-     * - /doc.html → Knife4j文档首页
-     * - /webjars/** → Maven webjars资源
-     * - /swagger-ui/** → Swagger UI资源
-     * - /v3/api-docs/** → OpenAPI文档
-     * 
-     * @param registry 资源处理器注册表
+     * Configure static resource mapping uniformly
+     *
+     * 🎯 Configuration Goals:
+     * 1. Static resource access paths
+     * 2. File upload directory access
+     * 3. API documentation related resources
+     * 4. Avoid conflicts with API paths
+     *
+     * 📁 Resource Mapping Rules:
+     * - /static/** → classpath:/static/ (Project static resources)
+     * - /files/** → file:./files/ (File upload directory)
+     * - /doc.html → Knife4j documentation homepage
+     * - /webjars/** → Maven webjars resources
+     * - /swagger-ui/** → Swagger UI resources
+     * - /v3/api-docs/** → OpenAPI documentation
+     *
+     * @param registry Resource handler registry
      */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // 1. 静态资源配置 - 项目自定义静态文件
+        // 1. Static resource configuration - project custom static files
         registry.addResourceHandler("/static/**")
                 .addResourceLocations("classpath:/static/")
-                .setCachePeriod(3600); // 缓存1小时
+                .setCachePeriod(3600); // Cache for 1 hour
         
-        // 2. 文件上传目录配置 - 用户上传文件访问
+        // 2. File upload directory configuration - user uploaded file access
         registry.addResourceHandler("/files/**")
                 .addResourceLocations("file:./files/")
-                .setCachePeriod(86400); // 缓存24小时
+                .setCachePeriod(86400); // Cache for 24 hours
         
-        // 2. API文档资源配置 - Knife4j/Swagger相关
+        // 3. API documentation resource configuration - Knife4j/Swagger related
         registry.addResourceHandler("doc.html")
                 .addResourceLocations("classpath:/META-INF/resources/");
                 

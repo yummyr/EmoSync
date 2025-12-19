@@ -28,6 +28,7 @@ import reactor.core.publisher.Flux;
 import com.emosync.AiService.StructOutPut;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +53,9 @@ public class PsychologicalChatController {
     private final ConsultationMessageService consultationMessageService;
     private final ObjectMapper objectMapper;
 
-    /** Get current authenticated UserDetailsImpl */
+    /**
+     * Get current authenticated UserDetailsImpl
+     */
     private UserDetailsImpl getCurrentUserInfo() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
@@ -61,15 +64,19 @@ public class PsychologicalChatController {
         }
         return (UserDetailsImpl) auth.getPrincipal();
     }
+
     /**
      * Get current user ID
      */
     private Long getCurrentUserId() {
         UserDetailsImpl userDetails = getCurrentUserInfo();
-        log.info("userDetails.getId():{}",userDetails.getId());
+        log.info("userDetails.getId():{}", userDetails.getId());
         return userDetails != null ? userDetails.getId() : null;
     }
-    /** Check if current user has ROLE_ADMIN */
+
+    /**
+     * Check if current user has ROLE_ADMIN
+     */
     private boolean isAdmin() {
         UserDetailsImpl userDetails = getCurrentUserInfo();
         return userDetails != null && userDetails.isAdmin();
@@ -85,6 +92,7 @@ public class PsychologicalChatController {
     //         return "{\"code\":500,\"message\":\"Data formatting failed\"}";
     //     }
     // }
+
     /**
      * Start a new psychological support session
      */
@@ -308,6 +316,7 @@ public class PsychologicalChatController {
             return Result.error("Failed to query sessions: " + e.getMessage());
         }
     }
+
     /**
      * Get session details
      */
@@ -510,7 +519,8 @@ public class PsychologicalChatController {
                     (String) emotionMap.getOrDefault("riskDescription", "Stable emotional state"),
                     (List<String>) emotionMap.getOrDefault("improvementSuggestions",
                             List.of("Maintain current state")),
-                    ((Number) emotionMap.getOrDefault("timestamp", System.currentTimeMillis())).longValue()
+                    ((String) emotionMap.getOrDefault("timestamp", Instant.now().toString()
+                    ))
             );
         } catch (Exception e) {
             log.warn("Failed to parse emotion analysis JSON, using default", e);
@@ -529,7 +539,8 @@ public class PsychologicalChatController {
 
             @Parameter(description = "User message")
             String userMessage
-    ) {}
+    ) {
+    }
 
     /**
      * Update session title request DTO
@@ -537,7 +548,8 @@ public class PsychologicalChatController {
     public record UpdateSessionTitleRequest(
             @Parameter(description = "New session title")
             String sessionTitle
-    ) {}
+    ) {
+    }
 
     /**
      * Convert object to SSE data format (JSON string)

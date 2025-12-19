@@ -40,4 +40,6 @@ public class ConsultationMessage extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "session_id")
     private ConsultationSession session;
+
+
 }

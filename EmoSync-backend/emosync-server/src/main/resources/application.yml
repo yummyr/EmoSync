@@ -5,6 +5,8 @@ server:
     context-path: /
 
 spring:
+  profiles:
+    active: dev
   # 数据源配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -36,19 +38,27 @@ spring:
   main:
     allow-bean-definition-overriding: true
   ai:
+    chat:
+      memory:
+        repository:
+          jdbc:
+            initialize-schema: always
+            platform: mariadb
+      options:
+        tool-calling:
+          enabled: true
     openai:
       # OpenAI API Key (或 DeepSeek API Key)
-      api-key: ${OPENAI_API_KEY:your-api-key-here}
-
+      api-key: ${OPENAI_API_KEY}
       # 基础 URL (OpenAI 或 DeepSeek)
-      base-url: ${OPENAI_BASE_URL:https://api.openai.com}
+      base-url: ${OPENAI_BASE_URL}
       # 如果用 DeepSeek: https://api.deepseek.com
 
       chat:
         enabled: true
         options:
           # 模型名称
-          model: ${OPENAI_MODEL:gpt-3.5-turbo}
+          model: ${OPENAI_MODEL}
           # 如果用 DeepSeek: deepseek-chat
 
           # 温度
@@ -59,6 +69,9 @@ spring:
 
           # 启用流式
           stream: true
+          tool-calling:
+            enabled: true
+        completions-path: /v1/chat/completions
   # Web配置
   mvc:
     static-path-pattern: /**  # 允许根路径访问静态资源
@@ -90,14 +103,20 @@ springdoc:
     enabled: true
   enable-spring-security: false
   paths-to-match: /**
-  packages-to-scan: org.example.springboot
+  packages-to-scan: com.emosync
 
 
 # Knife4j配置
 knife4j:
   enable: true
   setting:
-    language: zh_cn
+    language: en  # 简洁的设置
+    enable-version: false  # 可选：隐藏版本号
+    enable-swagger-models: true
+  documents:
+    - group: "API Documentation"
+      name: "Mental Health Chatbot"
+      locations: classpath:*
   basic:
     enable: true
     username: admin
@@ -126,4 +145,4 @@ EmoSync:
   cloud-name: ${EmoSync.cloudinary.cloud-name}
   api-key: ${EmoSync.cloudinary.api-key}
   api-secret: ${EmoSync.cloudinary.api-secret}
-  secure: ${EmoSync.cloudinary.secure}compact
+  secure: true

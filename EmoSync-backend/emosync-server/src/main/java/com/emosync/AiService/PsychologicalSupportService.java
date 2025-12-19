@@ -18,9 +18,11 @@ import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -33,19 +35,32 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class PsychologicalSupportService {
 
-    /** Spring AI OpenAI Chat Model (直接注入 OpenAiChatModel) */
+    @Value("${spring.ai.openai.chat.options.model}")
+    private String model;
+
+    /**
+     * Spring AI OpenAI Chat Model (Inject OpenAiChatModel directly)
+     */
     private final OpenAiChatModel openAiChatModel;
 
-    /** Conversation memory for Spring AI */
+    /**
+     * Conversation memory for Spring AI
+     */
     private final ChatMemory chatMemory;
 
-    /** DB service for consultation sessions */
+    /**
+     * DB service for consultation sessions
+     */
     private final ConsultationSessionService consultationSessionService;
 
-    /** DB service for consultation messages */
+    /**
+     * DB service for consultation messages
+     */
     private final ConsultationMessageService consultationMessageService;
 
-    /** Jackson mapper for JSON construction */
+    /**
+     * Jackson mapper for JSON construction
+     */
     private final ObjectMapper objectMapper;
 
     /**
@@ -56,18 +71,18 @@ public class PsychologicalSupportService {
         log.info("Starting new psychological support session, userId={}", userId);
 
         try {
-            // 1. Create session record in DB
+            // 1. Create session record in database
             ConsultationSession dbSession =
                     consultationSessionService.createSession(userId, createDTO);
 
-            // 2. Save initial user message to DB
+            // 2. Save initial user message to database
             consultationMessageService.saveUserMessage(
                     dbSession.getId(),
                     createDTO.getInitialMessage(),
                     null
             );
 
-            // 3. Build session & conversation IDs
+            // 3. Build session and conversation IDs
             String sessionId = "session_" + dbSession.getId();
             String conversationId = generateConversationId(sessionId);
 
@@ -107,7 +122,7 @@ public class PsychologicalSupportService {
     }
 
     /**
-     * ✅ Streaming psychological support chat - 使用 OpenAiChatModel
+     * ✅ Streaming psychological support chat - using OpenAiChatModel
      */
     public Flux<String> streamPsychologicalChat(String sessionId, String userMessage) {
         log.info("Starting streaming psychological chat, sessionId={}, message={}",
@@ -115,7 +130,7 @@ public class PsychologicalSupportService {
 
         return Flux.create(sink -> {
             try {
-                // 1. 验证会话
+                // 1. Validate session
                 Long dbSessionId = extractSessionId(sessionId);
                 if (dbSessionId == null) {
                     sink.error(new RuntimeException("Invalid sessionId format"));
@@ -129,59 +144,63 @@ public class PsychologicalSupportService {
                     return;
                 }
 
-                // 2. 生成 conversationId
+                // 2. Generate conversationId
                 String conversationId = generateConversationId(sessionId);
 
-                // 3. 保存用户消息（避免重复）
+                // 3. Save user message (avoid duplicates)
                 saveUserMessageIfNeeded(dbSessionId, userMessage);
 
-                // 4. 异步情感分析
+                // 4. Asynchronous emotion analysis
                 CompletableFuture.runAsync(() ->
                         runAsyncEmotionAnalysis(dbSessionId, userMessage)
                 );
 
-                // 5. ✅ 从 ChatMemory 获取历史消息
+                // 5. ✅ Get historical messages from ChatMemory
                 List<Message> historyMessages = chatMemory.get(conversationId, 10);
 
-                // 6. ✅ 构建完整的消息列表
+                // 6. ✅ Build complete message list
                 List<Message> allMessages = new ArrayList<>();
 
-                // 添加系统提示
+                // Add system prompt
                 allMessages.add(new SystemMessage(
                         PromptManage.PSYCHOLOGICAL_SUPPORT_SYSTEM_PROMPT
                 ));
 
-                // 添加历史消息
+                // Add historical messages
                 if (historyMessages != null && !historyMessages.isEmpty()) {
                     allMessages.addAll(historyMessages);
                 }
 
-                // 添加当前用户消息
+                // Add current user message
                 allMessages.add(new UserMessage(userMessage));
 
-                // 7. 保存用户消息到 ChatMemory
+                // 7. Save user message to ChatMemory
                 chatMemory.add(conversationId, List.of(new UserMessage(userMessage)));
 
-                // 8. ✅ 创建 Prompt 对象
+                // 8. ✅ Create Prompt object
                 Prompt prompt = new Prompt(allMessages,
                         OpenAiChatOptions.builder()
-                                .withModel("gpt-3.5-turbo")  // 或你配置的模型
+                                .withModel(model)  // or your configured model
                                 .withTemperature(0.7)
+                                .withMaxTokens(2000)
                                 .build()
                 );
 
-                // 9. ✅ 使用 OpenAiChatModel 进行流式调用
+                // 9. ✅ Use OpenAiChatModel for streaming call
                 StringBuilder fullResponse = new StringBuilder();
 
                 openAiChatModel.stream(prompt)
                         .flatMap(chatResponse -> {
-                            // 从 ChatResponse 中提取内容
+                            // Extract content from ChatResponse
                             if (chatResponse.getResults() != null &&
-                                    !chatResponse.getResults().isEmpty()) {
+                                    chatResponse.getResult().getOutput() != null) {
                                 String content = chatResponse.getResult()
                                         .getOutput()
                                         .getContent();
-                                return Flux.just(content);
+                                if (content != null) {
+                                    return Flux.just(content);
+                                }
+
                             }
                             return Flux.empty();
                         })
@@ -196,7 +215,7 @@ public class PsychologicalSupportService {
                         .doOnComplete(() -> {
                             String fullReply = fullResponse.toString();
 
-                            // 异步保存到数据库
+                            // Asynchronously save to database
                             CompletableFuture.runAsync(() -> {
                                 try {
                                     consultationMessageService.saveAiMessage(
@@ -209,7 +228,7 @@ public class PsychologicalSupportService {
                                 }
                             });
 
-                            // 同步添加到 ChatMemory
+                            // Synchronously add to ChatMemory
                             try {
                                 chatMemory.add(
                                         conversationId,
@@ -336,7 +355,8 @@ public class PsychologicalSupportService {
                 "Calm",
                 "No significant psychological risk detected at the moment.",
                 List.of("Maintain regular sleep schedule", "Do some light exercise", "Talk to friends"),
-                System.currentTimeMillis()
+                Instant.now().toString()
+
         );
     }
 
@@ -357,10 +377,12 @@ public class PsychologicalSupportService {
 
             ChatResponse response = openAiChatModel.call(prompt);
             String resultJson = response.getResult().getOutput().getContent();
+            String cleanedJson = cleanJsonString(resultJson);
+            log.debug("Cleaned emotion JSON: {}", cleanedJson);
 
-            // 解析 JSON 响应为 EmotionAnalysisResult
+            // Parse JSON response to EmotionAnalysisResult
             StructOutPut.EmotionAnalysisResult result =
-                    objectMapper.readValue(resultJson, StructOutPut.EmotionAnalysisResult.class);
+                    objectMapper.readValue(cleanedJson, StructOutPut.EmotionAnalysisResult.class);
 
             log.info("Emotion analysis done: emotion={}, riskLevel={}",
                     result.primaryEmotion(), result.riskLevel());
@@ -422,4 +444,17 @@ public class PsychologicalSupportService {
             log.error("Async emotion analysis failed", e);
         }
     }
+
+    // Clean markdown code blocks, backticks, etc., keep pure JSON
+    private String cleanJsonString(String text) {
+        if (text == null) return "";
+
+        return text
+                .replace("```json", "")
+                .replace("```", "")
+                .replace("`", "")
+                .trim();
+    }
+
+
 }

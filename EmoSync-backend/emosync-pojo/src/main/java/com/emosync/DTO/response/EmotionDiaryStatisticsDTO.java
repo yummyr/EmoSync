@@ -11,7 +11,6 @@ import java.util.Map;
 
 /**
  * 情绪日记统计响应DTO
- * @author system
  */
 @Data
 @NoArgsConstructor

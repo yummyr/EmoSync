@@ -9,7 +9,6 @@ import java.util.List;
  *
  * All structures are defined using Java Record (immutable and concise).
  *
- * Author: system
  */
 public class StructOutPut {
 
@@ -67,7 +66,7 @@ public class StructOutPut {
             String label,
             String riskDescription,
             List<String> improvementSuggestions,
-            long timestamp
+            String timestamp
     ) {}
 
 
