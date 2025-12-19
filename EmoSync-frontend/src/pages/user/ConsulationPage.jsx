@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 import {
   faRobot,
-  faSeedling,
   faComments,
   faClock,
   faTrash,
@@ -14,38 +13,37 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import api from "@/api";
-import Pagination from "@/components/Pagination";
-import { formatDateTime } from "@/utils/date";
+
 import EmotionGarden from "./components/EmotionGarden";
 import EmergencyDialog from "./components/EmergencyDialog";
 import ChatMessageBubble from "./components/ChatMessageBubble";
 
-// 简单 toast，用浏览器 alert 代替，你可以换成自己的通知组件
+// Simple toast, using browser alert as replacement
 const toast = {
   success: (msg) => console.log(msg),
   error: (msg) => console.error(msg),
   info: (msg) => console.log(msg),
 };
 
-// 获取 token（与你原 Vue 的 userStore + localStorage 行为类似）
+// Get authentication token
 function getAuthToken() {
   return localStorage.getItem("token") || "";
 }
 
 export default function ConsultationPage() {
-  const INIT_SESSION_EMOTION ={
-          primaryEmotion: "Neutral",
-          emotionScore: 50,
-          isNegative: false,
-          riskLevel: 0,
-          keywords: [],
-          suggestion: "Keep observing your feelings gently.",
-          icon: "😐",
-          label: "Calm",
-          riskDescription: "Stable emotional state",
-          improvementSuggestions: [],
-          timestamp: Date.now(),
-        };
+  const INIT_SESSION_EMOTION = {
+    primaryEmotion: "Neutral",
+    emotionScore: 50,
+    isNegative: false,
+    riskLevel: 0,
+    keywords: [],
+    suggestion: "Keep observing your feelings gently.",
+    icon: "😐",
+    label: "Calm",
+    riskDescription: "Stable emotional state",
+    improvementSuggestions: [],
+    timestamp: Date.now(),
+  };
   const INIT_CONSULTATION_SESSION_QUERY = {
     page: 1,
     size: 10,
@@ -55,7 +53,7 @@ export default function ConsultationPage() {
     endDate: "",
     keyword: "",
   };
-  // 会话相关
+  // Session related
   const [consultationSessionQuery, setConsultationSessionQuery] = useState(
     INIT_CONSULTATION_SESSION_QUERY
   );
@@ -70,21 +68,21 @@ export default function ConsultationPage() {
 
   const [currentSession, setCurrentSession] = useState(null); // { sessionId: "session_xxx", dbId, title }
 
-  // 聊天消息
+  // Chat messages
   const [messages, setMessages] = useState([]);
   const [userMessage, setUserMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isAiTyping, setIsAiTyping] = useState(false);
 
-  // Header 标题编辑
+  // Header title editing
   const [isEditingHeaderTitle, setIsEditingHeaderTitle] = useState(false);
   const [headerTitleEdit, setHeaderTitleEdit] = useState("");
 
-  // 情绪状态
+  // Emotion state
   const [emotion, setEmotion] = useState(null);
   const [emotionPollingCount, setEmotionPollingCount] = useState(0);
 
-  // 紧急求助
+  // Emergency help
   const [showEmergency, setShowEmergency] = useState(false);
 
   // refs
@@ -92,9 +90,9 @@ export default function ConsultationPage() {
   const pollTimerRef = useRef(null);
   const sseAbortRef = useRef(null);
 
-  const maxEmotionPollingCount = 30;
+  const maxEmotionPollingCount = 10;
 
-  // 自动滚动到底部 ✅（C）
+  // Auto scroll to bottom ✅ (C)
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({
@@ -104,10 +102,10 @@ export default function ConsultationPage() {
     }
   }, [messages]);
 
-  // 页面初始化：加载会话列表
+  // Page initialization: load session list
   useEffect(() => {
     loadSessionList(true);
-    // 创建一个前端临时会话
+    // Create a frontend temporary session
     createNewFrontendSession(false);
 
     return () => {
@@ -119,7 +117,7 @@ export default function ConsultationPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 切换 session 时加载消息 & 情绪
+  // Load messages & emotion when switching session
   useEffect(() => {
     if (!currentSession || !currentSession.dbId) return;
     loadSessionMessages(currentSession.dbId);
@@ -128,7 +126,7 @@ export default function ConsultationPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentSession?.dbId, currentSession?.sessionId]);
 
-  // ===================== 会话相关 =====================
+  // ===================== Session Related =====================
 
   const createNewFrontendSession = (showMsg = true) => {
     const temp = {
@@ -145,11 +143,11 @@ export default function ConsultationPage() {
       toast.success("New conversation created, you can start talking now.");
     }
   };
-  // 刷新会话列表（重置到第一页）
+  // Refresh session list (reset to first page)
   const refreshSessionList = async () => {
     setConsultationSessionQuery((prev) => ({ ...prev, currentPage: 1 }));
     const { records, total, pages } = await loadSessionList(true);
-    console.log("刷新会话列表完成:", {
+    console.log("Session list refresh completed:", {
       recordsCount: records.length,
       total,
       pages,
@@ -157,7 +155,7 @@ export default function ConsultationPage() {
     return { records, total, pages };
   };
 
-  // 加载更多会话
+  // Load more sessions
   const loadMoreSessions = async () => {
     if (hasMoreSessions && !loadingMore) {
       setConsultationSessionQuery((prev) => ({
@@ -165,7 +163,7 @@ export default function ConsultationPage() {
         currentPage: prev.currentPage + 1,
       }));
       const { records, total, pages } = await loadSessionList(false);
-      console.log("加载更多会话完成:", {
+      console.log("Load more sessions completed:", {
         recordsCount: records.length,
         total,
         pages,
@@ -175,105 +173,100 @@ export default function ConsultationPage() {
     return { records: [], total: 0, pages: 0 };
   };
 
-  // 获取会话列表
-const loadSessionList = async (reset = true) => {
-  if (reset) {
-    setSessionListLoading(true);
-  } else {
-    setLoadingMore(true);
-  }
-
-  try {
-    // 构建查询参数对象
-    const params = {
-      currentPage: reset ? 1 : consultationSessionQuery.currentPage,
-      size: consultationSessionQuery.size,
-    };
-
-    // 只添加非空的查询条件
-    if (consultationSessionQuery.userId) {
-      params.userId = consultationSessionQuery.userId;
-    }
-    if (consultationSessionQuery.emotionTag) {
-      params.emotionTag = consultationSessionQuery.emotionTag;
-    }
-    if (consultationSessionQuery.startDate) {
-      params.startDate = consultationSessionQuery.startDate;
-    }
-    if (consultationSessionQuery.endDate) {
-      params.endDate = consultationSessionQuery.endDate;
-    }
-    if (consultationSessionQuery.keyword) {
-      params.keyword = consultationSessionQuery.keyword;
+  // Get session list
+  const loadSessionList = async (reset = true) => {
+    if (reset) {
+      setSessionListLoading(true);
+    } else {
+      setLoadingMore(true);
     }
 
-    console.log('发送查询参数:', params);
-    const response = await api.get('/psychological-chat/sessions', {
-      params: {
-        ...params
+    try {
+      // Build query parameter object
+      const params = {
+        currentPage: reset ? 1 : consultationSessionQuery.currentPage,
+        size: consultationSessionQuery.size,
+      };
+
+      // Only add non-empty query conditions
+      if (consultationSessionQuery.userId) {
+        params.userId = consultationSessionQuery.userId;
       }
-    });
+      if (consultationSessionQuery.emotionTag) {
+        params.emotionTag = consultationSessionQuery.emotionTag;
+      }
+      if (consultationSessionQuery.startDate) {
+        params.startDate = consultationSessionQuery.startDate;
+      }
+      if (consultationSessionQuery.endDate) {
+        params.endDate = consultationSessionQuery.endDate;
+      }
+      if (consultationSessionQuery.keyword) {
+        params.keyword = consultationSessionQuery.keyword;
+      }
 
-    console.log('获取会话列表响应:', response);
-
-    const { code, data } = response.data;
-
-    
-
-    if (code === 200) {
-      // Extract data from different possible response structures
-      const responseData = result || response.data.data || response.data;
-      const { records = [], total = 0, pages = 1 } = responseData;
-
-      console.log('获取会话列表成功:', {
-        recordsCount: records.length,
-        total,
-        pages,
-        currentPage: params.currentPage,
+      console.log("Sending query parameters:", params);
+      const response = await api.get("/psychological-chat/sessions", {
+        params: {
+          ...params,
+        },
       });
 
-      // 更新会话列表
-      if (reset) {
-        setSessionList(records);
-        setConsultationSessionQuery(prev => ({ ...prev, currentPage: 1 }));
-      } else {
-        setSessionList(prev => [...prev, ...records]);
+      console.log("Session list response:", response);
+
+      const { code, data } = response.data;
+
+      if (code === 200) {
+        // Extract data from different possible response structures
+        const responseData = result || response.data.data || response.data;
+        const { records = [], total = 0, pages = 1 } = responseData;
+
+        console.log("Session list retrieved successfully:", {
+          recordsCount: records.length,
+          total,
+          pages,
+          currentPage: params.currentPage,
+        });
+
+        // Update session list
+        if (reset) {
+          setSessionList(records);
+          setConsultationSessionQuery((prev) => ({ ...prev, currentPage: 1 }));
+        } else {
+          setSessionList((prev) => [...prev, ...records]);
+        }
+
+        // Update pagination info
+        setSessionTotalPages(pages);
+        setSessionTotal(total);
+        setHasMoreSessions(params.currentPage < pages);
+
+        return { records, data };
       }
+    } catch (error) {
+      console.error("Failed to load session list:", error);
 
-      // 更新分页信息
-      setSessionTotalPages(pages);
-      setSessionTotal(total);
-      setHasMoreSessions(params.currentPage < pages);
+      if (error.response) {
+        const { data: errorData, status } = error.response;
+        console.error("Error response data:", errorData);
 
-      return { records, data};
-
-    } 
-  } catch (error) {
-    console.error('加载会话列表失败:', error);
-
-    if (error.response) {
-      const { data: errorData, status } = error.response;
-      console.error('错误响应数据:', errorData);
-      
-      if (status === 401) {
-        alert('登录已过期，请重新登录');
+        if (status === 401) {
+          alert("Login expired, please login again");
+        } else {
+          alert(`Failed to load session list: ${errorData.message || "Server error"}`);
+        }
+      } else if (error.request) {
+        console.error("No response received:", error.request);
+        alert("Network connection failed, please check your network and try again");
       } else {
-        alert(`加载会话列表失败: ${errorData.message || '服务器错误'}`);
+        console.error("Request configuration error:", error.message);
+        alert(`Request failed: ${error.message}`);
       }
-    } else if (error.request) {
-      console.error('请求未收到响应:', error.request);
-      alert('网络连接失败，请检查网络后重试');
-    } else {
-      console.error('请求配置错误:', error.message);
-      alert(`请求失败: ${error.message}`);
+    } finally {
+      setSessionListLoading(false);
+      setLoadingMore(false);
     }
-
-
-  } finally {
-    setSessionListLoading(false);
-    setLoadingMore(false);
-  }
-};
+  };
 
   const handleSwitchSession = async (session) => {
     if (currentSession && currentSession.dbId === session.id) return;
@@ -307,7 +300,7 @@ const loadSessionList = async (reset = true) => {
     }
   };
 
-  // ===================== 消息相关 =====================
+  // ===================== Message Related =====================
 
   const formatTimeLabel = (isoString) => {
     if (!isoString) return "";
@@ -352,7 +345,7 @@ const loadSessionList = async (reset = true) => {
     }
     setUserMessage("");
 
-    // 先把用户消息加进去
+    // Add user message first
     setMessages((prev) => [
       ...prev,
       {
@@ -367,7 +360,7 @@ const loadSessionList = async (reset = true) => {
       },
     ]);
 
-    // 如果当前是临时会话，先调用 startChatSession
+    // If current is temporary session, call startChatSession first
     if (
       !currentSession ||
       currentSession.status === "TEMP" ||
@@ -383,9 +376,7 @@ const loadSessionList = async (reset = true) => {
               : null) || `EmoSync - ${new Date().toLocaleString()}`,
         };
         console.log("Creating session:", dto);
-        const res = await api.post("/psychological-chat/session/start", {
-          dto,
-        });
+        const res = await api.post("/psychological-chat/session/start", dto);
         const session = res.data.data;
         const newSession = {
           sessionId: session.sessionId,
@@ -404,39 +395,30 @@ const loadSessionList = async (reset = true) => {
       return;
     }
 
-    // 已有正式会话，直接流式对话
+    // Already have formal session, direct streaming conversation
     await startAIResponse(currentSession.sessionId, text);
   };
-// const getSessionEmotion=async(sessionId, callbacks = {}) {
-//   const res = await api.get(`/psychological-chat/session/${sessionId}/emotion`, null, callbacks);
-//   console.log("Loaded session emotion detail:", res);
-//   const sessionData = res.data.data;
-//   console.log("Session data:", sessionData);
-//   if (sessionData) {
-//     setCurrentSessionEmotion({
-//       ...sessionData,
-//     });
-//   }
-// }
   const startAIResponse = async (sessionId, userText) => {
     const token = getAuthToken();
     if (!sessionId) {
       toast.error("Invalid session");
       return;
     }
-    // 取消上一轮 SSE
+
+    // 🔥 Force stop old SSE
     if (sseAbortRef.current) {
+      console.log("Closing previous SSE connection...");
       sseAbortRef.current.abort();
+      sseAbortRef.current = null;
     }
+
     const abort = new AbortController();
     sseAbortRef.current = abort;
 
+    // Place AI typing placeholder message
+    const aiMessageId = `ai_${Date.now()}`;
     setIsAiTyping(true);
 
-    // 先放一个 AI 占位消息
-    const aiMessageId = `ai_${Date.now()}_${Math.random()
-      .toString(36)
-      .slice(2)}`;
     setMessages((prev) => [
       ...prev,
       {
@@ -452,49 +434,58 @@ const loadSessionList = async (reset = true) => {
       },
     ]);
 
-    const findAiMessage = () =>
-      messagesRef.current.find((m) => m.id === aiMessageId);
+    // ✅ Unified cleanup function - ensures execution
+    const cleanup = (complete = true, errorMessage = null) => {
+      console.log("Cleaning up SSE connection, complete:", complete);
 
-    // 为了在 onmessage 中访问最新 messages，用一个 ref 保存
-    messagesRef.current = messages;
-
-    const cleanup = (markComplete = false) => {
+      // ✅ 1. Reset AI input state (most critical)
       setIsAiTyping(false);
+      setIsLoading(false);
+
+      // ✅ 2. Update message status
       setMessages((prev) =>
         prev.map((m) =>
           m.id === aiMessageId
             ? {
                 ...m,
                 isTyping: false,
-                isComplete: markComplete,
+                isComplete: complete,
+                isError: !complete && !!errorMessage,
+                content: errorMessage || m.content || "No response from AI",
                 timeLabel: formatTimeLabel(m.createdAt),
               }
             : m
         )
       );
-      // 对话结束后，启动情绪轮询
-      if (markComplete && currentSession && currentSession.sessionId) {
+
+      // ✅ 3. Start emotion polling (only on success)
+      if (complete && currentSession?.sessionId) {
         startEmotionPolling(currentSession.sessionId);
+      }
+
+      // ✅ 4. Close SSE
+      if (sseAbortRef.current) {
+        sseAbortRef.current.abort();
+        sseAbortRef.current = null;
       }
     };
 
-    const appendToAiMessage = (fragment) => {
+    // ----------- Utility Functions -----------
+    const append = (fragment) => {
       setMessages((prev) =>
         prev.map((m) =>
-          m.id === aiMessageId
-            ? { ...m, content: (m.content || "") + fragment }
-            : m
+          m.id === aiMessageId ? { ...m, content: m.content + fragment } : m
         )
       );
     };
 
-    const pushRiskWarning = (content) => {
+    const pushWarning = (text) => {
       setMessages((prev) => [
         ...prev,
         {
           id: `risk_${Date.now()}`,
           senderType: 2,
-          content,
+          content: text,
           createdAt: new Date().toISOString(),
           isRiskWarning: true,
           isTyping: false,
@@ -504,123 +495,137 @@ const loadSessionList = async (reset = true) => {
       ]);
     };
 
+    // ============ 🔥 Actual SSE Request ============
     try {
-      console.log("Attempting SSE connection to: /api/psychological-chat/stream");
-      console.log("Request payload:", { sessionId, userMessage: userText });
+      console.log(
+        "Connecting SSE → http://localhost:8080/api/psychological-chat/stream"
+      );
 
-      await fetchEventSource("/api/psychological-chat/stream", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-          Accept: "text/event-stream",
-        },
-        body: JSON.stringify({
-          sessionId,
-          userMessage: userText,
-        }),
-        signal: abort.signal,
+      await fetchEventSource(
+        "http://localhost:8080/api/psychological-chat/stream",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            Accept: "text/event-stream",
+          },
+          body: JSON.stringify({
+            sessionId,
+            userMessage: userText,
+          }),
+          signal: abort.signal,
 
-        onopen: async (response) => {
-          console.log("SSE connection opened:", response.status, response.statusText);
+          onopen: async (response) => {
+            console.log("SSE OPEN:", response.status, response.statusText);
 
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status} ${response.statusText}`);
-          }
+            if (!response.ok) {
+              // ✅ Immediate cleanup on HTTP error
+              const errorText = await response.text();
+              console.error("SSE connection failed:", errorText);
+              cleanup(false, `Connection failed: ${response.status}`);
+              throw new Error(
+                `HTTP ${response.status}: ${response.statusText}`
+              );
+            }
 
-          const ct = response.headers.get("content-type") || "";
-          console.log("SSE content-type:", ct);
+            // Check Content-Type
+            const contentType = response.headers.get("content-type");
+            if (!contentType || !contentType.includes("text/event-stream")) {
+              console.error("Invalid content type:", contentType);
+              cleanup(false, "Invalid response type");
+              throw new Error("Response is not SSE stream");
+            }
+          },
 
-          if (!ct.includes("text/event-stream")) {
-            throw new Error("Response is not SSE: " + ct);
-          }
-        },
+          onmessage: (event) => {
+            console.log("SSE MESSAGE:", event.event, event.data);
 
-        onmessage: (event) => {
-          const eventName = event.event || "message";
-          if (eventName === "done") {
+            if (!event.data) return;
+
+            // ✅ Handle done event
+            if (event.event === "done") {
+              console.log("SSE DONE received");
+              cleanup(true);
+              return;
+            }
+
+            let payload;
+            try {
+              payload = JSON.parse(event.data);
+            } catch (e) {
+              console.error("JSON parse failed:", event.data);
+              return;
+            }
+
+      
+            // ✅ Check response code
+            if (payload.code !== 200 && payload.code !== "200") {
+              console.error("AI error response:", payload);
+              append(
+                "\n❌ AI error: " + (payload.message || "Unknown error") + "\n"
+              );
+              cleanup(false, payload.message);
+              return;
+            }
+
+            const content = payload?.data?.content || "";
+
+            // Risk warning
+            if (event.event === "risk-warning") {
+              pushWarning(content);
+              return;
+            }
+
+            // Normal streaming message
+            append(content);
+          },
+
+          onerror: (err) => {
+            console.error("SSE ERROR:", err);
+            cleanup(false, "Connection error");
+            throw err; // Let fetchEventSource stop continuing
+          },
+
+          onclose: () => {
+            console.log("SSE CLOSED");
+            // ✅ Also cleanup on normal close
             cleanup(true);
-            abort.abort();
-            return;
-          }
-
-          if (!event.data) return;
-          let payload;
-          try {
-            payload = JSON.parse(event.data);
-          } catch (e) {
-            console.error("Failed to parse SSE data:", e, event.data);
-            return;
-          }
-
-          const ok = String(payload.code) === "200";
-          const content = payload?.data?.content || "";
-
-          if (!ok) {
-            console.error("SSE error payload:", payload);
-            setMessages((prev) =>
-              prev.map((m) =>
-                m.id === aiMessageId
-                  ? {
-                      ...m,
-                      isTyping: false,
-                      isError: true,
-                      isComplete: true,
-                      content: payload.message || "AI response failed",
-                    }
-                  : m
-              )
-            );
-            cleanup(false);
-            return;
-          }
-
-          // 风险预警事件 ✅（A）
-          if (eventName === "risk-warning" || payload?.data?.type === "risk") {
-            pushRiskWarning(content);
-            return;
-          }
-
-          // 正常消息流
-          appendToAiMessage(content);
-        },
-
-        onclose: () => {
-          cleanup(true);
-        },
-
-        onerror: (err) => {
-          console.error("SSE error:", err);
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === aiMessageId
-                ? {
-                    ...m,
-                    isTyping: false,
-                    isError: true,
-                    isComplete: true,
-                    content: "❌ AI response failed, please try again.",
-                  }
-                : m
-            )
-          );
-          setIsAiTyping(false);
-          throw err;
-        },
-      });
+          },
+        }
+      );
     } catch (err) {
-      console.error("startAIResponse failed:", err);
-      setIsAiTyping(false);
+      console.error("SSE failed:", err);
+
+      // ✅ Final fallback: ensure state cleanup
+      cleanup(false, err.message || "Connection failed");
+
+      // Friendly error messages
+      if (err.message?.includes("404") || err.message?.includes("Not Found")) {
+        toast.error(
+          "SSE endpoint not found. Please check if backend is running."
+        );
+      } else if (err.message?.includes("Failed to fetch")) {
+        toast.error("Network error. Please check your connection.");
+      } else if (
+        err.message?.includes("401") ||
+        err.message?.includes("Unauthorized")
+      ) {
+        toast.error("Session expired. Please login again.");
+      } else {
+        toast.error("Connection failed: " + err.message);
+      }
     }
   };
+  
 
-  // 用 ref 保存最新 messages，以便在 SSE 回调中使用
+  // Use ref to store latest messages for use in SSE callbacks
   const messagesRef = useRef(messages);
   useEffect(() => {
     messagesRef.current = messages;
   }, [messages]);
 
-  // ===================== 情绪轮询 =====================
+  // ===================== Emotion Polling =====================
 
   const stopEmotionPolling = () => {
     if (pollTimerRef.current) {
@@ -634,7 +639,7 @@ const loadSessionList = async (reset = true) => {
     stopEmotionPolling();
     if (!sessionId) return;
 
-    // 先立即拉一次
+    // Immediately fetch once
     loadSessionEmotion(sessionId);
 
     let count = 0;
@@ -646,33 +651,54 @@ const loadSessionList = async (reset = true) => {
         return;
       }
       loadSessionEmotion(sessionId);
-    }, 2000);
+    }, 4000);
   };
 
   const loadSessionEmotion = async (sessionId) => {
     try {
       if (!sessionId) return;
-      const res = await api.get(`/psychological-chat/session/${sessionId}/emotion`);
+      const res = await api.get(
+        `/psychological-chat/session/${sessionId}/emotion`
+      );
       const result = res.data.data;
       setEmotion((prev) => {
-        if (!prev || (result.timestamp || 0) > (prev.timestamp || 0)) {
+        if (!prev || (result?.timestamp || 0) > (prev.timestamp || 0)) {
           return result;
         }
         return prev;
       });
-      // 如果已经得到最新结果，可以停止轮询
+      // If latest result is received, can stop polling
       if (emotionPollingCount > 0) {
         stopEmotionPolling();
       }
     } catch (err) {
-      // 初次没有结果直接给默认值
+      // First time without result, give default value
       if (!emotion) {
         setEmotion(INIT_SESSION_EMOTION);
       }
     }
   };
+  // Add in component
+  const forceResetInputState = () => {
+    setIsAiTyping(false);
+    setIsLoading(false);
+    if (sseAbortRef.current) {
+      sseAbortRef.current.abort();
+      sseAbortRef.current = null;
+    }
+    toast.success("Input state reset");
+  };
 
-  // ===================== 标题编辑（B） =====================
+  // // Add button in UI (for debugging only)
+  // {(isAiTyping || isLoading) && (
+  //   <button
+  //     onClick={forceResetInputState}
+  //     className="text-xs text-red-500 underline"
+  //   >
+  //     Force Reset (Debug)
+  //   </button>
+  // )}
+  // ===================== Title Editing (B) =====================
 
   const handleStartEditHeaderTitle = () => {
     if (!currentSession) {
@@ -687,7 +713,7 @@ const loadSessionList = async (reset = true) => {
     if (!currentSession) return;
     const newTitle = headerTitleEdit.trim();
     if (currentSession.status === "TEMP") {
-      // 本地临时会话，只改前端
+      // Local temporary session, only change frontend
       setCurrentSession((prev) =>
         prev ? { ...prev, title: newTitle || "New conversation" } : prev
       );
@@ -697,7 +723,9 @@ const loadSessionList = async (reset = true) => {
     }
 
     try {
-      await api.put(`/psychological-chat/sessions/${currentSession.id}/title`, { sessionTitle:  newTitle || null});
+      await api.put(`/psychological-chat/sessions/${currentSession.id}/title`, {
+        sessionTitle: newTitle || null,
+      });
       setCurrentSession((prev) =>
         prev ? { ...prev, title: newTitle || prev.title } : prev
       );
@@ -725,7 +753,7 @@ const loadSessionList = async (reset = true) => {
     }
   };
 
-  // ===================== 输入框发送 =====================
+  // ===================== Input Box Send =====================
 
   const handleInputKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -734,7 +762,7 @@ const loadSessionList = async (reset = true) => {
     }
   };
 
-  // ===================== 紧急求助 =====================
+  // ===================== Emergency Help =====================
 
   const openEmergencyDialog = () => setShowEmergency(true);
   const closeEmergencyDialog = () => setShowEmergency(false);
@@ -743,12 +771,12 @@ const loadSessionList = async (reset = true) => {
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-sky-50/60 to-slate-100 py-5">
-      {/* 背景柔光 */}
+      {/* Background soft light */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(251,207,232,0.4),transparent_55%),radial-gradient(circle_at_70%_80%,rgba(191,219,254,0.4),transparent_55%)]" />
 
       <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-4 px-4">
         <div className="grid min-h-[calc(100vh-60px)] grid-cols-[320px_minmax(0,1fr)] gap-4">
-          {/* 左侧侧边栏 */}
+          {/* Left sidebar */}
           <div className="flex flex-col gap-4">
             {/* AI assistant info */}
             <div className="rounded-2xl border border-orange-200/60 bg-gradient-to-br from-white/95 to-orange-50/90 p-4 shadow-[0_10px_30px_rgba(251,146,60,0.12)] backdrop-blur-md">
@@ -769,7 +797,10 @@ const loadSessionList = async (reset = true) => {
             </div>
 
             {/* Emotion Garden （D） */}
-            <EmotionGarden sessionId={currentSession?.sessionId} initialEmotionData={emotion} />
+            <EmotionGarden
+              sessionId={currentSession?.sessionId}
+              initialEmotionData={emotion}
+            />
 
             {/* Session history */}
             <div className="flex min-h-[260px] flex-col rounded-2xl bg-white/95 p-4 shadow-lg">
@@ -919,7 +950,7 @@ const loadSessionList = async (reset = true) => {
             </div>
           </div>
 
-          {/* 右侧聊天区 */}
+          {/* Right chat area */}
           <div className="flex h-[calc(100vh-60px)] flex-col rounded-2xl border border-orange-200/70 bg-gradient-to-br from-white/95 to-orange-50/95 shadow-[0_16px_45px_rgba(251,146,60,0.18)] backdrop-blur-md">
             {/* Header */}
             <div className="relative flex items-center justify-between px-6 py-4 bg-gradient-to-r from-orange-400 via-amber-400 to-orange-300 text-white shadow-md">
@@ -975,7 +1006,7 @@ const loadSessionList = async (reset = true) => {
 
             {/* Messages */}
             <div className="custom-scrollbar flex-1 space-y-4 overflow-y-auto px-6 py-4 bg-gradient-to-br from-white/40 to-orange-50/40">
-              {/* 欢迎消息 */}
+              {/* Welcome message */}
               {messages.length === 0 && (
                 <div className="mb-4 max-w-xl rounded-2xl border border-orange-100 bg-white/90 p-3 shadow-sm">
                   <ChatMessageBubble
@@ -1042,7 +1073,6 @@ const loadSessionList = async (reset = true) => {
       {showEmergency && (
         <EmergencyDialog open={showEmergency} onClose={closeEmergencyDialog} />
       )}
-
     </div>
   );
 }
