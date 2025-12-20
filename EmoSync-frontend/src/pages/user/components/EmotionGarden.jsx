@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from "react";
-import api from "@/api";
+import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSeedling, faSync } from "@fortawesome/free-solid-svg-icons";
 
 const EmotionGarden = ({
-  sessionId,
-  initialEmotionData,
-  autoRefresh = false,
-  refreshInterval = 30000,
+  emotion,
+  onRefresh,
+  isRefreshing = false,
 }) => {
-  const [currentEmotion, setCurrentEmotion] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [lastUpdated, setLastUpdated] = useState(null);
+  const [lastUpdated, setLastUpdated] = React.useState(emotion?.timestamp ? new Date(emotion.timestamp) : null);
+
+  // Sync lastUpdated time when emotion prop changes
+  React.useEffect(() => {
+    if (emotion?.timestamp) {
+      setLastUpdated(new Date(emotion.timestamp));
+    }
+  }, [emotion]);
 
   // Default empty state data
   const emptyEmotionData = {
@@ -32,68 +34,11 @@ const EmotionGarden = ({
     timestamp: Date.now(),
   };
 
-  // Use initial data if available
-  useEffect(() => {
-    if (initialEmotionData) {
-      setCurrentEmotion(initialEmotionData);
-      setLastUpdated(new Date(initialEmotionData.timestamp));
-    } else if (sessionId) {
-      fetchEmotionData();
-    } else {
-      setCurrentEmotion(emptyEmotionData);
-    }
-  }, [sessionId, initialEmotionData]);
-
-  // Auto refresh logic
-  useEffect(() => {
-    if (!autoRefresh || !sessionId) return;
-
-    const intervalId = setInterval(() => {
-      fetchEmotionData();
-    }, refreshInterval);
-
-    return () => clearInterval(intervalId);
-  }, [autoRefresh, sessionId, refreshInterval]);
-
-  // Fetch emotion data
-  const fetchEmotionData = async () => {
-    if (!sessionId) {
-      setError("Session ID is required");
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await api.get(
-        `/psychological-chat/session/${sessionId}/emotion`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-
-      if (response.data.code === 200 && response.data.data) {
-        setCurrentEmotion(response.data.data);
-        setLastUpdated(new Date(response.data.data.timestamp));
-      } else {
-        setError(response.data.message || "Failed to fetch emotion data");
-        setCurrentEmotion(emptyEmotionData);
-      }
-    } catch (err) {
-      console.error("Error fetching emotion data:", err);
-      setError(err.response?.data?.message || err.message || "Network error");
-      setCurrentEmotion(emptyEmotionData);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Manual refresh
   const handleRefresh = () => {
-    fetchEmotionData();
+    if (onRefresh) {
+      onRefresh();
+    }
   };
 
   // Get emotion flower center class name
@@ -195,7 +140,7 @@ const EmotionGarden = ({
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
-  const emotionData = currentEmotion || emptyEmotionData;
+  const emotionData = emotion || emptyEmotionData;
   const riskIndicator = getRiskIndicator(emotionData.riskLevel || 0);
 
   return (
@@ -238,7 +183,7 @@ const EmotionGarden = ({
 
           <button
             onClick={handleRefresh}
-            disabled={loading}
+            disabled={isRefreshing}
             className="text-gray-500 hover:text-blue-600 transition-colors duration-200
                       disabled:opacity-50 disabled:cursor-not-allowed"
             title="Refresh emotion analysis"
@@ -249,7 +194,7 @@ const EmotionGarden = ({
       </div>
 
       {/* Loading state */}
-      {loading && (
+      {isRefreshing && (
         <div className="absolute inset-0 bg-white/70 flex items-center justify-center z-20 rounded-2xl">
           <div className="text-center">
             <div
@@ -261,16 +206,7 @@ const EmotionGarden = ({
         </div>
       )}
 
-      {/* Error state */}
-      {error && !loading && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg relative z-10">
-          <div className="flex items-center gap-2 text-red-600">
-            <i className="fas fa-exclamation-triangle"></i>
-            <span className="text-sm">{error}</span>
-          </div>
-        </div>
-      )}
-
+      
       {/* Risk indicator */}
       {emotionData.riskLevel > 0 && (
         <div
@@ -470,12 +406,10 @@ const EmotionGarden = ({
       <div className="mt-4 pt-3 border-t border-white/30 text-xs text-gray-500 relative z-10">
         <div className="flex justify-between items-center">
           <div>Emotion analysis based on AI-powered conversation analysis</div>
-          {autoRefresh && (
-            <div className="flex items-center gap-1">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span>Auto-refresh enabled</span>
-            </div>
-          )}
+          <div className="flex items-center gap-1">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span>Auto-sync enabled</span>
+          </div>
         </div>
       </div>
     </div>

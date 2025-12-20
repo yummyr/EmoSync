@@ -10,6 +10,7 @@ import {
   faHeart,
   faPaperPlane,
   faPhone,
+  faStop,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import api from "@/api";
@@ -31,42 +32,22 @@ function getAuthToken() {
 }
 
 export default function ConsultationPage() {
-  const INIT_SESSION_EMOTION = {
-    primaryEmotion: "Neutral",
-    emotionScore: 50,
-    isNegative: false,
-    riskLevel: 0,
-    keywords: [],
-    suggestion: "Keep observing your feelings gently.",
-    icon: "😐",
-    label: "Calm",
-    riskDescription: "Stable emotional state",
-    improvementSuggestions: [],
-    timestamp: Date.now(),
-  };
-  const INIT_CONSULTATION_SESSION_QUERY = {
-    page: 1,
-    size: 10,
-    userId: "",
-    emotionTag: "",
-    startDate: "",
-    endDate: "",
-    keyword: "",
-  };
   // Session related
-  const [consultationSessionQuery, setConsultationSessionQuery] = useState(
-    INIT_CONSULTATION_SESSION_QUERY
-  );
+  const [consultationSessionQuery, setConsultationSessionQuery] = useState({
+    currentPage: 1,
+    size: 10,
+  });
   const [sessionList, setSessionList] = useState([]);
-  const [sessions, setSessions] = useState([]);
+
   const [sessionListLoading, setSessionListLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [sessionsLoading, setSessionsLoading] = useState(false);
   const [hasMoreSessions, setHasMoreSessions] = useState(true);
-  const [sessionTotalPages, setSessionTotalPages] = useState(0);
-  const [sessionTotal, setSessionTotal] = useState(0);
-
-  const [currentSession, setCurrentSession] = useState(null); // { sessionId: "session_xxx", dbId, title }
+  const [currentSession, setCurrentSession] = useState({
+    sessionId: null,
+    dbId: null,
+    title: null,
+    status: null,
+  });
 
   // Chat messages
   const [messages, setMessages] = useState([]);
@@ -92,7 +73,7 @@ export default function ConsultationPage() {
 
   const maxEmotionPollingCount = 10;
 
-  // Auto scroll to bottom ✅ (C)
+  // Auto scroll to bottom
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({
@@ -120,11 +101,20 @@ export default function ConsultationPage() {
   // Load messages & emotion when switching session
   useEffect(() => {
     if (!currentSession || !currentSession.dbId) return;
+    console.log("Effect: session dbId changed:", currentSession);
     loadSessionMessages(currentSession.dbId);
-    loadSessionEmotion(currentSession.sessionId);
-    startEmotionPolling(currentSession.sessionId);
+    // Only load emotion and start polling for valid session IDs (not temp sessions)
+    if (
+      currentSession.sessionId &&
+      currentSession.sessionId.startsWith("session_")
+    ) {
+      stopEmotionPolling();
+      // Start emotion polling after emotion is loaded
+      loadSessionEmotion(currentSession.sessionId);
+      startEmotionPolling(currentSession.sessionId);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentSession?.dbId, currentSession?.sessionId]);
+  }, [currentSession?.dbId, currentSession.sessionId]);
 
   // ===================== Session Related =====================
 
@@ -146,13 +136,7 @@ export default function ConsultationPage() {
   // Refresh session list (reset to first page)
   const refreshSessionList = async () => {
     setConsultationSessionQuery((prev) => ({ ...prev, currentPage: 1 }));
-    const { records, total, pages } = await loadSessionList(true);
-    console.log("Session list refresh completed:", {
-      recordsCount: records.length,
-      total,
-      pages,
-    });
-    return { records, total, pages };
+    await loadSessionList(true);
   };
 
   // Load more sessions
@@ -162,15 +146,8 @@ export default function ConsultationPage() {
         ...prev,
         currentPage: prev.currentPage + 1,
       }));
-      const { records, total, pages } = await loadSessionList(false);
-      console.log("Load more sessions completed:", {
-        recordsCount: records.length,
-        total,
-        pages,
-      });
-      return { records, total, pages };
+      await loadSessionList(false);
     }
-    return { records: [], total: 0, pages: 0 };
   };
 
   // Get session list
@@ -188,23 +165,6 @@ export default function ConsultationPage() {
         size: consultationSessionQuery.size,
       };
 
-      // Only add non-empty query conditions
-      if (consultationSessionQuery.userId) {
-        params.userId = consultationSessionQuery.userId;
-      }
-      if (consultationSessionQuery.emotionTag) {
-        params.emotionTag = consultationSessionQuery.emotionTag;
-      }
-      if (consultationSessionQuery.startDate) {
-        params.startDate = consultationSessionQuery.startDate;
-      }
-      if (consultationSessionQuery.endDate) {
-        params.endDate = consultationSessionQuery.endDate;
-      }
-      if (consultationSessionQuery.keyword) {
-        params.keyword = consultationSessionQuery.keyword;
-      }
-
       console.log("Sending query parameters:", params);
       const response = await api.get("/psychological-chat/sessions", {
         params: {
@@ -212,56 +172,23 @@ export default function ConsultationPage() {
         },
       });
 
-      console.log("Session list response:", response);
+      const code = response.data.code;
+      const payload = response.data.data;
 
-      const { code, data } = response.data;
-
-      if (code === 200) {
-        // Extract data from different possible response structures
-        const responseData = result || response.data.data || response.data;
-        const { records = [], total = 0, pages = 1 } = responseData;
-
-        console.log("Session list retrieved successfully:", {
-          recordsCount: records.length,
-          total,
-          pages,
-          currentPage: params.currentPage,
-        });
-
-        // Update session list
+      if (code === 200 || code === "200") {
+        const { records } = payload;
+        // Update pagination info
         if (reset) {
           setSessionList(records);
-          setConsultationSessionQuery((prev) => ({ ...prev, currentPage: 1 }));
         } else {
           setSessionList((prev) => [...prev, ...records]);
         }
 
-        // Update pagination info
-        setSessionTotalPages(pages);
-        setSessionTotal(total);
-        setHasMoreSessions(params.currentPage < pages);
-
-        return { records, data };
+        setHasMoreSessions(records.length >= params.size);
       }
     } catch (error) {
       console.error("Failed to load session list:", error);
-
-      if (error.response) {
-        const { data: errorData, status } = error.response;
-        console.error("Error response data:", errorData);
-
-        if (status === 401) {
-          alert("Login expired, please login again");
-        } else {
-          alert(`Failed to load session list: ${errorData.message || "Server error"}`);
-        }
-      } else if (error.request) {
-        console.error("No response received:", error.request);
-        alert("Network connection failed, please check your network and try again");
-      } else {
-        console.error("Request configuration error:", error.message);
-        alert(`Request failed: ${error.message}`);
-      }
+      toast.error("Failed to load session list");
     } finally {
       setSessionListLoading(false);
       setLoadingMore(false);
@@ -270,12 +197,13 @@ export default function ConsultationPage() {
 
   const handleSwitchSession = async (session) => {
     if (currentSession && currentSession.dbId === session.id) return;
-    const sessionIdStr = `session_${session.id}`;
+    stopEmotionPolling();
+
     const newSession = {
-      sessionId: sessionIdStr,
+      sessionId: `session_${session.id}`,
       dbId: session.id,
       title: session.sessionTitle || "Untitled session",
-      status: "ACTIVE",
+      status: session.status || "ACTIVE",
     };
     setCurrentSession(newSession);
     toast.success(`Switched to session: ${newSession.title}`);
@@ -290,7 +218,7 @@ export default function ConsultationPage() {
     try {
       await api.delete(`/psychological-chat/sessions/${session.id}`);
       toast.success("Session deleted");
-      if (currentSession && currentSession.dbId === session.id) {
+      if (currentSession?.dbId === session.id) {
         createNewFrontendSession(false);
       }
       loadSessionList(true);
@@ -318,8 +246,8 @@ export default function ConsultationPage() {
     try {
       const res = await api.get(`/psychological-chat/${dbSessionId}/messages`);
       console.log("Loaded messages:", res);
-      const msgs = res.data.data;
-      const formatted = (msgs || []).map((m) => ({
+      const msgs = res.data.data || [];
+      const formatted = msgs.map((m) => ({
         id: m.id,
         senderType: m.senderType === 1 ? 1 : 2, // 1: user, 2: ai
         content: m.messageContent,
@@ -337,6 +265,7 @@ export default function ConsultationPage() {
   };
 
   const sendMessage = async () => {
+    console.log("Sending message:", userMessage);
     const text = userMessage.trim();
     if (!text) return;
     if (isAiTyping) {
@@ -378,6 +307,7 @@ export default function ConsultationPage() {
         console.log("Creating session:", dto);
         const res = await api.post("/psychological-chat/session/start", dto);
         const session = res.data.data;
+        console.log("Created session:", session);
         const newSession = {
           sessionId: session.sessionId,
           dbId: parseInt(session.sessionId.replace("session_", ""), 10),
@@ -394,11 +324,13 @@ export default function ConsultationPage() {
       }
       return;
     }
+    console.log("①Current session to start ai response:", currentSession);
 
     // Already have formal session, direct streaming conversation
     await startAIResponse(currentSession.sessionId, text);
   };
   const startAIResponse = async (sessionId, userText) => {
+    console.log("②Starting AI response for session:", sessionId);
     const token = getAuthToken();
     if (!sessionId) {
       toast.error("Invalid session");
@@ -435,7 +367,7 @@ export default function ConsultationPage() {
     ]);
 
     // ✅ Unified cleanup function - ensures execution
-    const cleanup = (complete = true, errorMessage = null) => {
+    const cleanup = async (complete = true, errorMessage = null) => {
       console.log("Cleaning up SSE connection, complete:", complete);
 
       // ✅ 1. Reset AI input state (most critical)
@@ -459,8 +391,13 @@ export default function ConsultationPage() {
       );
 
       // ✅ 3. Start emotion polling (only on success)
-      if (complete && currentSession?.sessionId) {
-        startEmotionPolling(currentSession.sessionId);
+      if (complete && sessionId.startsWith("session_")) {
+        console.log(
+          "Starting emotion polling...after AI response success with sessionId:",
+          sessionId
+        );
+        await loadSessionEmotion(sessionId);
+        startEmotionPolling(sessionId);
       }
 
       // ✅ 4. Close SSE
@@ -538,7 +475,7 @@ export default function ConsultationPage() {
             }
           },
 
-          onmessage: (event) => {
+          onmessage: async (event) => {
             console.log("SSE MESSAGE:", event.event, event.data);
 
             if (!event.data) return;
@@ -546,7 +483,7 @@ export default function ConsultationPage() {
             // ✅ Handle done event
             if (event.event === "done") {
               console.log("SSE DONE received");
-              cleanup(true);
+              await cleanup(true);
               return;
             }
 
@@ -558,7 +495,6 @@ export default function ConsultationPage() {
               return;
             }
 
-      
             // ✅ Check response code
             if (payload.code !== 200 && payload.code !== "200") {
               console.error("AI error response:", payload);
@@ -576,7 +512,6 @@ export default function ConsultationPage() {
               pushWarning(content);
               return;
             }
-
             // Normal streaming message
             append(content);
           },
@@ -587,10 +522,10 @@ export default function ConsultationPage() {
             throw err; // Let fetchEventSource stop continuing
           },
 
-          onclose: () => {
+          onclose: async () => {
             console.log("SSE CLOSED");
             // ✅ Also cleanup on normal close
-            cleanup(true);
+            await cleanup(true);
           },
         }
       );
@@ -598,7 +533,7 @@ export default function ConsultationPage() {
       console.error("SSE failed:", err);
 
       // ✅ Final fallback: ensure state cleanup
-      cleanup(false, err.message || "Connection failed");
+     await cleanup(false, err.message || "Connection failed");
 
       // Friendly error messages
       if (err.message?.includes("404") || err.message?.includes("Not Found")) {
@@ -617,7 +552,6 @@ export default function ConsultationPage() {
       }
     }
   };
-  
 
   // Use ref to store latest messages for use in SSE callbacks
   const messagesRef = useRef(messages);
@@ -636,69 +570,122 @@ export default function ConsultationPage() {
   };
 
   const startEmotionPolling = (sessionId) => {
-    stopEmotionPolling();
-    if (!sessionId) return;
+    console.log("Starting emotion polling for session:", sessionId);
 
-    // Immediately fetch once
-    loadSessionEmotion(sessionId);
+    if (!sessionId || !sessionId.startsWith("session_")) {
+      return;
+    }
+    stopEmotionPolling();
 
     let count = 0;
     pollTimerRef.current = setInterval(() => {
-      count += 1;
+      console.log("Polling emotion count=:", count);
+      count+=1;
       setEmotionPollingCount(count);
       if (count >= maxEmotionPollingCount) {
+        console.log("Reached max polling count, stopEmotionPolling()");
         stopEmotionPolling();
         return;
       }
+      console.log("Polling emotion for session:", sessionId, "count:", count);
       loadSessionEmotion(sessionId);
-    }, 4000);
+    }, 2000);
   };
 
   const loadSessionEmotion = async (sessionId) => {
     try {
-      if (!sessionId) return;
+      if (!sessionId || !sessionId.startsWith("session_")) return;
+
       const res = await api.get(
         `/psychological-chat/session/${sessionId}/emotion`
       );
-      const result = res.data.data;
-      setEmotion((prev) => {
-        if (!prev || (result?.timestamp || 0) > (prev.timestamp || 0)) {
-          return result;
-        }
-        return prev;
-      });
-      // If latest result is received, can stop polling
+
+      // Check if the response indicates an error
+      const responseData = res.data;
+      if (responseData && responseData.code === "-1") {
+        console.error("Backend error:", responseData.message);
+        return;
+      }
+
+      // Handle different possible response structures
+      const result = responseData.data;
+
+      console.log("Emotion data extracted:", result); // Debug log to see what we're extracting
+
+      if (result) {
+        setEmotion(result);
+      } else {
+        console.warn("No valid emotion data found in response");
+      }
+    } catch (err) {
+      console.error("Error loading session emotion:", err);
+      // Stop polling on error to avoid continuous failed requests
       if (emotionPollingCount > 0) {
         stopEmotionPolling();
       }
-    } catch (err) {
-      // First time without result, give default value
-      if (!emotion) {
-        setEmotion(INIT_SESSION_EMOTION);
-      }
     }
-  };
-  // Add in component
-  const forceResetInputState = () => {
-    setIsAiTyping(false);
-    setIsLoading(false);
-    if (sseAbortRef.current) {
-      sseAbortRef.current.abort();
-      sseAbortRef.current = null;
-    }
-    toast.success("Input state reset");
   };
 
-  // // Add button in UI (for debugging only)
-  // {(isAiTyping || isLoading) && (
-  //   <button
-  //     onClick={forceResetInputState}
-  //     className="text-xs text-red-500 underline"
-  //   >
-  //     Force Reset (Debug)
-  //   </button>
-  // )}
-  // ===================== Title Editing (B) =====================
+  const endChat = async () => {
+    if (!currentSession || !currentSession.sessionId) {
+      toast.error("No active chat to end.");
+      return;
+    }
+
+    if (!window.confirm("Are you sure you want to end this chat session?")) {
+      return;
+    }
+
+    try {
+      // Stop SSE stream if running
+      if (sseAbortRef.current) {
+        sseAbortRef.current.abort();
+        sseAbortRef.current = null;
+      }
+
+      setIsAiTyping(false);
+      setIsLoading(false);
+
+      const sessionId = currentSession.sessionId;
+
+      console.log("Ending session:", sessionId);
+
+      await api.post("/psychological-chat/session/end", null, {
+        params: {
+          sessionId,
+        },
+      });
+
+      toast.success("Chat session ended.");
+
+      // update UI
+      setCurrentSession((prev) => (prev ? { ...prev, status: "ENDED" } : prev));
+      setEmotion(null);
+      stopEmotionPolling();
+      loadSessionList(true);
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `ended_${Date.now()}`,
+          senderType: 2,
+          content: "This session has ended. Thank you for sharing with me. 💛",
+          createdAt: new Date().toISOString(),
+          isTyping: false,
+          isComplete: true,
+          isError: false,
+          isEndedNotice: true,
+          timeLabel: "Just now",
+        },
+      ]);
+
+      createNewFrontendSession(false);
+      toast.success("Chat session ended.");
+    } catch (err) {
+      console.error("Failed to end chat session:", err);
+      toast.error(err.message || "Failed to end chat session");
+    }
+  };
 
   const handleStartEditHeaderTitle = () => {
     if (!currentSession) {
@@ -723,18 +710,14 @@ export default function ConsultationPage() {
     }
 
     try {
-      await api.put(`/psychological-chat/sessions/${currentSession.id}/title`, {
-        sessionTitle: newTitle || null,
-      });
+      await api.put(
+        `/psychological-chat/sessions/${currentSession.dbId}/title`,
+        {
+          sessionTitle: newTitle || null,
+        }
+      );
       setCurrentSession((prev) =>
         prev ? { ...prev, title: newTitle || prev.title } : prev
-      );
-      setSessions((prev) =>
-        prev.map((s) =>
-          s.id === currentSession.dbId
-            ? { ...s, sessionTitle: newTitle || s.sessionTitle }
-            : s
-        )
       );
       toast.success("Title updated.");
     } catch (err) {
@@ -798,8 +781,13 @@ export default function ConsultationPage() {
 
             {/* Emotion Garden （D） */}
             <EmotionGarden
-              sessionId={currentSession?.sessionId}
-              initialEmotionData={emotion}
+              emotion={emotion}
+              onRefresh={() => {
+                if (currentSession?.sessionId?.startsWith("session_")) {
+                  loadSessionEmotion(currentSession.sessionId);
+                }
+              }}
+              isRefreshing={false}
             />
 
             {/* Session history */}
@@ -819,7 +807,7 @@ export default function ConsultationPage() {
                   </button>
                   <button
                     className="rounded-md items-center px-2 py-1 text-2xl  font-medium text-slate-500 hover:bg-slate-50"
-                    onClick={() => loadSessionList(true)}
+                    onClick={() => refreshSessionList()}
                     title="Refresh"
                   >
                     ⟳
@@ -828,22 +816,23 @@ export default function ConsultationPage() {
               </div>
 
               <div className="custom-scrollbar flex-1 space-y-2 overflow-y-auto">
-                {sessionsLoading && (
+                {sessionListLoading && (
                   <div className="py-6 text-center text-xs text-slate-400">
                     Loading sessions...
                   </div>
                 )}
-                {!sessionsLoading && sessions.length === 0 && (
-                  <div className="flex flex-col items-center justify-center py-6 text-xs text-slate-400">
-                    <FontAwesomeIcon
-                      icon={faComments}
-                      className="mb-2 text-xl text-slate-200"
-                    />
-                    <p>No sessions yet.</p>
-                  </div>
-                )}
+                {!sessionListLoading &&
+                  (!sessionList || sessionList.length === 0) && (
+                    <div className="flex flex-col items-center justify-center py-6 text-xs text-slate-400">
+                      <FontAwesomeIcon
+                        icon={faComments}
+                        className="mb-2 text-xl text-slate-200"
+                      />
+                      <p>No sessions yet.</p>
+                    </div>
+                  )}
 
-                {sessions.map((s) => {
+                {(sessionList || []).map((s) => {
                   const isActive =
                     currentSession && currentSession.dbId === s.id;
                   return (
@@ -860,6 +849,11 @@ export default function ConsultationPage() {
                         <div className="mb-0.5 flex items-center justify-between gap-2">
                           <div className="truncate font-medium text-slate-800">
                             {s.sessionTitle || "Untitled session"}
+                            {s.status === "ENDED" && (
+                              <span className="text-[10px] text-slate-400 ml-1">
+                                🔒 Ended
+                              </span>
+                            )}
                           </div>
                           <span className="whitespace-nowrap text-[10px] text-slate-400">
                             {formatTimeLabel(s.startedAt)}
@@ -1001,11 +995,29 @@ export default function ConsultationPage() {
                   <FontAwesomeIcon icon={faPlus} className="mr-1" />
                   New chat
                 </button>
+
+                <button
+                  className="rounded-full bg-pink-400 px-3 py-1 text-xs font-medium text-white hover:bg-white/25 hover:text-red-400"
+                  onClick={endChat}
+                  disabled={
+                    !currentSession || currentSession.status !== "ACTIVE"
+                  }
+                  title="End this chat session"
+                >
+                  <FontAwesomeIcon icon={faStop} className="mr-1" />
+                  End chat
+                </button>
               </div>
             </div>
 
             {/* Messages */}
             <div className="custom-scrollbar flex-1 space-y-4 overflow-y-auto px-6 py-4 bg-gradient-to-br from-white/40 to-orange-50/40">
+              {currentSession?.status === "ENDED" && (
+                <div className="mx-auto mb-4 max-w-xl rounded-2xl border border-slate-300 bg-slate-100/80 px-4 py-2 text-center text-sm text-slate-600">
+                  This session has ended. Start a new conversation anytime.
+                </div>
+              )}
+
               {/* Welcome message */}
               {messages.length === 0 && (
                 <div className="mb-4 max-w-xl rounded-2xl border border-orange-100 bg-white/90 p-3 shadow-sm">
@@ -1041,7 +1053,11 @@ export default function ConsultationPage() {
                   value={userMessage}
                   onChange={(e) => setUserMessage(e.target.value)}
                   onKeyDown={handleInputKeyDown}
-                  disabled={isLoading || isAiTyping}
+                  disabled={
+                    isLoading ||
+                    isAiTyping ||
+                    currentSession?.status === "ENDED"
+                  }
                 />
                 <div className="mt-1 flex items-center justify-between text-[11px] text-slate-400">
                   <span>Press Enter to send · Shift + Enter for new line</span>
@@ -1056,6 +1072,7 @@ export default function ConsultationPage() {
                 className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-400 to-amber-400 text-white shadow-lg transition-all hover:translate-y-[1px] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={sendMessage}
                 disabled={
+                  currentSession?.status === "ENDED" ||
                   !userMessage.trim() ||
                   userMessage.length > 500 ||
                   isLoading ||
