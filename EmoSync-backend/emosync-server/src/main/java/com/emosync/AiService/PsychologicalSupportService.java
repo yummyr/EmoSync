@@ -34,6 +34,8 @@ import java.util.concurrent.CompletableFuture;
 @Service
 @RequiredArgsConstructor
 public class PsychologicalSupportService {
+    private int MAX_TOKENS = 2000;
+    private double PROMPT_TEMPERATURE = 0.7;
 
     @Value("${spring.ai.openai.chat.options.model}")
     private String model;
@@ -181,8 +183,8 @@ public class PsychologicalSupportService {
                 Prompt prompt = new Prompt(allMessages,
                         OpenAiChatOptions.builder()
                                 .withModel(model)  // or your configured model
-                                .withTemperature(0.7)
-                                .withMaxTokens(2000)
+                                .withTemperature(PROMPT_TEMPERATURE)
+                                .withMaxTokens(MAX_TOKENS)
                                 .build()
                 );
 
@@ -254,7 +256,7 @@ public class PsychologicalSupportService {
     /**
      * End chat session
      */
-    public boolean endChatSession(String sessionId, Integer moodAfter) {
+    public boolean endChatSession(String sessionId) {
         try {
             log.info("Ending psychological support session, sessionId={}", sessionId);
 

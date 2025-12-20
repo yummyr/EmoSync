@@ -186,8 +186,7 @@ public class PsychologicalChatController {
     @Operation(summary = "End Chat Session", description = "End the current chat session")
     @PostMapping("/session/end")
     public Result<Boolean> endChatSession(
-            @Parameter(description = "Session ID") @RequestParam String sessionId,
-            @Parameter(description = "Mood after session") @RequestParam(required = false) Integer moodAfter) {
+            @Parameter(description = "Session ID") @RequestParam String sessionId) {
         log.info("Received request to end session, sessionId: {}", sessionId);
 
         try {
@@ -211,7 +210,7 @@ public class PsychologicalChatController {
                 return Result.error("Unauthorized access to this session");
             }
 
-            boolean success = psychologicalSupportService.endChatSession(sessionId, moodAfter);
+            boolean success = psychologicalSupportService.endChatSession(sessionId);
 
             if (success) {
                 log.info("Session ended successfully, sessionId: {}", sessionId);

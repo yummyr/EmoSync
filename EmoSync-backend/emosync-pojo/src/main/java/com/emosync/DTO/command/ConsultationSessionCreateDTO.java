@@ -6,19 +6,18 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 /**
- * 咨询会话创建DTO
- * @author system
+ * Consultation session creation DTO
  */
 @Data
-@Schema(description = "咨询会话创建DTO")
+@Schema(description = "Consultation session creation DTO")
 public class ConsultationSessionCreateDTO {
 
-    @Schema(description = "会话标题")
-    @Size(max = 200, message = "会话标题长度不能超过200个字符")
+    @Schema(description = "Session title")
+    @Size(max = 200, message = "Session title cannot exceed 200 characters")
     private String sessionTitle;
 
-    @Schema(description = "初始消息")
-    @NotBlank(message = "初始消息不能为空")
-    @Size(max = 2000, message = "初始消息长度不能超过2000个字符")
+    @Schema(description = "Initial message")
+    @NotBlank(message = "Initial message cannot be blank")
+    @Size(max = 2000, message = "Initial message cannot exceed 2000 characters")
     private String initialMessage;
 }
