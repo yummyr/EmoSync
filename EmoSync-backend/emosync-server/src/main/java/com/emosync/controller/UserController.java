@@ -9,6 +9,7 @@ import com.emosync.Result.PageResult;
 import com.emosync.security.UserDetailsImpl;
 import com.emosync.service.UserService;
 
+import com.emosync.util.JwtTokenUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,6 +22,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -40,6 +42,7 @@ public class UserController {
 
 
     private final UserService userService;
+    private JwtTokenUtils jwtTokenUtils;
 
 
     /** Get current authenticated UserDetailsImpl */
@@ -66,6 +69,35 @@ public class UserController {
         log.info("get loginDTO:{}",loginDTO);
         UserLoginResponseDTO response = userService.login(loginDTO);
         return Result.success("Login successful", response);
+    }
+
+    /**
+     * User refresh token
+     */
+
+    @PostMapping("/refresh")
+    public Result<String> refreshToken(
+            @RequestHeader(value = "Authorization", required = false) String authHeader){
+       try {
+           log.info("Token refresh request received~");
+           if (authHeader == null || !authHeader.startsWith("Bearer ")){
+               return Result.error("Invalid or missing Authorization header");
+           }
+           String token = authHeader.substring(7);
+           String newToken = jwtTokenUtils.refreshToken(token);
+           if (newToken == null){
+               return Result.error("Token refresh failed- invalid or expired token");
+           }
+
+           log.info("Token refresh successfully~");
+           return Result.success(newToken);
+       }
+      catch (Exception e){
+           log.error("Token refresh failed, error message: ${}",e);
+           return Result.error("Token refresh failed, error message: ${}",e.getMessage());
+      }
+
+
     }
 
     /** User Registration */

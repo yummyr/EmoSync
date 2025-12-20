@@ -10,89 +10,89 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 情绪日记统计响应DTO
+ * Emotion diary statistics response DTO
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "情绪日记统计响应DTO")
+@Schema(description = "Emotion diary statistics response DTO")
 public class EmotionDiaryStatisticsDTO {
 
-    @Schema(description = "统计期间总天数")
+    @Schema(description = "Total days in statistics period")
     private Integer totalDays;
 
-    @Schema(description = "记录天数")
+    @Schema(description = "Recorded days")
     private Integer recordedDays;
 
-    @Schema(description = "实际记录天数")
+    @Schema(description = "Actual recorded days")
     private Integer recordDays;
 
-    @Schema(description = "目标天数")
+    @Schema(description = "Target days")
     private Integer targetDays;
 
-    @Schema(description = "记录完成率")
+    @Schema(description = "Completion rate")
     private BigDecimal completionRate;
 
-    @Schema(description = "平均情绪评分")
+    @Schema(description = "Average mood score")
     private BigDecimal averageMoodScore;
 
-    @Schema(description = "最高情绪评分")
+    @Schema(description = "Maximum mood score")
     private Integer maxMoodScore;
 
-    @Schema(description = "最低情绪评分")
+    @Schema(description = "Minimum mood score")
     private Integer minMoodScore;
 
-    @Schema(description = "积极情绪天数")
+    @Schema(description = "Positive emotion days")
     private Integer positiveDays;
 
-    @Schema(description = "消极情绪天数")
+    @Schema(description = "Negative emotion days")
     private Integer negativeDays;
 
-    @Schema(description = "中性情绪天数")
+    @Schema(description = "Neutral emotion days")
     private Integer neutralDays;
 
-    @Schema(description = "平均睡眠质量")
+    @Schema(description = "Average sleep quality")
     private BigDecimal averageSleepQuality;
 
-    @Schema(description = "平均压力水平")
+    @Schema(description = "Average stress level")
     private BigDecimal averageStressLevel;
 
-    @Schema(description = "情绪趋势数据（7天）")
+    @Schema(description = "Mood trend data (7 days)")
     private List<MoodTrendData> moodTrend;
 
-    @Schema(description = "情绪分布统计")
+    @Schema(description = "Emotion distribution statistics")
     private Map<String, Integer> emotionDistribution;
 
-    @Schema(description = "睡眠质量分布")
+    @Schema(description = "Sleep quality distribution")
     private Map<String, Integer> sleepQualityDistribution;
 
-    @Schema(description = "压力水平分布")
+    @Schema(description = "Stress level distribution")
     private Map<String, Integer> stressLevelDistribution;
 
-    @Schema(description = "最常见的主要情绪")
+    @Schema(description = "Most common dominant emotion")
     private String mostCommonEmotion;
 
-    @Schema(description = "改善建议")
+    @Schema(description = "Improvement suggestions")
     private List<String> suggestions;
 
     /**
-     * 情绪趋势数据内部类
+     * Mood trend data inner class
      */
     @Data
-    @Schema(description = "情绪趋势数据")
+    @Schema(description = "Mood trend data")
     public static class MoodTrendData {
-        @Schema(description = "日期标签")
+        @Schema(description = "Date label")
         private String dateLabel;
 
-        @Schema(description = "情绪评分")
+        @Schema(description = "Mood score")
         private Integer moodScore;
 
-        @Schema(description = "主要情绪")
+        @Schema(description = "Dominant emotion")
         private String dominantEmotion;
     }
 
     /**
-     * 计算积极情绪占比
+     * Calculate positive emotion ratio
      */
     public BigDecimal getPositiveRatio() {
         if (recordedDays == null || recordedDays == 0) {
@@ -104,7 +104,7 @@ public class EmotionDiaryStatisticsDTO {
     }
 
     /**
-     * 计算消极情绪占比
+     * Calculate negative emotion ratio
      */
     public BigDecimal getNegativeRatio() {
         if (recordedDays == null || recordedDays == 0) {
@@ -116,21 +116,21 @@ public class EmotionDiaryStatisticsDTO {
     }
 
     /**
-     * 获取情绪稳定性描述
+     * Get mood stability description
      */
     public String getMoodStabilityDesc() {
         if (maxMoodScore == null || minMoodScore == null) {
-            return "数据不足";
+            return "Insufficient data";
         }
         int range = maxMoodScore - minMoodScore;
         if (range <= 2) {
-            return "非常稳定";
+            return "Very stable";
         } else if (range <= 4) {
-            return "较为稳定";
+            return "Relatively stable";
         } else if (range <= 6) {
-            return "中等波动";
+            return "Moderate fluctuation";
         } else {
-            return "波动较大";
+            return "High fluctuation";
         }
     }
 }
