@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { formatDateTime } from "@/utils/date";
-import { useDispatch, useSelector } from "react-redux"; // 添加 useSelector
+import { useDispatch, useSelector } from "react-redux"; // Add useSelector
 import { useNavigate, useLocation, Outlet } from "react-router-dom";
-import { logoutUser, selectUser, selectRoleType } from "@/store/userSlice"; // 导入 selector
+import { logoutUser, selectUser, selectRoleType } from "@/store/userSlice"; // Import selector
 import {
   faRobot,
   faUsers,
@@ -344,7 +344,7 @@ const AdminLayout = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   
-  // 从 Redux store 获取用户信息
+  // Get user information from Redux store
   const user = useSelector(selectUser);
   const roleType = useSelector(selectRoleType);
   
@@ -365,17 +365,18 @@ const AdminLayout = () => {
     navigate(path);
   };
 
-  // 修改 logout 处理函数
+  // Modify logout handler function
   const handleLogout = async () => {
     console.log("Logging out...");
     try {
-      // 直接 dispatch logoutUser，不需要 unwrap()
-      await dispatch(logoutUser());
-      // 登出成功后跳转到登录页
+      if(!window.confirm("Are you sure you want to log out?")) return;
+      // Direct dispatch logoutUser, no need to unwrap()
+     dispatch(logoutUser());
+      // Navigate to login page after successful logout
       navigate("/auth/login");
     } catch (error) {
       console.error("Logout failed:", error);
-      // 即使登出 API 失败，也清除本地状态并跳转到登录页
+      // Even if logout API fails, clear local state and navigate to login page
       navigate("/auth/login");
     }
   };
@@ -385,14 +386,14 @@ const AdminLayout = () => {
     navigate("/back/profile");
   };
 
-  // 获取用户名（从 Redux store 或使用默认值）
+  // Get username (from Redux store or use default value)
   const getUserName = () => {
     return user?.username || user?.name || "Administrator";
   };
 
-  // 检查是否是管理员（从 Redux store）
+  // Check if user is administrator (from Redux store)
   const getIsAdmin = () => {
-    return roleType === 2; // 根据你的 userSlice，2 表示管理员
+    return roleType === 2; // Based on your userSlice, 2 represents administrator
   };
 
   // Get page title from current path
@@ -425,8 +426,8 @@ const AdminLayout = () => {
         isCollapsed={isCollapsed}
         onToggle={handleToggleSidebar}
         currentPage={getPageTitle()}
-        userName={getUserName()} // 使用真实的用户名
-        isAdmin={getIsAdmin()} // 使用真实的角色信息
+        userName={getUserName()} // Use actual username
+        isAdmin={getIsAdmin()} // Use actual role information
         onLogout={handleLogout}
         onProfileClick={handleProfileClick}
       />

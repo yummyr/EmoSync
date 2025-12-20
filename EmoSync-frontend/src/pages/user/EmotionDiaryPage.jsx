@@ -56,6 +56,8 @@ export default function EmotionDiaryPage() {
       try {
         const res = await api.get("/emotion-diary/today");
         console.log("Fetched today's entry:", res);
+        if (!res.data.data) return;
+        
         const data = res.data.data;
         diaryIdRef.current = data.id;
         setForm((prev) => ({
@@ -79,7 +81,8 @@ export default function EmotionDiaryPage() {
 
   const loadStats = async () => {
     try {
-      const res = await api.get("/emotion-diary/statistics?days=7");
+      const res = await api.get("/emotion-diary/statistics");
+      console.log("Fetched stats:", res);
       const data = await res.data.data;
       setTrend(data.moodTrend || []);
       setStatistics(data.emotionDistribution || []);
@@ -123,9 +126,9 @@ export default function EmotionDiaryPage() {
     const res = await api.post("/emotion-diary", {
       ...payload,
     });
+    console.log("Response after save:", res);
     const data = res.data.data;
-    console.log(data);
-
+   
     setForm((prev) => ({
       ...prev,
       ...data,

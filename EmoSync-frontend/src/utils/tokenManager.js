@@ -1,6 +1,6 @@
-import api from "../api";
+import api from "@/api";
 const TOKEN_REFRESH_INTERVAL = 25 * 60 * 1000; // 25 minutes (if token expires in 30 min)
-const ACTIVITY_TIMEOUT =24 * 60 * 60 * 1000; // 24 hours of inactivity
+const ACTIVITY_TIMEOUT = 24 * 60 * 60 * 1000; // 24 hours of inactivity
 
 class TokenManager {
   constructor() {
@@ -83,7 +83,7 @@ class TokenManager {
 
       // Call your refresh token endpoint
       const response = await api.post(
-        "/auth/refresh",
+        "/user/refresh",
         {},
         {
           headers: {
@@ -91,9 +91,9 @@ class TokenManager {
           },
         }
       );
-
-      if (response.data.code === 1 && response.data.data.token) {
-        const newToken = response.data.data.token;
+      console.log("Refresh response:", response);
+      if (response.data.code === "200" && response.data.data) {
+        const newToken = response.data.data;
         localStorage.setItem("token", newToken);
         console.log("Token refreshed successfully");
         return true;
@@ -131,23 +131,6 @@ class TokenManager {
     });
 
     console.log("TokenManager cleaned up");
-  }
-
-  // Manual token validation check
-  async validateToken() {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        return false;
-      }
-
-      // Try a simple API call to validate token
-      const response = await api.get("/shop/status");
-      return response.data.code === 1;
-    } catch (error) {
-      console.error("Token validation failed:", error);
-      return false;
-    }
   }
 }
 

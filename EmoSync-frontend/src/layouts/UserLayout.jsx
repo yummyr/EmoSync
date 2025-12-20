@@ -31,6 +31,7 @@ export default function UserLayout() {
 
   // Main Navigation Menu Items
   const menuItems = [
+    
     { name: "AI Consultation", icon: faComments, path: "/user/consultation", id: "consultation" },
     { name: "Emotion Diary", icon: faFaceGrinWink, path: "/user/emotion-diary", id: "emotion-diary" },
     { name: "My Favorites", icon: faHeart, path: "/user/favorites", id: "favorites" },
@@ -40,6 +41,7 @@ export default function UserLayout() {
 
   
   const handleLogout = () => {
+    if (!window.confirm("Are you sure you want to log out?")) return;
     dispatch(logoutUser());
   };
 
