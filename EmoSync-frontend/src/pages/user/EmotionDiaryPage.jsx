@@ -7,8 +7,6 @@ import HistoryModal from "./components/HistoryModal";
 import api from "@/api";
 import {
   faPalette,
-  faChartLine,
-  faChartPie,
   faLightbulb,
   faComments,
   faCalendar,
@@ -16,9 +14,10 @@ import {
   faEdit,
   faRedo,
   faSave,
+  faChartPie,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useNavigate } from "react-router-dom";
+import EmotionDistribution from "./components/EmotionDistribution";
 
 export default function EmotionDiaryPage() {
   const diaryIdRef = useRef(null);
@@ -41,8 +40,8 @@ export default function EmotionDiaryPage() {
 
   const [form, setForm] = useState(INIT_FORM_DATA);
 
-  const [statistics, setStatistics] = useState([]);
-  const [trend, setTrend] = useState([]);
+  const [emotionDistribution, setEmotionDistribution] = useState({});
+  const [moodTrend, setMoodTrend] = useState([]);
   const [ai, setAi] = useState(null);
   const [loadingAi, setLoadingAi] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
@@ -57,7 +56,7 @@ export default function EmotionDiaryPage() {
         const res = await api.get("/emotion-diary/today");
         console.log("Fetched today's entry:", res);
         if (!res.data.data) return;
-        
+
         const data = res.data.data;
         diaryIdRef.current = data.id;
         setForm((prev) => ({
@@ -84,8 +83,9 @@ export default function EmotionDiaryPage() {
       const res = await api.get("/emotion-diary/statistics");
       console.log("Fetched stats:", res);
       const data = await res.data.data;
-      setTrend(data.moodTrend || []);
-      setStatistics(data.emotionDistribution || []);
+      setMoodTrend(data.moodTrend || []);
+      setEmotionDistribution(data.emotionDistribution || {});
+      console.log("emotionDistribution:", data.emotionDistribution);
     } catch (err) {
       console.error("Failed to load stats:", err);
     }
@@ -127,13 +127,13 @@ export default function EmotionDiaryPage() {
       ...payload,
     });
     console.log("Response after save:", res);
+    if (res.data.code == "200") {
+      alert("Diary saved successfully");
+    }
+
     const data = res.data.data;
-   
-    setForm((prev) => ({
-      ...prev,
-      ...data,
-      diaryDate: data.diaryDate || prev.diaryDate,
-    }));
+
+    setForm(INIT_FORM_DATA);
     loadStats();
     loadAiAnalysis();
   };
@@ -355,49 +355,20 @@ export default function EmotionDiaryPage() {
         <div className="flex flex-col gap-6">
           {/* Trend Chart */}
           <div className="bg-white rounded-xl p-6 shadow">
-            <div className="flex items-center justify-start mb-4">
-              <FontAwesomeIcon
-                icon={faChartLine}
-                className="text-2xl text-[#4ADE80] mr-4"
-              />
-              <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                7-Day Mood Trend
-              </h3>
-            </div>
-            <TrendChart data={trend} />
+            <TrendChart data={moodTrend} />
           </div>
           {/*This week Statistics */}
-          <div className="bg-white rounded-xl p-6 shadow">
-            <div className="flex items-center justify-start mb-4 ">
+          <div className="bg-white rounded-xl p-2 shadow">
+            <div className="flex items-start ">
               <FontAwesomeIcon
                 icon={faChartPie}
                 className="text-xl text-[#a9ea68] p-2"
               />
-              <h4 className="text-lg font-semibold text-gray-700">
+              <h4 className="text- font-semibold text-gray-700 ml-2">
                 This Week's Emotion Distribution
               </h4>
             </div>
-            <div>
-              {statistics && statistics.length > 0 ? (
-                <div>
-                  <span>{statistics.emotion}</span>
-                  <span>{statistics.percentage}%</span>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-4 space-y-1">
-                  <p>
-                    <FontAwesomeIcon
-                      icon={faChartPie}
-                      className="text-4xl text-gray-300"
-                    />
-                  </p>
-                  <p className="text-gray-500">No emotion data available</p>
-                  <p className="text-gray-400 text-sm">
-                    Please record emotion diaries to view statistics
-                  </p>
-                </div>
-              )}
-            </div>
+            <EmotionDistribution data={emotionDistribution} />
           </div>
 
           {/* AI Analysis */}
@@ -412,10 +383,11 @@ export default function EmotionDiaryPage() {
               </h3>
             </div>
             <div>
-              {statistics.suggestions && statistics.suggestions.length > 0 ? (
+              {emotionDistribution.suggestions &&
+              emotionDistribution.suggestions.length > 0 ? (
                 <div>
-                  <span>{statistics.ai}</span>
-                  <span>{statistics.percentage}%</span>
+                  <span>{emotionDistribution.ai}</span>
+                  <span>{emotionDistribution.percentage}%</span>
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-4 space-y-1">
