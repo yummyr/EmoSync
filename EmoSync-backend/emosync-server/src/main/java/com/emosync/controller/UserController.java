@@ -42,7 +42,7 @@ public class UserController {
 
 
     private final UserService userService;
-    private JwtTokenUtils jwtTokenUtils;
+    private final JwtTokenUtils jwtTokenUtils;
 
 
     /** Get current authenticated UserDetailsImpl */
