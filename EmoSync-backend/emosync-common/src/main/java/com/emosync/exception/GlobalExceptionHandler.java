@@ -50,6 +50,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public Result<?> handleException(Exception e) {
         log.error(e.getMessage(), e);
-        return Result.error(ResultCode.SYSTEM_ERROR.getCode(), "系统错误");
+        return Result.error(ResultCode.SYSTEM_ERROR.getCode(), "System error");
     }
 } 

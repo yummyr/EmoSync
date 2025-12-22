@@ -6,20 +6,19 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 /**
- * 用户登录命令DTO
- * @author system
+ * User Login Command DTO
  */
 @Data
-@Schema(description = "用户登录命令")
+@Schema(description = "User Login Command")
 public class UserLoginCommandDTO {
 
-    @Schema(description = "用户名或邮箱", example = "admin")
-    @NotBlank(message = "用户名或邮箱不能为空")
-    @Size(max = 100, message = "用户名或邮箱长度不能超过100个字符")
+    @Schema(description = "Username or email", example = "admin")
+    @NotBlank(message = "Username or email cannot be empty")
+    @Size(max = 100, message = "Username or email length cannot exceed 100 characters")
     private String username;
 
-    @Schema(description = "密码", example = "123456")
-    @NotBlank(message = "密码不能为空")
-    @Size(min = 6, max = 50, message = "密码长度必须在6到50个字符之间")
+    @Schema(description = "Password", example = "123456")
+    @NotBlank(message = "Password cannot be empty")
+    @Size(min = 6, max = 50, message = "Password length must be between 6 and 50 characters")
     private String password;
 }

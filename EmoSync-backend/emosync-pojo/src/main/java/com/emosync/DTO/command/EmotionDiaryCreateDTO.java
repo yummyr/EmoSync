@@ -10,43 +10,42 @@ import lombok.Data;
 import java.time.LocalDate;
 
 /**
- * 情绪日记创建DTO
- * @author system
+ * Emotion diary creation DTO
  */
 @Data
-@Schema(description = "情绪日记创建DTO")
+@Schema(description = "Emotion diary creation DTO")
 public class EmotionDiaryCreateDTO {
 
-    @Schema(description = "日记日期")
-    @NotNull(message = "日记日期不能为空")
+    @Schema(description = "Diary date")
+    @NotNull(message = "Diary date cannot be null")
     private LocalDate diaryDate;
 
-    @Schema(description = "情绪评分(1-10)")
-    @NotNull(message = "情绪评分不能为空")
-    @Min(value = 1, message = "情绪评分不能小于1")
-    @Max(value = 10, message = "情绪评分不能大于10")
+    @Schema(description = "Mood score (1-10)")
+    @NotNull(message = "Mood score cannot be null")
+    @Min(value = 1, message = "Mood score cannot be less than 1")
+    @Max(value = 10, message = "Mood score cannot be greater than 10")
     private Integer moodScore;
 
-    @Schema(description = "主要情绪")
-    @Size(max = 50, message = "主要情绪长度不能超过50个字符")
+    @Schema(description = "Dominant emotion")
+    @Size(max = 50, message = "Dominant emotion length cannot exceed 50 characters")
     private String dominantEmotion;
 
-    @Schema(description = "情绪触发因素")
-    @Size(max = 1000, message = "情绪触发因素长度不能超过1000个字符")
+    @Schema(description = "Emotion triggers")
+    @Size(max = 1000, message = "Emotion triggers length cannot exceed 1000 characters")
     private String emotionTriggers;
 
-    @Schema(description = "日记内容")
-    @Size(max = 2000, message = "日记内容长度不能超过2000个字符")
+    @Schema(description = "Diary content")
+    @Size(max = 2000, message = "Diary content length cannot exceed 2000 characters")
     private String diaryContent;
 
-    @Schema(description = "睡眠质量(1-5)")
-    @Min(value = 1, message = "睡眠质量评分不能小于1")
-    @Max(value = 5, message = "睡眠质量评分不能大于5")
+    @Schema(description = "Sleep quality (1-5)")
+    @Min(value = 1, message = "Sleep quality score cannot be less than 1")
+    @Max(value = 5, message = "Sleep quality score cannot be greater than 5")
     private Integer sleepQuality;
 
-    @Schema(description = "压力水平(1-5)")
-    @Min(value = 1, message = "压力水平评分不能小于1")
-    @Max(value = 5, message = "压力水平评分不能大于5")
+    @Schema(description = "Stress level (1-5)")
+    @Min(value = 1, message = "Stress level score cannot be less than 1")
+    @Max(value = 5, message = "Stress level score cannot be greater than 5")
     private Integer stressLevel;
 }
 

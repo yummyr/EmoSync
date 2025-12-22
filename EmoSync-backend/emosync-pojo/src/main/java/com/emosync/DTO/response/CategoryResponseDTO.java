@@ -9,41 +9,40 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * 知识分类响应DTO
- * @author system
+ * Knowledge category response DTO
  */
 @Data
 @Builder
-@Schema(description = "知识分类响应")
+@Schema(description = "Knowledge category response")
 public class CategoryResponseDTO {
 
-    @Schema(description = "分类ID")
+    @Schema(description = "Category ID")
     private Long id;
 
-    @Schema(description = "分类名称")
+    @Schema(description = "Category name")
     private String categoryName;
 
-    @Schema(description = "分类描述")
+    @Schema(description = "Category description")
     private String description;
 
-    @Schema(description = "排序号")
+    @Schema(description = "Sort order")
     private Integer sortOrder;
 
-    @Schema(description = "状态")
+    @Schema(description = "Status")
     private Integer status;
 
-    @Schema(description = "状态描述")
+    @Schema(description = "Status description")
     private String statusText;
 
-    @Schema(description = "文章数量")
+    @Schema(description = "Article count")
     private Integer articleCount;
 
-    @Schema(description = "创建时间")
+    @Schema(description = "Creation time")
     private LocalDateTime createdAt;
 
-    @Schema(description = "更新时间")
+    @Schema(description = "Update time")
     private LocalDateTime updatedAt;
-    // 用于JPQL查询的构造函数
+    // Constructor for JPQL queries
     public CategoryResponseDTO(Long id, String categoryName, String description,
                                Integer sortOrder, Integer status, String statusText,
                                Integer articleCount, LocalDateTime createdAt, LocalDateTime updatedAt) {

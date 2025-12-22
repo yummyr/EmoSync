@@ -41,7 +41,7 @@ public class ConsultationSession  {
     private List<ConsultationMessage> messages;
 
     /**
-     * 获取用户ID
+     * Get user ID
      */
     public Long getUserId() {
         return user != null ? user.getId() : null;
@@ -49,8 +49,8 @@ public class ConsultationSession  {
 
 
     /**
-     * 计算会话持续时间（分钟）
-     * 从开始时间到现在的持续时间
+     * Calculate session duration (minutes)
+     * Duration from start time to now
      */
     public Long getDurationMinutes() {
         if (startedAt == null) {
@@ -61,15 +61,15 @@ public class ConsultationSession  {
     }
 
     /**
-     * 判断是否有情绪分析数据
+     * Check if there is emotion analysis data
      */
     public boolean hasEmotionAnalysis() {
         return lastEmotionAnalysis != null && !lastEmotionAnalysis.trim().isEmpty();
     }
 
     /**
-     * 判断情绪分析数据是否需要更新
-     * @param thresholdMinutes 更新阈值（分钟）
+     * Check if emotion analysis data needs to be updated
+     * @param thresholdMinutes Update threshold (minutes)
      */
     public boolean needsEmotionAnalysisUpdate(int thresholdMinutes) {
         if (lastEmotionUpdatedAt == null) {

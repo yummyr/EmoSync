@@ -7,7 +7,6 @@ import lombok.Data;
 
 /**
  * Password Update Command DTO
- * @author Yuan
  */
 @Data
 @Schema(description = "Password update command")

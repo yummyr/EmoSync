@@ -4,7 +4,6 @@ import lombok.Getter;
 
 /**
  * User Type Enum
- * @author Yuan
  */
 @Getter
 public enum UserType {

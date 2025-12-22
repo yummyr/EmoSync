@@ -8,54 +8,53 @@ import lombok.Data;
 import java.time.LocalDate;
 
 /**
- * 情绪日记查询DTO
- * @author system
+ * Emotion diary query DTO
  */
 @Data
-@Schema(description = "情绪日记查询DTO")
+@Schema(description = "Emotion diary query")
 public class EmotionDiaryQueryDTO {
 
-    @Schema(description = "用户ID")
+    @Schema(description = "User ID")
     private Long userId;
 
-    @Schema(description = "用户名")
+    @Schema(description = "Username")
     private String username;
 
-    @Schema(description = "开始日期")
+    @Schema(description = "Start date")
     private LocalDate startDate;
 
-    @Schema(description = "结束日期")
+    @Schema(description = "End date")
     private LocalDate endDate;
 
-    @Schema(description = "最低情绪评分")
-    @Min(value = 1, message = "最低情绪评分不能小于1")
-    @Max(value = 10, message = "最低情绪评分不能大于10")
+    @Schema(description = "Minimum mood score")
+    @Min(value = 1, message = "Minimum mood score cannot be less than 1")
+    @Max(value = 10, message = "Minimum mood score cannot be greater than 10")
     private Integer minMoodScore;
 
-    @Schema(description = "最高情绪评分")
-    @Min(value = 1, message = "最高情绪评分不能小于1")
-    @Max(value = 10, message = "最高情绪评分不能大于10")
+    @Schema(description = "Maximum mood score")
+    @Min(value = 1, message = "Maximum mood score cannot be less than 1")
+    @Max(value = 10, message = "Maximum mood score cannot be greater than 10")
     private Integer maxMoodScore;
 
-    @Schema(description = "主要情绪")
+    @Schema(description = "Primary emotion")
     private String dominantEmotion;
 
-    @Schema(description = "睡眠质量")
-    @Min(value = 1, message = "睡眠质量评分不能小于1")
-    @Max(value = 5, message = "睡眠质量评分不能大于5")
+    @Schema(description = "Sleep quality")
+    @Min(value = 1, message = "Sleep quality score cannot be less than 1")
+    @Max(value = 5, message = "Sleep quality score cannot be greater than 5")
     private Integer sleepQuality;
 
-    @Schema(description = "压力水平")
-    @Min(value = 1, message = "压力水平评分不能小于1")
-    @Max(value = 5, message = "压力水平评分不能大于5")
+    @Schema(description = "Stress level")
+    @Min(value = 1, message = "Stress level score cannot be less than 1")
+    @Max(value = 5, message = "Stress level score cannot be greater than 5")
     private Integer stressLevel;
 
-    @Schema(description = "页码", example = "1")
-    @Min(value = 1, message = "页码不能小于1")
+    @Schema(description = "Page number", example = "1")
+    @Min(value = 1, message = "Page number cannot be less than 1")
     private Integer current = 1;
 
-    @Schema(description = "每页大小", example = "10")
-    @Min(value = 1, message = "每页大小不能小于1")
-    @Max(value = 100, message = "每页大小不能大于100")
+    @Schema(description = "Page size", example = "10")
+    @Min(value = 1, message = "Page size cannot be less than 1")
+    @Max(value = 100, message = "Page size cannot be greater than 100")
     private Integer size = 10;
 }

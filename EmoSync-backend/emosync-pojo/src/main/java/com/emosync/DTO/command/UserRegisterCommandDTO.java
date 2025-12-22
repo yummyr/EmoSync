@@ -14,7 +14,6 @@ import java.time.LocalDate;
 
 /**
  * User Registration Command DTO
- * @author system
  */
 @Data
 @Builder

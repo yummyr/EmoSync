@@ -5,14 +5,13 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
- * 文章状态更新命令DTO
- * @author system
+ * Article status update command DTO
  */
 @Data
-@Schema(description = "文章状态更新命令")
+@Schema(description = "Article status update command")
 public class ArticleStatusUpdateDTO {
 
-    @Schema(description = "文章状态", example = "1", allowableValues = {"0", "1", "2"})
-    @NotNull(message = "文章状态不能为空")
+    @Schema(description = "Article status", example = "1", allowableValues = {"0", "1", "2"})
+    @NotNull(message = "Article status cannot be empty")
     private Integer status;
 }

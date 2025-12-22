@@ -5,7 +5,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- 继承父项目 -->
+    <!-- Inherit from parent project -->
     <parent>
         <groupId>com.emosync</groupId>
         <artifactId>EmoSync-backend</artifactId>
@@ -35,14 +35,14 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- Lombok 共用 -->
+        <!-- Lombok shared -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
 
-        <!-- JWT 工具 -->
+        <!-- JWT utilities -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
@@ -61,7 +61,7 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Redis 依赖（server 也会用到） -->
+        <!-- Redis dependency (also used by server) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>

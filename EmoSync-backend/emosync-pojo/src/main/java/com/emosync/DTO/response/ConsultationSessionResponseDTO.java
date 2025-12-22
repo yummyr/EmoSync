@@ -7,46 +7,45 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * 咨询会话响应DTO
- * @author system
+ * Consultation session response DTO
  */
 @Data
-@Schema(description = "咨询会话响应DTO")
+@Schema(description = "Consultation session response")
 public class ConsultationSessionResponseDTO {
 
-    @Schema(description = "会话ID")
+    @Schema(description = "Session ID")
     private Long id;
 
-    @Schema(description = "用户ID")
+    @Schema(description = "User ID")
     private Long userId;
 
-    @Schema(description = "用户昵称")
+    @Schema(description = "User nickname")
     private String userNickname;
 
-    @Schema(description = "用户头像")
+    @Schema(description = "User avatar")
     private String userAvatar;
 
-    @Schema(description = "会话标题")
+    @Schema(description = "Session title")
     private String sessionTitle;
 
-    @Schema(description = "开始时间")
+    @Schema(description = "Start time")
     private LocalDateTime startedAt;
 
-    @Schema(description = "会话持续时间（分钟）")
+    @Schema(description = "Session duration (minutes)")
     private Long durationMinutes;
 
-    @Schema(description = "消息总数")
+    @Schema(description = "Total message count")
     private Integer messageCount;
 
-    @Schema(description = "最后一条消息内容（预览）")
+    @Schema(description = "Last message content (preview)")
     private String lastMessageContent;
 
-    @Schema(description = "最后一条消息时间")
+    @Schema(description = "Last message time")
     private LocalDateTime lastMessageTime;
 
-    @Schema(description = "情绪标签列表")
+    @Schema(description = "Emotion tag list")
     private List<String> emotionTags;
 
-    @Schema(description = "主要情绪")
+    @Schema(description = "Primary emotion")
     private String primaryEmotion;
 }

@@ -53,28 +53,28 @@ public class AiAnalysisTask extends BaseEntity {
     private User user;
 
     /**
-     * 判断任务是否可以重试
+     * Determine if the task can be retried
      */
     public boolean canRetry() {
         return retryCount < maxRetryCount && "FAILED".equals(status);
     }
 
     /**
-     * 判断任务是否正在处理
+     * Determine if the task is currently processing
      */
     public boolean isProcessing() {
         return "PROCESSING".equals(status);
     }
 
     /**
-     * 判断任务是否已完成
+     * Determine if the task is completed
      */
     public boolean isCompleted() {
         return "COMPLETED".equals(status);
     }
 
     /**
-     * 判断任务是否失败
+     * Determine if the task has failed
      */
     public boolean isFailed() {
         return "FAILED".equals(status);

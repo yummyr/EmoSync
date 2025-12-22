@@ -5,18 +5,18 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.util.List;
-@Schema(description = "业务文件配置DTO")
+@Schema(description = "Business file configuration DTO")
 @Data
 @AllArgsConstructor
 public class BussinessFileUploadConfig {
-  @Schema(description = "业务文件类型")
+  @Schema(description = "Business file type")
   String  businessType;
-  @Schema(description = "业务文件描述")
+  @Schema(description = "Business file description")
   String  businessDesc;
-  @Schema(description = "允许的类型")
+  @Schema(description = "Allowed types")
   List<String> allowedTypes;
-  @Schema(description = "文件最大大小")
+  @Schema(description = "Maximum file size")
   Long  maxFileSize;
-  @Schema(description = "允许的扩展")
+  @Schema(description = "Allowed extensions")
   List<String> allowedExtensions;
 }

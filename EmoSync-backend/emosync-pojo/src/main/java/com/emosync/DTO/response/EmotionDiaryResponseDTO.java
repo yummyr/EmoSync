@@ -7,87 +7,86 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * 情绪日记响应DTO
- * @author system
+ * Emotion Diary Response DTO
  */
 @Data
-@Schema(description = "情绪日记响应DTO")
+@Schema(description = "Emotion Diary Response")
 public class EmotionDiaryResponseDTO {
 
-    @Schema(description = "日记ID")
+    @Schema(description = "Diary ID")
     private Long id;
 
-    @Schema(description = "用户ID")
+    @Schema(description = "User ID")
     private Long userId;
 
-    @Schema(description = "用户昵称")
+    @Schema(description = "User nickname")
     private String userNickname;
 
-    @Schema(description = "用户名")
+    @Schema(description = "Username")
     private String username;
 
-    @Schema(description = "昵称")
+    @Schema(description = "Nickname")
     private String nickname;
 
-    @Schema(description = "日记日期")
+    @Schema(description = "Diary date")
     private LocalDate diaryDate;
 
-    @Schema(description = "情绪评分(1-10)")
+    @Schema(description = "Mood score (1-10)")
     private Integer moodScore;
 
-    @Schema(description = "情绪评分描述")
+    @Schema(description = "Mood score description")
     private String moodScoreDesc;
 
-    @Schema(description = "主要情绪")
+    @Schema(description = "Dominant emotion")
     private String dominantEmotion;
 
-    @Schema(description = "情绪触发因素")
+    @Schema(description = "Emotion triggers")
     private String emotionTriggers;
 
-    @Schema(description = "日记内容")
+    @Schema(description = "Diary content")
     private String diaryContent;
 
-    @Schema(description = "日记内容预览")
+    @Schema(description = "Diary content preview")
     private String diaryContentPreview;
 
-    @Schema(description = "睡眠质量(1-5)")
+    @Schema(description = "Sleep quality (1-5)")
     private Integer sleepQuality;
 
-    @Schema(description = "睡眠质量描述")
+    @Schema(description = "Sleep quality description")
     private String sleepQualityDesc;
 
-    @Schema(description = "压力水平(1-5)")
+    @Schema(description = "Stress level (1-5)")
     private Integer stressLevel;
 
-    @Schema(description = "压力水平描述")
+    @Schema(description = "Stress level description")
     private String stressLevelDesc;
 
-    @Schema(description = "创建时间")
+    @Schema(description = "Creation time")
     private LocalDateTime createdAt;
 
-    @Schema(description = "更新时间")
+    @Schema(description = "Update time")
     private LocalDateTime updatedAt;
 
-    @Schema(description = "是否为积极情绪")
+    @Schema(description = "Is positive mood")
     private Boolean isPositiveMood;
 
-    @Schema(description = "是否为消极情绪")
+    @Schema(description = "Is negative mood")
     private Boolean isNegativeMood;
 
-    @Schema(description = "AI情绪分析结果(JSON格式)")
+    @Schema(description = "AI emotion analysis result (JSON format)")
     private String aiEmotionAnalysis;
 
-    @Schema(description = "AI分析更新时间")
+    @Schema(description = "AI analysis update time")
     private LocalDateTime aiAnalysisUpdatedAt;
 
-    @Schema(description = "是否有AI情绪分析")
+    @Schema(description = "Has AI emotion analysis")
     private Boolean hasAiEmotionAnalysis;
 
-    @Schema(description = "AI分析状态：PENDING-分析中，COMPLETED-已完成，FAILED-分析失败")
+    @Schema(description = "AI analysis status: PENDING-analyzing, COMPLETED-completed, FAILED-analysis failed")
     private String aiAnalysisStatus;
 
     /**
-     * 获取日记内容预览（截取前100个字符）
+     * Get diary content preview (first 100 characters)
      */
     public String getDiaryContentPreview() {
         if (diaryContent == null) {
@@ -97,14 +96,14 @@ public class EmotionDiaryResponseDTO {
     }
 
     /**
-     * 计算内容长度
+     * Calculate content length
      */
     public int getContentLength() {
         return diaryContent != null ? diaryContent.length() : 0;
     }
 
     /**
-     * 判断是否包含情绪触发因素
+     * Check if emotion triggers are included
      */
     public boolean hasEmotionTriggers() {
         return emotionTriggers != null && !emotionTriggers.trim().isEmpty();

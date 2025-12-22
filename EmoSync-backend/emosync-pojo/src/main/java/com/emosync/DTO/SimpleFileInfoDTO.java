@@ -4,15 +4,15 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
-@Schema(description = "简单文件信息")
+@Schema(description = "Simple file information")
 public class SimpleFileInfoDTO {
-    @Schema(description = "文件名")
+    @Schema(description = "File name")
     private String filename;
-    @Schema(description = "文件大小")
+    @Schema(description = "File size")
     private long size;
-    @Schema(description = "上次修改")
+    @Schema(description = "Last modified")
     private long lastModified;
-    @Schema(description = "文件路径")
+    @Schema(description = "File path")
     private String path;
 
 }

@@ -7,42 +7,41 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 /**
- * 知识文章创建命令DTO
- * @author system
+ * Knowledge article creation command DTO
  */
 @Data
-@Schema(description = "知识文章创建命令")
+@Schema(description = "Knowledge article creation command")
 public class ArticleCreateDTO {
 
-    @Schema(description = "文章ID（可选，支持UUID预生成）", example = "550e8400-e29b-41d4-a716-446655440000")
-    @Size(max = 50, message = "文章ID长度不能超过50个字符")
+    @Schema(description = "Article ID (optional, supports UUID pre-generation)", example = "550e8400-e29b-41d4-a716-446655440000")
+    @Size(max = 50, message = "Article ID length cannot exceed 50 characters")
     private String id;
 
-    @Schema(description = "分类ID", example = "1")
-    @NotNull(message = "分类ID不能为空")
+    @Schema(description = "Category ID", example = "1")
+    @NotNull(message = "Category ID cannot be empty")
     private Long categoryId;
 
-    @Schema(description = "文章标题", example = "如何管理焦虑情绪")
-    @NotBlank(message = "文章标题不能为空")
-    @Size(max = 200, message = "文章标题长度不能超过200个字符")
+    @Schema(description = "Article title", example = "How to manage anxiety")
+    @NotBlank(message = "Article title cannot be empty")
+    @Size(max = 200, message = "Article title length cannot exceed 200 characters")
     private String title;
 
-    @Schema(description = "文章摘要", example = "本文介绍了管理焦虑情绪的有效方法和技巧")
-    @Size(max = 1000, message = "文章摘要长度不能超过1000个字符")
+    @Schema(description = "Article summary", example = "This article introduces effective methods and techniques for managing anxiety")
+    @Size(max = 1000, message = "Article summary length cannot exceed 1000 characters")
     private String summary;
 
-    @Schema(description = "文章内容", example = "焦虑是一种常见的情绪反应...")
-    @NotBlank(message = "文章内容不能为空")
+    @Schema(description = "Article content", example = "Anxiety is a common emotional response...")
+    @NotBlank(message = "Article content cannot be empty")
     private String content;
 
-    @Schema(description = "封面图片URL", example = "https://example.com/cover.jpg")
-    @Size(max = 500, message = "封面图片URL长度不能超过500个字符")
+    @Schema(description = "Cover image URL", example = "https://example.com/cover.jpg")
+    @Size(max = 500, message = "Cover image URL length cannot exceed 500 characters")
     private String coverImage;
 
-    @Schema(description = "标签（多个标签用逗号分隔）", example = "焦虑,情绪管理,心理健康")
-    @Size(max = 500, message = "标签长度不能超过500个字符")
+    @Schema(description = "Tags (multiple tags separated by commas)", example = "anxiety,emotion management,mental health")
+    @Size(max = 500, message = "Tags length cannot exceed 500 characters")
     private String tags;
 
-    @Schema(description = "状态", example = "0", allowableValues = {"0", "1", "2"})
-    private Integer status = 0; // 默认为草稿状态
+    @Schema(description = "Status", example = "0", allowableValues = {"0", "1", "2"})
+    private Integer status = 0; // Default is draft status
 }

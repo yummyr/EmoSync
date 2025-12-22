@@ -9,8 +9,6 @@ import java.util.List;
 /**
  * File Business Type Enum
  * Defines different business types for file categorization
- *
- * @author Yuan
  */
 @Getter
 public enum FileBusinessTypeEnum {

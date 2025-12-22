@@ -5,24 +5,23 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 /**
- * 知识分类更新命令DTO
- * @author system
+ * Knowledge category update command DTO
  */
 @Data
-@Schema(description = "知识分类更新命令")
+@Schema(description = "Knowledge category update command")
 public class CategoryUpdateDTO {
 
-    @Schema(description = "分类名称", example = "心理健康基础")
-    @Size(max = 100, message = "分类名称长度不能超过100个字符")
+    @Schema(description = "Category name", example = "Mental Health Basics")
+    @Size(max = 100, message = "Category name length cannot exceed 100 characters")
     private String categoryName;
 
-    @Schema(description = "分类描述", example = "心理健康基础知识和概念")
-    @Size(max = 500, message = "分类描述长度不能超过500个字符")
+    @Schema(description = "Category description", example = "Basic mental health knowledge and concepts")
+    @Size(max = 500, message = "Category description length cannot exceed 500 characters")
     private String description;
 
-    @Schema(description = "排序号", example = "1")
+    @Schema(description = "Sort order", example = "1")
     private Integer sortOrder;
 
-    @Schema(description = "状态", example = "1", allowableValues = {"0", "1"})
+    @Schema(description = "Status", example = "1", allowableValues = {"0", "1"})
     private Integer status;
 }

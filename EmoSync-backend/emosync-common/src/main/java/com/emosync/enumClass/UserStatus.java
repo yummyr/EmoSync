@@ -4,7 +4,6 @@ import lombok.Getter;
 
 /**
  * User Status Enum
- * @author Yuan
  */
 @Getter
 public enum UserStatus {

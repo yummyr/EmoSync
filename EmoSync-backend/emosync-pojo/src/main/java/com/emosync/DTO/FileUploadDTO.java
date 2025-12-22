@@ -5,24 +5,23 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 /**
- * 文件上传请求DTO
- * @author system
+ * File upload request DTO
  */
 @Data
-@Schema(description = "文件上传请求DTO")
+@Schema(description = "File upload request DTO")
 public class FileUploadDTO {
 
-    @NotBlank(message = "业务类型不能为空")
-    @Schema(description = "业务类型", example = "USER_AVATAR")
+    @NotBlank(message = "Business type cannot be empty")
+    @Schema(description = "Business type", example = "USER_AVATAR")
     private String businessType;
 
-    @NotBlank(message = "业务对象ID不能为空")
-    @Schema(description = "业务对象ID（支持数字ID和UUID格式）", example = "1")
+    @NotBlank(message = "Business object ID cannot be empty")
+    @Schema(description = "Business object ID (supports numeric ID and UUID format)", example = "1")
     private String businessId;
 
-    @Schema(description = "业务字段名", example = "avatar")
+    @Schema(description = "Business field name", example = "avatar")
     private String businessField;
 
-    @Schema(description = "是否临时文件", example = "false")
+    @Schema(description = "Whether it is a temporary file", example = "false")
     private Boolean isTemp;
 } 

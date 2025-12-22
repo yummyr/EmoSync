@@ -7,31 +7,30 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 文章统计信息响应DTO
- * @author system
+ * Article statistics response DTO
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "文章统计信息响应")
+@Schema(description = "Article statistics response")
 public class ArticleStatisticsResponseDTO {
 
-    @Schema(description = "文章总数")
+    @Schema(description = "Total articles")
     private Long totalArticles;
 
-    @Schema(description = "已发布文章数")
+    @Schema(description = "Published articles")
     private Long publishedArticles;
 
-    @Schema(description = "草稿文章数")
+    @Schema(description = "Draft articles")
     private Long draftArticles;
 
-    @Schema(description = "已下线文章数")
+    @Schema(description = "Offline articles")
     private Long offlineArticles;
 
-    @Schema(description = "总阅读量")
+    @Schema(description = "Total views")
     private Long totalViews;
 
-    @Schema(description = "总收藏数")
+    @Schema(description = "Total favorites")
     private Long totalFavorites;
 }

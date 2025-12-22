@@ -22,19 +22,19 @@ public class UserFavorite {
     private Long id;
 
     /**
-     * User entity relationship - 这个属性名必须与 User 实体中 mappedBy 的值匹配
+     * User entity relationship - This attribute name must match the mappedBy value in the User entity
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;  // 属性名必须是 "user"
+    private User user;  // Attribute name must be "user"
 
 
     /**
-     * KnowledgeArticle entity relationship - 这个属性名必须与 KnowledgeArticle 实体中 mappedBy 的值匹配
+     * KnowledgeArticle entity relationship - This attribute name must match the mappedBy value in the KnowledgeArticle entity
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "article_id", nullable = false)
-    private KnowledgeArticle knowledgeArticle;  // 属性名必须是 "knowledgeArticle"
+    private KnowledgeArticle knowledgeArticle;  // Attribute name must be "knowledgeArticle"
 
     /**
      * Created time

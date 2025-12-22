@@ -13,7 +13,6 @@ import java.util.Map;
 
 /**
  * Data Analytics Response DTO
- * @author Yuan
  */
 @Data
 @Builder

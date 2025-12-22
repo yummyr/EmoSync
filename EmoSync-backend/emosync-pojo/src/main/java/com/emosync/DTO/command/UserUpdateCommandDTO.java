@@ -10,7 +10,6 @@ import java.time.LocalDate;
 
 /**
  * User Information Update Command DTO
- * @author Yuan
  */
 @Data
 @Schema(description = "User information update command")

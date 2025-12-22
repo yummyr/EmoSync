@@ -8,49 +8,48 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 /**
- * 用户创建命令DTO（管理员功能）
- * @author system
+ * User creation command DTO (Admin function)
  */
 @Data
-@Schema(description = "用户创建命令")
+@Schema(description = "User creation command")
 public class UserCreateDTO {
 
-    @Schema(description = "用户名", example = "newuser")
-    @NotBlank(message = "用户名不能为空")
-    @Size(min = 3, max = 50, message = "用户名长度必须在3到50个字符之间")
-    @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "用户名只能包含字母、数字和下划线")
+    @Schema(description = "Username", example = "newuser")
+    @NotBlank(message = "Username cannot be blank")
+    @Size(min = 3, max = 50, message = "Username length must be between 3 and 50 characters")
+    @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "Username can only contain letters, numbers and underscores")
     private String username;
 
-    @Schema(description = "邮箱", example = "newuser@drone.com")
-    @NotBlank(message = "邮箱不能为空")
-    @Email(message = "邮箱格式不正确")
-    @Size(max = 100, message = "邮箱长度不能超过100个字符")
+    @Schema(description = "Email", example = "newuser@drone.com")
+    @NotBlank(message = "Email cannot be blank")
+    @Email(message = "Email format is invalid")
+    @Size(max = 100, message = "Email length cannot exceed 100 characters")
     private String email;
 
-    @Schema(description = "密码", example = "123456")
-    @NotBlank(message = "密码不能为空")
-    @Size(min = 6, max = 50, message = "密码长度必须在6到50个字符之间")
+    @Schema(description = "Password", example = "123456")
+    @NotBlank(message = "Password cannot be blank")
+    @Size(min = 6, max = 50, message = "Password length must be between 6 and 50 characters")
     private String password;
 
-    @Schema(description = "昵称", example = "新用户")
-    @Size(max = 50, message = "昵称长度不能超过50个字符")
+    @Schema(description = "Nickname", example = "New User")
+    @Size(max = 50, message = "Nickname length cannot exceed 50 characters")
     private String nickname;
 
-    @Schema(description = "手机号", example = "13800138000")
-    @Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式不正确")
+    @Schema(description = "Phone number", example = "13800138000")
+    @Pattern(regexp = "^1[3-9]\\d{9}$", message = "Phone number format is invalid")
     private String phone;
 
-    @Schema(description = "性别", example = "男", allowableValues = {"男", "女"})
+    @Schema(description = "Gender", example = "male", allowableValues = {"male", "female"})
     private String sex;
 
-    @Schema(description = "个人简介", example = "无人机爱好者，喜欢航拍摄影")
-    @Size(max = 500, message = "个人简介长度不能超过500个字符")
+    @Schema(description = "Bio", example = "Drone enthusiast, loves aerial photography")
+    @Size(max = 500, message = "Bio length cannot exceed 500 characters")
     private String bio;
 
-    @Schema(description = "用户类型", example = "user", allowableValues = {"user", "merchant", "admin"})
-    @NotBlank(message = "用户类型不能为空")
+    @Schema(description = "User type", example = "user", allowableValues = {"user", "merchant", "admin"})
+    @NotBlank(message = "User type cannot be blank")
     private String userType;
 
-    @Schema(description = "用户状态", example = "active", allowableValues = {"active", "inactive", "banned"})
+    @Schema(description = "User status", example = "active", allowableValues = {"active", "inactive", "banned"})
     private String status = "active";
 }

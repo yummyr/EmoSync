@@ -56,94 +56,94 @@ public class EmotionDiary extends BaseEntity {
 
 
     /**
-     * 获取情绪评分的描述
-     * @return 情绪评分描述
+     * Get mood score description
+     * @return Mood score description
      */
     public String getMoodScoreDesc() {
         if (moodScore == null) {
-            return "未知";
+            return "Unknown";
         }
         return switch (moodScore) {
-            case 1 -> "非常糟糕";
-            case 2 -> "糟糕";
-            case 3 -> "不好";
-            case 4 -> "略差";
-            case 5 -> "一般";
-            case 6 -> "还可以";
-            case 7 -> "不错";
-            case 8 -> "很好";
-            case 9 -> "非常好";
-            case 10 -> "极好";
-            default -> "无效评分";
+            case 1 -> "Terrible";
+            case 2 -> "Very Bad";
+            case 3 -> "Bad";
+            case 4 -> "Poor";
+            case 5 -> "Average";
+            case 6 -> "Fair";
+            case 7 -> "Good";
+            case 8 -> "Very Good";
+            case 9 -> "Excellent";
+            case 10 -> "Outstanding";
+            default -> "Invalid score";
         };
     }
 
     /**
-     * 获取睡眠质量的描述
-     * @return 睡眠质量描述
+     * Get sleep quality description
+     * @return Sleep quality description
      */
     public String getSleepQualityDesc() {
         if (sleepQuality == null) {
-            return "未记录";
+            return "Not recorded";
         }
         return switch (sleepQuality) {
-            case 1 -> "很差";
-            case 2 -> "较差";
-            case 3 -> "一般";
-            case 4 -> "良好";
-            case 5 -> "优秀";
-            default -> "无效评分";
+            case 1 -> "Very Poor";
+            case 2 -> "Poor";
+            case 3 -> "Average";
+            case 4 -> "Good";
+            case 5 -> "Excellent";
+            default -> "Invalid score";
         };
     }
 
     /**
-     * 获取压力水平的描述
-     * @return 压力水平描述
+     * Get stress level description
+     * @return Stress level description
      */
     public String getStressLevelDesc() {
         if (stressLevel == null) {
-            return "未记录";
+            return "Not recorded";
         }
         return switch (stressLevel) {
-            case 1 -> "很低";
-            case 2 -> "较低";
-            case 3 -> "中等";
-            case 4 -> "较高";
-            case 5 -> "很高";
-            default -> "无效评分";
+            case 1 -> "Very Low";
+            case 2 -> "Low";
+            case 3 -> "Moderate";
+            case 4 -> "High";
+            case 5 -> "Very High";
+            default -> "Invalid score";
         };
     }
 
     /**
-     * 判断是否为积极情绪
-     * 根据情绪评分判断，7分及以上认为是积极情绪
-     * @return true-积极情绪，false-非积极情绪
+     * Check if mood is positive
+     * Based on mood score, 7 and above is considered positive mood
+     * @return true-Positive mood, false-Not positive mood
      */
     public boolean isPositiveMood() {
         return moodScore != null && moodScore >= 7;
     }
 
     /**
-     * 判断是否为消极情绪
-     * 根据情绪评分判断，4分及以下认为是消极情绪
-     * @return true-消极情绪，false-非消极情绪
+     * Check if mood is negative
+     * Based on mood score, 4 and below is considered negative mood
+     * @return true-Negative mood, false-Not negative mood
      */
     public boolean isNegativeMood() {
         return moodScore != null && moodScore <= 4;
     }
 
     /**
-     * 判断是否有AI情绪分析数据
-     * @return true-有AI分析数据，false-无AI分析数据
+     * Check if there is AI emotion analysis data
+     * @return true-Has AI analysis data, false-No AI analysis data
      */
     public boolean hasAiEmotionAnalysis() {
         return aiEmotionAnalysis != null && !aiEmotionAnalysis.trim().isEmpty();
     }
 
     /**
-     * 判断AI情绪分析数据是否需要更新
-     * @param thresholdMinutes 更新阈值（分钟）
-     * @return true-需要更新，false-不需要更新
+     * Check if AI emotion analysis data needs to be updated
+     * @param thresholdMinutes Update threshold (minutes)
+     * @return true-Needs update, false-Does not need update
      */
     public boolean needsAiAnalysisUpdate(int thresholdMinutes) {
         if (aiAnalysisUpdatedAt == null) {
@@ -153,19 +153,19 @@ public class EmotionDiary extends BaseEntity {
     }
 
     /**
-     * 获取分析内容（用于AI分析）
-     * 组合日记内容和情绪触发因素
-     * @return 用于AI分析的文本内容
+     * Get analysis content (for AI analysis)
+     * Combine diary content and emotion triggers
+     * @return Text content for AI analysis
      */
     public String getAnalysisContent() {
         StringBuilder content = new StringBuilder();
 
         if (emotionTriggers != null && !emotionTriggers.trim().isEmpty()) {
-            content.append("情绪触发因素：").append(emotionTriggers).append("\n");
+            content.append("Emotion Triggers: ").append(emotionTriggers).append("\n");
         }
 
         if (diaryContent != null && !diaryContent.trim().isEmpty()) {
-            content.append("日记内容：").append(diaryContent);
+            content.append("Diary Content: ").append(diaryContent);
         }
 
         return content.toString().trim();

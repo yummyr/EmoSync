@@ -1,14 +1,14 @@
 package com.emosync.exception;
 
 /**
- * JWT认证异常类
- * 
- * 用于处理JWT认证过程中的各种异常情况：
- * - Token缺失
- * - Token格式错误
- * - Token过期
- * - Token验证失败
- * - 用户信息不存在
+ * JWT Authentication Exception Class
+ *
+ * Used to handle various exceptions during JWT authentication:
+ * - Token missing
+ * - Token format error
+ * - Token expired
+ * - Token validation failed
+ * - User information not found
  */
 public class JwtAuthenticationException extends RuntimeException {
     

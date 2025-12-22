@@ -9,64 +9,63 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * 文章简化响应DTO（用于列表展示）
- * @author system
+ * Article simplified response DTO (for list display)
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "文章简化响应")
+@Schema(description = "Article simplified response")
 public class ArticleSimpleResponseDTO {
 
-    @Schema(description = "文章ID")
+    @Schema(description = "Article ID")
     private String id;
 
-    @Schema(description = "分类ID")
+    @Schema(description = "Category ID")
     private Long categoryId;
 
-    @Schema(description = "分类名称")
+    @Schema(description = "Category name")
     private String categoryName;
 
-    @Schema(description = "文章标题")
+    @Schema(description = "Article title")
     private String title;
 
-    @Schema(description = "文章摘要")
+    @Schema(description = "Article summary")
     private String summary;
 
-    @Schema(description = "封面图片")
+    @Schema(description = "Cover image")
     private String coverImage;
 
-    @Schema(description = "标签")
+    @Schema(description = "Tags")
     private String tags;
 
-    @Schema(description = "作者名称")
+    @Schema(description = "Author name")
     private String authorName;
 
-    @Schema(description = "阅读次数")
+    @Schema(description = "Read count")
     private Integer readCount;
 
-    @Schema(description = "状态")
+    @Schema(description = "Status")
     private Integer status;
 
-    @Schema(description = "状态描述")
+    @Schema(description = "Status description")
     private String statusText;
 
-    @Schema(description = "是否收藏")
+    @Schema(description = "Is favorited")
     private Boolean isFavorited;
 
-    @Schema(description = "收藏数量")
+    @Schema(description = "Favorite count")
     private Integer favoriteCount;
 
-    @Schema(description = "发布时间")
+    @Schema(description = "Published time")
     private LocalDateTime publishedAt;
 
-    @Schema(description = "创建时间")
+    @Schema(description = "Creation time")
     private LocalDateTime createdAt;
 
-    @Schema(description = "更新时间")
+    @Schema(description = "Update time")
     private LocalDateTime updatedAt;
 
-    @Schema(description = "收藏时间")
+    @Schema(description = "Favorite time")
     private LocalDateTime favoriteTime;
 }

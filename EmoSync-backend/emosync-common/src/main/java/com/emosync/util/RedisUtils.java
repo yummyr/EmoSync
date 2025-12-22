@@ -46,7 +46,7 @@ public class RedisUtils {
         try {
             redisTemplate.opsForValue().set(key, value);
         } catch (Exception e) {
-            log.error("Redis设置缓存失败，key: {}, error: {}", key, e.getMessage(), e);
+            log.error("Failed to set Redis cache, key: {}, error: {}", key, e.getMessage(), e);
         }
     }
 

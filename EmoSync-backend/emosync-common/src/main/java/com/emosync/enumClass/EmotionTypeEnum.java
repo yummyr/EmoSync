@@ -5,9 +5,6 @@ import lombok.Getter;
 /**
  * Emotion Type Enum
  * Standardized emotion classification for AI emotion analysis
- *
- * @author Yuan
- * @since 2025-01-18
  */
 @Getter
 public enum EmotionTypeEnum {
@@ -38,7 +35,7 @@ public enum EmotionTypeEnum {
     NOSTALGIC("Nostalgic", "neutral", "🧠", "Recollection and nostalgia for the past", "#71717A");
     
     /**
-     * Emotion name (English)
+     * Emotion name
      */
     private final String emotionName;
 

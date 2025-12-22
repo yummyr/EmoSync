@@ -4,31 +4,30 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 /**
- * 用户收藏文章查询DTO
- * @author system
+ * User favorite articles query DTO
  */
 @Data
-@Schema(description = "用户收藏文章查询")
+@Schema(description = "User favorite articles query")
 public class UserFavoriteQueryDTO {
 
-    @Schema(description = "用户ID", example = "1")
+    @Schema(description = "User ID", example = "1")
     private Long userId;
 
-    @Schema(description = "文章标题（模糊查询）", example = "焦虑")
+    @Schema(description = "Article title (fuzzy search)", example = "anxiety")
     private String title;
 
-    @Schema(description = "分类ID", example = "1")
+    @Schema(description = "Category ID", example = "1")
     private Long categoryId;
 
-    @Schema(description = "排序字段", example = "createdAt", allowableValues = {"createdAt", "title"})
+    @Schema(description = "Sort field", example = "createdAt", allowableValues = {"createdAt", "title"})
     private String sortField = "createdAt";
 
-    @Schema(description = "排序方向", example = "desc", allowableValues = {"asc", "desc"})
+    @Schema(description = "Sort direction", example = "desc", allowableValues = {"asc", "desc"})
     private String sortDirection = "desc";
 
-    @Schema(description = "当前页码", example = "1")
+    @Schema(description = "Current page number", example = "1")
     private Long currentPage = 1L;
 
-    @Schema(description = "每页大小", example = "10")
+    @Schema(description = "Page size", example = "10")
     private Long size = 10L;
 }

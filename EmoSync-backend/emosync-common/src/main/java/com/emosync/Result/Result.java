@@ -55,14 +55,14 @@ public class Result<T> {
     }
     
     /**
-     * 判断操作是否成功
+     * Check if the operation is successful
      */
     public boolean isSuccess() {
         return ResultCode.SUCCESS.getCode().equals(this.code);
     }
-    
+
     /**
-     * 获取错误消息
+     * Get error message
      */
     public String getMessage() {
         return this.msg;

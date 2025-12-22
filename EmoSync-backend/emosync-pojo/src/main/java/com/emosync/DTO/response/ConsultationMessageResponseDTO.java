@@ -6,55 +6,54 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 咨询消息响应DTO
- * @author system
+ * Consultation message response DTO
  */
 @Data
-@Schema(description = "咨询消息响应DTO")
+@Schema(description = "Consultation message response DTO")
 public class ConsultationMessageResponseDTO {
 
-    @Schema(description = "消息ID")
+    @Schema(description = "Message ID")
     private Long id;
 
-    @Schema(description = "会话ID")
+    @Schema(description = "Session ID")
     private Long sessionId;
 
-    @Schema(description = "发送者类型 1:用户 2:AI助手")
+    @Schema(description = "Sender type 1:User 2:AI Assistant")
     private Integer senderType;
 
-    @Schema(description = "发送者类型描述")
+    @Schema(description = "Sender type description")
     private String senderTypeDesc;
 
-    @Schema(description = "消息类型 1:文本")
+    @Schema(description = "Message type 1:Text")
     private Integer messageType;
 
-    @Schema(description = "消息类型描述")
+    @Schema(description = "Message type description")
     private String messageTypeDesc;
 
-    @Schema(description = "消息内容")
+    @Schema(description = "Message content")
     private String content;
 
-    @Schema(description = "情绪标签")
+    @Schema(description = "Emotion tag")
     private String emotionTag;
 
-    @Schema(description = "使用的AI模型")
+    @Schema(description = "AI model used")
     private String aiModel;
 
-    @Schema(description = "创建时间")
+    @Schema(description = "Creation time")
     private LocalDateTime createdAt;
 
-    @Schema(description = "消息长度")
+    @Schema(description = "Message length")
     private Integer contentLength;
 
     /**
-     * 计算消息长度
+     * Calculate message length
      */
     public void calculateContentLength() {
         this.contentLength = content != null ? content.length() : 0;
     }
 
     /**
-     * 获取消息预览（截取前100个字符）
+     * Get message preview (first 100 characters)
      */
     public String getContentPreview() {
         if (content == null) {

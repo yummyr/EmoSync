@@ -4,44 +4,43 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 /**
- * AI分析任务查询DTO
- * @author Yuan
+ * AI Analysis Task Query DTO
  */
 @Data
-@Schema(description = "AI分析任务查询DTO")
+@Schema(description = "AI Analysis Task Query DTO")
 public class AiAnalysisTaskQueryDTO {
 
-    @Schema(description = "当前页码", example = "1")
+    @Schema(description = "Current page number", example = "1")
     private Integer current = 1;
 
-    @Schema(description = "每页大小", example = "20")
+    @Schema(description = "Page size", example = "20")
     private Integer size = 20;
 
-    @Schema(description = "任务状态")
+    @Schema(description = "Task status")
     private String status;
 
-    @Schema(description = "任务类型")
+    @Schema(description = "Task type")
     private String taskType;
 
-    @Schema(description = "用户ID")
+    @Schema(description = "User ID")
     private Long userId;
 
-    @Schema(description = "用户名")
+    @Schema(description = "Username")
     private String username;
 
-    @Schema(description = "优先级")
+    @Schema(description = "Priority")
     private Integer priority;
 
-    @Schema(description = "开始时间")
+    @Schema(description = "Start time")
     private String startTime;
 
-    @Schema(description = "结束时间")
+    @Schema(description = "End time")
     private String endTime;
 
-    @Schema(description = "是否只显示失败任务")
+    @Schema(description = "Show only failed tasks")
     private Boolean failedOnly;
 
-    @Schema(description = "是否只显示可重试任务")
+    @Schema(description = "Show only retryable tasks")
     private Boolean retryableOnly;
 }
 

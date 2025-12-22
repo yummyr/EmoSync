@@ -9,10 +9,6 @@ import java.util.List;
 /**
  * File Type Enum
  * Unified management of supported file types and extensions.
- *
- * Replaced Hutool StrUtil with Spring's StringUtils.
- *
- * @author Yuan
  */
 @Getter
 public enum FileTypeEnum {

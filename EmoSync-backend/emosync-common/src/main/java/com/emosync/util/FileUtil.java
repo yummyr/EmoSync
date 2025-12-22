@@ -22,8 +22,6 @@ import java.nio.file.Paths;
  * File Operation Utility Class
  * Focuses on basic file operations: save, delete, check, etc.
  * File type validation uniformly uses FileTypeEnum
- *
- * @author Yuan
  */
 public class FileUtil {
     private final static Logger log = LoggerFactory.getLogger(FileUtil.class);

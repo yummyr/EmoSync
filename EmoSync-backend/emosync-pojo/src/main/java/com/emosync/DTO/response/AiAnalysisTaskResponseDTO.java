@@ -6,74 +6,73 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * AI分析任务响应DTO
- * @author Yuan
+ * AI Analysis Task Response DTO
  */
 @Data
-@Schema(description = "AI分析任务响应DTO")
+@Schema(description = "AI Analysis Task Response DTO")
 public class AiAnalysisTaskResponseDTO {
 
-    @Schema(description = "任务ID")
+    @Schema(description = "Task ID")
     private Long id;
 
-    @Schema(description = "日记ID")
+    @Schema(description = "Diary ID")
     private Long diaryId;
 
-    @Schema(description = "用户ID")
+    @Schema(description = "User ID")
     private Long userId;
 
-    @Schema(description = "用户名")
+    @Schema(description = "Username")
     private String username;
 
-    @Schema(description = "用户昵称")
+    @Schema(description = "User nickname")
     private String nickname;
 
-    @Schema(description = "日记日期")
+    @Schema(description = "Diary date")
     private String diaryDate;
 
-    @Schema(description = "任务状态")
+    @Schema(description = "Task status")
     private String status;
 
-    @Schema(description = "任务状态描述")
+    @Schema(description = "Task status description")
     private String statusDescription;
 
-    @Schema(description = "任务类型")
+    @Schema(description = "Task type")
     private String taskType;
 
-    @Schema(description = "任务类型描述")
+    @Schema(description = "Task type description")
     private String taskTypeDescription;
 
-    @Schema(description = "优先级")
+    @Schema(description = "Priority")
     private Integer priority;
 
-    @Schema(description = "优先级描述")
+    @Schema(description = "Priority description")
     private String priorityDescription;
 
-    @Schema(description = "重试次数")
+    @Schema(description = "Retry count")
     private Integer retryCount;
 
-    @Schema(description = "最大重试次数")
+    @Schema(description = "Max retry count")
     private Integer maxRetryCount;
 
-    @Schema(description = "错误信息")
+    @Schema(description = "Error message")
     private String errorMessage;
 
-    @Schema(description = "处理开始时间")
+    @Schema(description = "Processing start time")
     private LocalDateTime startedAt;
 
-    @Schema(description = "处理完成时间")
+    @Schema(description = "Processing completion time")
     private LocalDateTime completedAt;
 
-    @Schema(description = "创建时间")
+    @Schema(description = "Creation time")
     private LocalDateTime createdAt;
 
-    @Schema(description = "更新时间")
+    @Schema(description = "Update time")
     private LocalDateTime updatedAt;
 
-    @Schema(description = "处理耗时（毫秒）")
+    @Schema(description = "Processing time (milliseconds)")
     private Long processingTimeMs;
 
-    @Schema(description = "是否可以重试")
+    @Schema(description = "Can retry")
     private Boolean canRetry;
 }
 

@@ -7,14 +7,13 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * 文章批量删除命令DTO
- * @author system
+ * Article batch delete command DTO
  */
 @Data
-@Schema(description = "文章批量删除命令")
+@Schema(description = "Article batch delete command")
 public class ArticleBatchDeleteDTO {
 
-    @Schema(description = "要删除的文章ID列表", example = "[\"uuid1\", \"uuid2\", \"uuid3\"]")
-    @NotEmpty(message = "删除的文章ID列表不能为空")
+    @Schema(description = "List of article IDs to delete", example = "[\"uuid1\", \"uuid2\", \"uuid3\"]")
+    @NotEmpty(message = "List of article IDs to delete cannot be empty")
     private List<String> ids;
 }

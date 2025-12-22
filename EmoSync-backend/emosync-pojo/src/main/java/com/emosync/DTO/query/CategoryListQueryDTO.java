@@ -4,22 +4,21 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 /**
- * 知识分类列表查询DTO
- * @author system
+ * Knowledge category list query DTO
  */
 @Data
-@Schema(description = "知识分类列表查询")
+@Schema(description = "Knowledge category list query")
 public class CategoryListQueryDTO {
 
-    @Schema(description = "分类名称（模糊查询）", example = "心理")
+    @Schema(description = "Category name (fuzzy search)", example = "psychology")
     private String categoryName;
 
-    @Schema(description = "状态", example = "1", allowableValues = {"0", "1"})
+    @Schema(description = "Status", example = "1", allowableValues = {"0", "1"})
     private Integer status;
 
-    @Schema(description = "当前页码", example = "1")
+    @Schema(description = "Current page number", example = "1")
     private Long currentPage = 1L;
 
-    @Schema(description = "每页大小", example = "10")
+    @Schema(description = "Page size", example = "10")
     private Long size = 10L;
 }
