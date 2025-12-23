@@ -20,7 +20,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import EmotionDistribution from "./components/EmotionDistribution";
 
 export default function EmotionDiaryPage() {
-  const diaryIdRef = useRef(null);
+  const [todayDiaryId, setTodayDiaryId] = useState(null);
+  const [selectedDiaryId, setSelectedDiaryId] = useState(null);
+  const [mode, setMode] = useState("create"); // "create" or "edit"
+  const pollingTimerRef = useRef(null);
+
   const INIT_FORM_DATA = {
     diaryDate: new Date().toISOString().slice(0, 10),
     moodScore: null,
@@ -47,33 +51,42 @@ export default function EmotionDiaryPage() {
   const [showHistory, setShowHistory] = useState(false);
   const [selectedAction, setSelectedAction] = useState(null);
 
-  // ---------------------------
   // Load Today's Entry
-  // ---------------------------
   useEffect(() => {
     (async () => {
       try {
         const res = await api.get("/emotion-diary/today");
         console.log("Fetched today's entry:", res);
-        if (!res.data.data) return;
+         if (!res.data.data) {
+          setTodayDiaryId(null);
+          setMode("create");
+          return;
+        }
+
 
         const data = res.data.data;
-        diaryIdRef.current = data.id;
+        setTodayDiaryId(data.id); 
+        setMode("edit");
         setForm((prev) => ({
           ...prev,
           ...data,
           diaryDate: data.diaryDate || prev.diaryDate,
         }));
-        loadAiAnalysis();
+        loadAiAnalysis(data.id);
       } catch (err) {
         console.error("No entry for today:", err);
+          setTodayDiaryId(null);
+        setMode("create");
       }
     })();
+       return () => {
+      if (pollingTimerRef.current) {
+        clearInterval(pollingTimerRef.current);
+      }
+    };
   }, []);
 
-  // ---------------------------
   // Load Stats
-  // ---------------------------
   useEffect(() => {
     loadStats();
   }, []);
@@ -91,14 +104,12 @@ export default function EmotionDiaryPage() {
     }
   };
 
-  // ---------------------------
   // AI Analysis
-  // ---------------------------
-  const loadAiAnalysis = async (diaryId) => {
-    if (!diaryId) return;
+  const loadAiAnalysis = async (todayDiaryId) => {
+    if (!todayDiaryId) return;
     setLoadingAi(true);
     try {
-      const res = await api.get(`/emotion-diary/${diaryId}/ai-analysis`);
+      const res = await api.get(`/emotion-diary/${todayDiaryId}/ai-analysis`);
 
       const data = await res.data.data;
       setAi(data);
@@ -110,35 +121,140 @@ export default function EmotionDiaryPage() {
   };
 
   const handleTriggerAnalysis = async (diaryId) => {
-    if (!diaryId) return;
-    console.log("Manually trigger AI emotion analysis for diary ID:", diaryId);
-    await api.post("/emotion-diary/${diaryId}/ai-analysis");
-    loadAiAnalysis();
+       if (!diaryId) {
+      alert("Please save the diary first");
+      return;
+    }
+    console.log("Manually trigger AI emotion analysis for diary ID:", todayDiaryId);
+      
+    try {
+      await api.post(`/emotion-diary/${diaryId}/ai-analysis`);
+
+      setAi(null);
+      setLoadingAi(true);
+  
+      startAiAnalysisPolling(diaryId);
+    } catch (err) {
+      console.error("Failed to trigger AI analysis:", err);
+      alert("Failed to start AI analysis");
+      setLoadingAi(false);
+    }
   };
 
-  // ---------------------------
-  // Save Diary
-  // ---------------------------
-  const handleSave = async () => {
-    const payload = { ...form };
-    console.log("Payload:", payload);
-    console.log("Create or update emotion diary with payload:", payload);
-    const res = await api.post("/emotion-diary", {
-      ...payload,
-    });
-    console.log("Response after save:", res);
-    if (res.data.code == "200") {
-      alert("Diary saved successfully");
+  // AI Analysis Polling
+  const startAiAnalysisPolling = (diaryId) => {
+    // Clear previous timer
+    if (pollingTimerRef.current) {
+      clearInterval(pollingTimerRef.current);
     }
 
-    const data = res.data.data;
+    const maxPollingAttempts = 20; // Maximum 20 polling attempts (10 minutes)
+    let pollingAttempts = 0;
 
-    setForm(INIT_FORM_DATA);
-    loadStats();
-    loadAiAnalysis();
+    pollingTimerRef.current = setInterval(async () => {
+      pollingAttempts++;
+
+      try {
+        await loadAiAnalysis(diaryId);
+
+        // If analysis result is obtained, stop polling
+        if (ai) {
+          clearInterval(pollingTimerRef.current);
+          pollingTimerRef.current = null;
+          alert("AI emotion analysis completed!");
+          return;
+        }
+
+        // Exceeded maximum attempts, stop polling
+        if (pollingAttempts >= maxPollingAttempts) {
+          clearInterval(pollingTimerRef.current);
+          pollingTimerRef.current = null;
+          setLoadingAi(false);
+          alert("AI analysis is taking longer than expected, please refresh manually later");
+          return;
+        }
+      } catch (error) {
+        console.error('Polling AI analysis result failed:', error);
+
+        // If failed multiple times, stop polling
+        if (pollingAttempts >= maxPollingAttempts) {
+          clearInterval(pollingTimerRef.current);
+          pollingTimerRef.current = null;
+          setLoadingAi(false);
+        }
+      }
+    }, 30000); // Poll every 30 seconds
+  };
+
+
+  // Save Diary
+  const handleSave = async () => {
+   try {
+      const payload = { ...form };
+      console.log("Payload:", payload);
+
+      let res;
+      if (mode === "edit" && todayDiaryId) {
+        // Edit mode: use update endpoint
+        console.log("Update existing diary with ID:", todayDiaryId);
+        res = await api.put(`/emotion-diary/${todayDiaryId}`, payload);
+      } else {
+        // Create mode: use create or update endpoint with edit mode parameter
+        const isEditMode = mode === "edit";
+        console.log(`Create or update diary, edit mode: ${isEditMode}`);
+        res = await api.post("/emotion-diary", payload, {
+          params: { isEditMode }
+        });
+      }
+
+      console.log("Response after save:", res);
+
+      if (res.data.code === "200") {
+        const savedData = res.data.data;
+
+        // Update today's diary ID
+        if (savedData && savedData.id) {
+          setTodayDiaryId(savedData.id);
+          setMode("edit"); // Enter edit mode after saving
+        }
+
+        alert("Diary saved successfully");
+
+        // Reload statistics and AI analysis
+        loadStats();
+        if (savedData && savedData.id) {
+          loadAiAnalysis(savedData.id);
+        }
+      } else {
+        alert(`Save failed: ${res.data.message || "Unknown error"}`);
+      }
+    } catch (err) {
+      console.error("Failed to save diary:", err);
+      alert("Failed to save diary. Please try again.");
+    }
   };
   const handleReset = () => {
-    setForm(INIT_FORM_DATA);
+     if (todayDiaryId) {
+      // Reload today's data
+      (async () => {
+        try {
+          const res = await api.get("/emotion-diary/today");
+          if (res.data.data) {
+            const data = res.data.data;
+            setForm((prev) => ({
+              ...prev,
+              ...data,
+              diaryDate: data.diaryDate || prev.diaryDate,
+            }));
+          }
+        } catch (err) {
+          console.error("Failed to reload today's data:", err);
+        }
+      })();
+    } else {
+      // No records, reset to initial state
+      setForm(INIT_FORM_DATA);
+    }
   };
 
   return (
@@ -153,10 +269,20 @@ export default function EmotionDiaryPage() {
 
             <h2 className="text-3xl font-bold text-white mb-2">
               Emotion Diary
+                {mode === "edit" && (
+                <span className="ml-2 text-sm bg-white text-amber-600 px-2 py-1 rounded">
+                  Edit Mode
+                </span>
+              )}
             </h2>
           </div>
           <p className="text-white">
             Record your mood and track emotional trends.
+             {todayDiaryId && (
+              <span className="ml-2 text-amber-100">
+                You have a diary for today. You can edit it.
+              </span>
+            )}
           </p>
         </div>
 
@@ -177,6 +303,16 @@ export default function EmotionDiaryPage() {
           </button>
         </div>
       </div>
+
+       {/* Mode Indicator */}
+      {mode === "edit" && todayDiaryId && (
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-blue-700 text-sm">
+            📝 You are editing today's diary. Only one diary entry is allowed per day.
+          </p>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* LEFT — Diary Form */}
         <div className="lg:col-span-2 flex flex-col gap-6">
@@ -342,8 +478,8 @@ export default function EmotionDiaryPage() {
                   icon={faSave}
                   className="text-2xl text-white pl-2"
                 />
-                <p className=" text-white font-semibold py-2 px-2">
-                  Save Diary
+                 <p className=" text-white font-semibold py-2 px-2">
+                  {mode === "edit" ? "Update Diary" : "Save Diary"}
                 </p>
               </button>
             </div>
@@ -383,17 +519,29 @@ export default function EmotionDiaryPage() {
               </h3>
             </div>
             <div>
-              {emotionDistribution.suggestions &&
-              emotionDistribution.suggestions.length > 0 ? (
-                <div>
-                  <span>{emotionDistribution.ai}</span>
-                  <span>{emotionDistribution.percentage}%</span>
+                  {loadingAi && (
+                <div className="mt-4 p-4 border rounded-lg bg-blue-50">
+                  <p className="text-gray-500">AI is analyzing your diary content...</p>
+                  <div className="mt-2 text-xs text-gray-400">
+                    This may take a few moments. Please wait...
+                  </div>
                 </div>
-              ) : (
+              )}
+
+              {ai &&!loadingAi && (
+                <div className="mt-4 p-4 border rounded-lg bg-blue-50">
+                  <p className="font-semibold">{ai.label}</p>
+                  <p className="text-sm text-gray-600">{ai.suggestion}</p>
+                </div>
+              )} 
+
+              {!ai && !loadingAi && (
                 <div className="flex flex-col items-center justify-center py-4 space-y-1">
                   <p className="text-gray-500">No analysis data available</p>
                   <p className="text-gray-400 text-sm">
-                    Please record emotion diaries
+                    {todayDiaryId 
+                      ? "Click 'Start Analysis' to generate AI insights"
+                      : "Please save your diary first to enable AI analysis"}
                   </p>
                 </div>
               )}
@@ -407,21 +555,22 @@ export default function EmotionDiaryPage() {
               </h3>
               <button
                 className="text-sm text-blue-600"
-                onClick={loadAiAnalysis}
-                disabled={loadingAi}
+                  onClick={() => todayDiaryId && loadAiAnalysis(todayDiaryId)}
+                disabled={loadingAi || !todayDiaryId}
               >
                 Refresh
               </button>
             </div>
 
             <div className="flex justify-between">
-              {!ai && !loadingAi && (
+              {todayDiaryId && !loadingAi && (
                 <div
                   className="flex items-center justify-center bg-gray-200 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors duration-200 "
                   onClick={() => {
                     setSelectedAction("analysis");
-                    handleTriggerAnalysis(diaryIdRef.current);
+                    handleTriggerAnalysis(todayDiaryId);
                   }}
+                     disabled={loadingAi}
                 >
                   <FontAwesomeIcon
                     icon={faComments}
@@ -432,19 +581,12 @@ export default function EmotionDiaryPage() {
                     }`}
                   />
                   <button className=" text-center p-3 rounded-lg text-gray-500">
-                    Start Analysis
+                    {ai ? "Re-analyze" : "Start Analysis"}
                   </button>
                 </div>
               )}
 
-              {loadingAi && <p className="text-gray-500 ">Analyzing…</p>}
-
-              {ai && (
-                <div className="mt-4 p-4 border rounded-lg bg-blue-50">
-                  <p className="font-semibold">{ai.label}</p>
-                  <p className="text-sm text-gray-600">{ai.suggestion}</p>
-                </div>
-              )}
+             
 
               {/* History */}
 
