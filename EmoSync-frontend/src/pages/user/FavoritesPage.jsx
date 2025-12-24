@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faHeart,
@@ -13,6 +14,7 @@ import error_default_img from "@/assets/images/error_default_img.png";
 import ArticleDetailPage from "./components/ArticleDetailPage";
 
 export default function FavoritesPage() {
+  const navigate = useNavigate();
   // State management
   const [loading, setLoading] = useState(false);
   const [articles, setArticles] = useState([]);
@@ -156,8 +158,7 @@ export default function FavoritesPage() {
 
   const goToKnowledge = () => {
     console.log("Navigate to knowledge base");
-    alert("Navigate to knowledge base");
-    // Actual project use: navigate('/knowledge')
+    navigate("/user/knowledge");
   };
 
   const refreshList = () => {
