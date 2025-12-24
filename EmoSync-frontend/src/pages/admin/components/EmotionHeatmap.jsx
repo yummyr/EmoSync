@@ -2,17 +2,17 @@ import React, { useRef, useEffect } from "react";
 import * as THREE from "three";
 
 /**
- * React 版 3D 情绪热力图（球体 + 螺旋分布柱状图）
+ * React version 3D Emotion Heatmap (sphere + spiral distributed bar chart)
  *
- * 预期数据结构（对应后端 DataAnalyticsResponseDTO.EmotionHeatmapData）：
+ * Expected data structure (corresponding to backend DataAnalyticsResponseDTO.EmotionHeatmapData):
  * heatmapData = {
  *   gridData: [ // 7 x 24
  *     [ { x, y, value, avgMoodScore, dominantEmotion }, ... 24 ],
  *     ...
  *   ],
- *   emotionDistribution: { "开心": 10, "难过": 4, ... },
+ *   emotionDistribution: { "Happy": 10, "Sad": 4, ... },
  *   peakEmotionTime: "14:00",
- *   dateRange: "2025-11-01 至 2025-11-30"
+ *   dateRange: "2025-11-01 to 2025-11-30"
  * }
  */
 const EmotionHeatmap = ({ heatmapData }) => {
@@ -25,10 +25,10 @@ const EmotionHeatmap = ({ heatmapData }) => {
   const sphereRef = useRef(null);
   const barsGroupRef = useRef(null);
 
-  // 情绪颜色映射（同一情绪固定颜色）
+  // Emotion color mapping (fixed color for each emotion)
   const emotionColorMapRef = useRef({});
 
-  /** 初始化 Three.js 场景，只在首次 mount 时执行 */
+  /** Initialize Three.js scene, only execute on first mount */
   useEffect(() => {
     initScene();
     animate();
@@ -39,14 +39,14 @@ const EmotionHeatmap = ({ heatmapData }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /** heatmapData 变化时，重建柱状图 */
+  /** Rebuild bar chart when heatmapData changes */
   useEffect(() => {
     if (!sceneRef.current || !heatmapData) return;
     buildBarsFromData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [heatmapData]);
 
-  /** 初始化场景、相机、灯光、球体等 */
+  /** Initialize scene, camera, lights, sphere, etc. */
   const initScene = () => {
     const container = mountRef.current;
     if (!container) return;
@@ -54,18 +54,18 @@ const EmotionHeatmap = ({ heatmapData }) => {
     const width = container.clientWidth || 800;
     const height = container.clientHeight || 450;
 
-    // 场景
+    // Scene
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color("#020617"); // 类似 bg-slate-950
+    scene.background = new THREE.Color("#020617"); 
     sceneRef.current = scene;
 
-    // 相机
+    // Camera
     const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 2000);
     camera.position.set(0, 120, 320);
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
-    // 渲染器
+    // Renderer
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true,
@@ -76,10 +76,10 @@ const EmotionHeatmap = ({ heatmapData }) => {
     container.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
-    // 半透明球体作为视觉中心
+    // Semi-transparent sphere as visual center
     const sphereGeom = new THREE.SphereGeometry(100, 64, 64);
     const sphereMat = new THREE.MeshPhongMaterial({
-      color: 0x1e293b, // slate-800-ish
+      color: 0x1e293b, 
       opacity: 0.18,
       transparent: true,
       shininess: 80,
@@ -91,34 +91,34 @@ const EmotionHeatmap = ({ heatmapData }) => {
     scene.add(sphere);
     sphereRef.current = sphere;
 
-    // 柱状图 group（方便统一管理）
+    // Bar chart group (for unified management)
     const barsGroup = new THREE.Group();
     scene.add(barsGroup);
     barsGroupRef.current = barsGroup;
 
-    // 环境光
+    // Ambient light
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
 
-    // 主方向光
+    // Main directional light
     const mainLight = new THREE.DirectionalLight(0xffffff, 1.5);
     mainLight.position.set(100, 160, 120);
     mainLight.castShadow = true;
     scene.add(mainLight);
 
-    // 补光
+    // Fill light
     const fillLight = new THREE.DirectionalLight(0x93c5fd, 0.6);
     fillLight.position.set(-80, 80, -60);
     scene.add(fillLight);
 
-    // 背景星点粒子
+    // Background star particles
     createParticles(scene);
 
-    // 自适应
+    // Responsive
     window.addEventListener("resize", handleResize);
   };
 
-  /** 创建背景粒子 */
+  /** Create background particles */
   const createParticles = (scene) => {
     const particleCount = 120;
     const positions = new Float32Array(particleCount * 3);
@@ -147,13 +147,13 @@ const EmotionHeatmap = ({ heatmapData }) => {
     scene.add(particles);
   };
 
-  /** 根据 heatmapData 构建柱状图（螺旋分布在球体表面） */
+  /** Build bar chart based on heatmapData (spiral distribution on sphere surface) */
   const buildBarsFromData = () => {
     const scene = sceneRef.current;
     const barsGroup = barsGroupRef.current;
     if (!scene || !barsGroup) return;
 
-    // 先清理旧的 bar
+    // Clean up old bars first
     while (barsGroup.children.length) {
       const obj = barsGroup.children.pop();
       if (obj.geometry) obj.geometry.dispose();
@@ -176,11 +176,11 @@ const EmotionHeatmap = ({ heatmapData }) => {
     );
     const safeMax = maxValue || 1;
 
-    const radius = 100; // 球体半径
-    const totalPoints = 7 * 24; // 7 天 * 24 小时
-    const goldenAngle = Math.PI * (3 - Math.sqrt(5)); // 黄金角度
+    const radius = 100; // Sphere radius
+    const totalPoints = 7 * 24; // 7 days * 24 hours
+    const goldenAngle = Math.PI * (3 - Math.sqrt(5)); // Golden angle
 
-    // 遍历 7x24 grid
+    // Iterate through 7x24 grid
     for (let dayIndex = 0; dayIndex < gridData.length; dayIndex++) {
       const dayRow = gridData[dayIndex] || [];
       for (let hourIndex = 0; hourIndex < dayRow.length; hourIndex++) {
@@ -189,9 +189,9 @@ const EmotionHeatmap = ({ heatmapData }) => {
 
         const currentIndex = dayIndex * 24 + hourIndex;
 
-        // 球面上的螺旋分布坐标（贴近你 Vue 的算法思想）
+        // Spiral distribution coordinates on sphere surface
         const y = 1 - (currentIndex / (totalPoints - 1)) * 2; // 1 → -1
-        const r = Math.sqrt(1 - y * y); // 当前纬度的半径
+        const r = Math.sqrt(1 - y * y); 
         const theta = goldenAngle * currentIndex;
 
         const sphereX = radius * r * Math.cos(theta);
@@ -200,14 +200,14 @@ const EmotionHeatmap = ({ heatmapData }) => {
 
         const direction = new THREE.Vector3(sphereX, sphereY, sphereZ).normalize();
 
-        // 柱子的长度与情绪强度相关
+        // Bar length relates to emotion intensity
         const valueRatio = point.value / safeMax;
-        const barLength = 20 + valueRatio * 60; // 最短 20，最长 ~80
+        const barLength = 20 + valueRatio * 60; // Min 20, Max ~80
 
-        // 柱子几何
+        // Bar geometry
         const geometry = new THREE.CylinderGeometry(1.6, 2.0, barLength, 10);
 
-        // 颜色根据情绪 + 强度
+        // Color based on emotion + intensity
         const color = getEmotionColor(point.dominantEmotion, valueRatio);
 
         const material = new THREE.MeshStandardMaterial({
@@ -229,7 +229,7 @@ const EmotionHeatmap = ({ heatmapData }) => {
           .multiplyScalar(startDistance + barLength / 2);
         bar.position.copy(centerPos);
 
-        // 让柱子朝外
+        // Make bar point outward
         const up = new THREE.Vector3(0, 1, 0);
         const quaternion = new THREE.Quaternion();
         quaternion.setFromUnitVectors(up, direction);
@@ -240,8 +240,8 @@ const EmotionHeatmap = ({ heatmapData }) => {
           hourIndex,
           value: point.value,
           avgMoodScore: point.avgMoodScore,
-          dominantEmotion: point.dominantEmotion || "未知",
-          phase: Math.random() * Math.PI * 2, // 呼吸动画相位
+          dominantEmotion: point.dominantEmotion || "Unknown",
+          phase: Math.random() * Math.PI * 2, // Breathing animation phase
           isBar: true,
         };
 
@@ -250,13 +250,13 @@ const EmotionHeatmap = ({ heatmapData }) => {
     }
   };
 
-  /** 获取情绪对应的颜色（固定情绪映射 + HSL 随机） */
+  /** Get emotion color (fixed emotion mapping + HSL random) */
   const getEmotionColor = (emotion, intensity = 1) => {
     const map = emotionColorMapRef.current;
-    if (!emotion) emotion = "默认";
+    if (!emotion) emotion = "Default";
 
     if (!map[emotion]) {
-      // 随机 h，但让颜色整体偏暖/柔和一点
+      // Random h, but make colors overall warmer/softer
       const hue = Math.random(); // 0~1
       const saturation = 0.55 + Math.random() * 0.3; // 0.55~0.85
       const lightness = 0.45 + Math.random() * 0.25; // 0.45~0.7
@@ -267,13 +267,13 @@ const EmotionHeatmap = ({ heatmapData }) => {
     }
 
     const base = map[emotion].clone();
-    // 根据强度稍微调亮一点
+    // Brighten slightly based on intensity
     const factor = 0.8 + intensity * 0.4; // 0.8~1.2
     base.multiplyScalar(factor);
     return base;
   };
 
-  /** 自适应窗口尺寸 */
+  /** Responsive to window size */
   const handleResize = () => {
     const container = mountRef.current;
     if (!container || !cameraRef.current || !rendererRef.current) return;
@@ -286,7 +286,7 @@ const EmotionHeatmap = ({ heatmapData }) => {
     rendererRef.current.setSize(width, height);
   };
 
-  /** 动画循环 */
+  /** Animation loop */
   const animate = () => {
     animationFrameRef.current = requestAnimationFrame(animate);
 
@@ -300,17 +300,17 @@ const EmotionHeatmap = ({ heatmapData }) => {
 
     const time = Date.now() * 0.001;
 
-    // 整体缓慢旋转
+    // Overall slow rotation
     if (scene) {
       scene.rotation.y = Math.sin(time * 0.15) * 0.12;
     }
 
-    // 球体微微旋转
+    // Sphere slight rotation
     if (sphere) {
       sphere.rotation.y += 0.0015;
     }
 
-    // 柱子“呼吸”动画
+    // Bar "breathing" animation
     if (barsGroup) {
       barsGroup.children.forEach((obj) => {
         if (obj.userData && obj.userData.isBar) {
@@ -326,7 +326,7 @@ const EmotionHeatmap = ({ heatmapData }) => {
     renderer.render(scene, camera);
   };
 
-  /** 清理 Three.js 资源 */
+  /** Clean up Three.js resources */
   const cleanup = () => {
     cancelAnimationFrame(animationFrameRef.current);
 
@@ -366,7 +366,7 @@ const EmotionHeatmap = ({ heatmapData }) => {
   return (
     <div className="emotion-heatmap-container w-full rounded-xl">
   
-      {/* Three.js 挂载容器 */}
+      {/* Three.js mount container */}
       <div className="p-4 bg-slate-900 rounded-b-2xl">
         <div
           ref={mountRef}

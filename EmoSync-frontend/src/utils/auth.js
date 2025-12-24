@@ -102,7 +102,7 @@ export async function safeLogout() {
 }
 
 /**
- * 获取用户信息的安全包装
+ * Safe wrapper to get user info
  * @returns {Object|null}
  */
 export function getCurrentUser() {

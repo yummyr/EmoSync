@@ -111,30 +111,6 @@ export const logoutUser = createAsyncThunk("user/logout", async () => {
   await logout();
 });
 
-// export const fetchCurrentUser = createAsyncThunk(
-//   "user/fetchCurrentUser",
-//   async (_, { rejectWithValue }) => {
-//     try {
-//       const data = await getCurrentUser();
-//       return data;
-//     } catch (err) {
-//       return rejectWithValue(err.message);
-//     }
-//   }
-// );
-
-// export const updateProfileInfo = createAsyncThunk(
-//   "user/updateProfileInfo",
-//   async (formData, { rejectWithValue }) => {
-//     try {
-//       const data = await updateUser(formData);
-//       return data;
-//     } catch (err) {
-//       return rejectWithValue(err.message);
-//     }
-//   }
-// );
-
 export const fetchCurrentUser = createAsyncThunk(
   "user/current",
   async (_, { getState, rejectWithValue }) => {

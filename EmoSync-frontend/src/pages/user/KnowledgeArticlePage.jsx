@@ -237,21 +237,21 @@ const KnowledgeArticlePage = () => {
   const goToArticle = async (articleId) => {
     console.log("View article:", articleId);
     try {
-      // 获取文章详情
+      // Fetch article details
       const response = await api.get(`/knowledge/article/${articleId}`);
       setSelectedArticle(response?.data?.data);
       setShowArticlePage(true);
 
-      // 增加阅读量 - 添加延迟和防重复调用
+      // Increment read count - add delay and prevent duplicate calls
       setTimeout(async () => {
         try {
           await api.post(`/knowledge/article/${articleId}/read`);
           console.log("read article:", response?.data?.data);
         } catch (readError) {
           console.error("Failed to update read count:", readError);
-          // 不显示错误，因为这不是关键功能
+          // Don't show error as this is not a critical function
         }
-      }, 500); // 延迟500ms执行，避免与React严格模式的重复执行冲突
+      }, 500); // Delay 500ms to avoid conflict with React strict mode re-execution
     } catch (error) {
       console.error("Failed to load article:", error);
       alert("Failed to load article details");

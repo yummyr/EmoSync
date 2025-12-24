@@ -116,9 +116,9 @@
   text-rendering: optimizeLegibility;
 }
 
-/* 英雄区域背景渐变 */
+/* Hero section background gradient */
 .hero-section {
-  /* 匹配 Vue 中的渐变: background: linear-gradient(135deg, #4A90E2 0%, #7ED321 100%); */
+  /* Matches Vue gradient: background: linear-gradient(135deg, #4A90E2 0%, #7ED321 100%); */
   background: linear-gradient(135deg, #4A90E2 0%, #7ED321 100%);
   color: white;
   padding: 5rem 0;
@@ -127,14 +127,14 @@
   align-items: center;
 }
 
-/* 布局调整 */
+/* Layout adjustments */
 .hero-container {
-  max-width: 900px; /* 略小于 features-container */
+  max-width: 900px; /* Slightly smaller than features-container */
   margin: 0 auto;
   padding: 0 1rem;
 }
 
-/* 英雄区域内容布局 */
+/* Hero section content layout */
 .hero-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -142,28 +142,28 @@
   align-items: center;
 }
 
-/* 机器人图标的玻璃拟态效果和动画 */
+/* Robot icon glassmorphism effect and animations */
 .hero-icon {
   width: 300px;
   height: 300px;
   border-radius: 50%;
-  /* Glassmorphism 效果 */
+  /* Glassmorphism effect */
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
   backdrop-filter: blur(10px);
   border: 2px solid rgba(255, 255, 255, 0.3);
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: 
+  box-shadow:
     0 20px 40px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
   position: relative;
   overflow: hidden;
-  /* 呼吸动画 */
-  animation: breathing 8s ease-in-out infinite; 
+  /* Breathing animation */
+  animation: breathing 8s ease-in-out infinite;
 }
 
-/* 机器人图标闪光动画伪元素 */
+/* Robot icon shine animation pseudo-element */
 .hero-icon::before {
   content: '';
   position: absolute;
@@ -188,14 +188,14 @@
 }
 
 
-/* 按钮样式 (使用 Tailwind 的类和自定义 CSS 结合实现 hover 效果) */
+/* Button styles (combining Tailwind classes with custom CSS for hover effects) */
 .primary-btn {
-  /* Tailwind 类: bg-white text-[#4A90E2] p-3 px-8 rounded-lg font-semibold transition-all shadow-lg flex items-center gap-2 */
+  /* Tailwind classes: bg-white text-[#4A90E2] p-3 px-8 rounded-lg font-semibold transition-all shadow-lg flex items-center gap-2 */
   box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
 }
 
 .primary-btn:hover {
-  /* 自定义 hover 效果 */
+  /* Custom hover effect */
   background: rgba(255, 255, 255, 0.9);
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(255, 255, 255, 0.3);
@@ -209,7 +209,7 @@
 }
 
 .secondary-btn:hover {
-  /* 自定义 hover 效果 */
+  /* Custom hover effect */
   background: rgba(255, 255, 255, 0.95);
   color: #4A90E2;
   transform: translateY(-2px);
@@ -218,13 +218,13 @@
 }
 
 
-/* 核心功能卡片 hover 效果 */
+/* Core feature card hover effects */
 .feature-card:hover {
   transform: translateY(-8px);
   box-shadow: 0 20px 40px rgba(74, 144, 226, 0.15);
 }
 
-/* 功能图标背景渐变 (无法用纯 Tailwind 类实现) */
+/* Feature icon background gradients (cannot be achieved with pure Tailwind classes) */
 .ai-icon {
   background: linear-gradient(135deg, #4A90E2, #9013FE);
 }
@@ -237,7 +237,7 @@
   background: linear-gradient(135deg, #F5A623, #9013FE);
 }
 
-/* 响应式设计 (与 Vue 中的 media queries 保持一致) */
+/* Responsive design (consistent with media queries in Vue) */
 @media (max-width: 768px) {
   .hero-content {
     grid-template-columns: 1fr;

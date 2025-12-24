@@ -69,7 +69,7 @@ function ChatMessageBubble({ message }) {
               : "ai-message-bubble"
           }`}
         >
-          {/* 打字中 */}
+          {/* Typing indicator */}
           {message.isTyping && !message.content && (
             <div className="flex gap-1 py-1">
               <span className="typing-dot" />
@@ -78,7 +78,7 @@ function ChatMessageBubble({ message }) {
             </div>
           )}
 
-          {/* 错误 */}
+          {/* Error message */}
           {message.isError && (
             <div className="flex items-center gap-2 text-sm text-red-800">
               <FontAwesomeIcon icon={faExclamationTriangle} />
@@ -86,7 +86,7 @@ function ChatMessageBubble({ message }) {
             </div>
           )}
 
-          {/* 正常内容 */}
+          {/* Normal content */}
           {!message.isTyping && !message.isError && message.content && (
             <p
               className="whitespace-pre-wrap text-[13px] leading-relaxed"

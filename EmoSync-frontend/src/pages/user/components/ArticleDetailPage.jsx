@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '@/api';
 import { formatDate } from '@/utils/date';
+import error_default_img from '@/assets/images/error_default_img.png';
 
 const ArticleDetailPage = ({ selectedArticle, onClose }) => {
 
@@ -25,7 +26,7 @@ useEffect(() => {
   };
 
   const handleImageError = (e) => {
-    e.target.src = 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+    e.target.src = error_default_img;
   };
 
   const handleToggleFavorite = async () => {
@@ -53,7 +54,7 @@ useEffect(() => {
   };
 
   const goToRelatedArticle = (relatedArticleId) => {
-    // 这里可以打开新的文章详情页或者替换当前文章
+    // Can open new article detail page or replace current article
     window.open(`/article/${relatedArticleId}`, '_blank');
   };
 

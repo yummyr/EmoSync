@@ -1,11 +1,11 @@
 import api from "./index";
 /**
- * 用户登录
- * 功能描述：用户使用用户名和密码进行登录认证
- * 入参：{ username: string, password: string }
- * 返回参数：{ userInfo: object, token: string, roleCode: string, menuList?: array }
- * url地址：/user/login
- * 请求方式：POST
+ * User login
+ * Description: User authentication with username and password
+ * Parameters: { username: string, password: string }
+ * Returns: { userInfo: object, token: string, roleCode: string, menuList?: array }
+ * URL: /user/login
+ * Method: POST
  */
 export function login(loginForm) {
   return api.post("/user/login", loginForm)
@@ -28,24 +28,24 @@ export function login(loginForm) {
 }
 
 /**
- * 用户注册
- * 功能描述：新用户注册账号
- * 入参：{ username: string, password: string, confirmPassword: string, email: string, phone?: string, nickname?: string, gender?: number, userType?: number }
- * 返回参数：注册成功信息
- * url地址：/user/add
- * 请求方式：POST
+ * User registration
+ * Description: Register new user account
+ * Parameters: { username: string, password: string, confirmPassword: string, email: string, phone?: string, nickname?: string, gender?: number, userType?: number }
+ * Returns: Registration success message
+ * URL: /user/add
+ * Method: POST
  */
 export function register(params, config = {}) {
   return api.post('/user/add', params, config)
 }
 
 /**
- * 获取当前登录用户信息
- * 功能描述：获取当前登录用户的详细信息
- * 入参：无
- * 返回参数：{ id: number, username: string, nickname: string, email: string, phone: string, gender: number, avatar: string, userType: number }
- * url地址：/user/current
- * 请求方式：GET
+ * Get current logged-in user info
+ * Description: Get detailed information of current logged-in user
+ * Parameters: None
+ * Returns: { id: number, username: string, nickname: string, email: string, phone: string, gender: number, avatar: string, userType: number }
+ * URL: /user/current
+ * Method: GET
  */
 export function getCurrentUser() {
   return api.get('/user/current').then(res => res.data.data);
@@ -53,12 +53,12 @@ export function getCurrentUser() {
 
 
 /**
- * 根据ID获取用户信息
- * 功能描述：根据用户ID获取用户详细信息
- * 入参：{ id: number }
- * 返回参数：{ id: number, username: string, nickname: string, email: string, phone: string, gender: number, avatar: string, userType: number }
- * url地址：/user/{id}
- * 请求方式：GET
+ * Get user info by ID
+ * Description: Get detailed user information by user ID
+ * Parameters: { id: number }
+ * Returns: { id: number, username: string, nickname: string, email: string, phone: string, gender: number, avatar: string, userType: number }
+ * URL: /user/{id}
+ * Method: GET
  */
 export function getUserById(id) {
   return api.get(`/user/${id}`).then(res => res.data.data);
@@ -66,12 +66,12 @@ export function getUserById(id) {
 
 
 /**
- * 更新用户个人信息
- * 功能描述：用户更新自己的基本信息
- * 入参：{ nickname?: string, email?: string, phone?: string, gender?: number, avatar?: string, birthday?: string }
- * 返回参数：更新后的用户信息
- * url地址：/user/profile
- * 请求方式：PUT
+ * Update user profile
+ * Description: User updates their basic information
+ * Parameters: { nickname?: string, email?: string, phone?: string, gender?: number, avatar?: string, birthday?: string }
+ * Returns: Updated user information
+ * URL: /user/profile
+ * Method: PUT
  */
 export function updateUser(params) {
   return api.put('/user/profile', params).then(res => res.data.data);
@@ -79,12 +79,12 @@ export function updateUser(params) {
 
 
 /**
- * 修改用户密码
- * 功能描述：用户修改登录密码
- * 入参：{ oldPassword: string, newPassword: string }
- * 返回参数：修改成功信息
- * url地址：/user/password
- * 请求方式：PUT
+ * Change user password
+ * Description: User changes login password
+ * Parameters: { oldPassword: string, newPassword: string }
+ * Returns: Password change success message
+ * URL: /user/password
+ * Method: PUT
  */
 export function updatePassword(params) {
   return api.put('/user/password', params).then(res => res.data.data);
@@ -92,36 +92,36 @@ export function updatePassword(params) {
 
 
 /**
- * 忘记密码
- * 功能描述：通过邮箱重置密码
- * 入参：{ email: string, newPassword: string }
- * 返回参数：重置成功信息
- * url地址：/user/forget
- * 请求方式：GET
+ * Forgot password
+ * Description: Reset password via email
+ * Parameters: { email: string, newPassword: string }
+ * Returns: Password reset success message
+ * URL: /user/forget
+ * Method: GET
  */
 export function forgetPassword(params, config = {}) {
   return request.get('/user/forget', params, config)
 }
 
 /**
- * 用户退出登录
- * 功能描述：用户退出登录，清除登录状态
- * 入参：无
- * 返回参数：退出成功信息
- * url地址：/user/logout
- * 请求方式：POST
+ * User logout
+ * Description: User logs out and clears login status
+ * Parameters: None
+ * Returns: Logout success message
+ * URL: /user/logout
+ * Method: POST
  */
 export function logout() {
   return api.post('/user/logout').then(res => res.data);
 }
 
 /**
- * 分页查询用户列表（管理员功能）
- * 功能描述：管理员分页查询系统用户列表，支持在所有字段中同时搜索
- * 入参：{ username?: string, email?: string, nickname?: string, phone?: string, userType?: number, status?: number, currentPage?: number, size?: number }
- * 返回参数：{ records: array, total: number, current: number, size: number }
- * url地址：/user/page
- * 请求方式：GET
+ * Get paginated user list (admin function)
+ * Description: Admin paginates system user list with full-field search support
+ * Parameters: { username?: string, email?: string, nickname?: string, phone?: string, userType?: number, status?: number, currentPage?: number, size?: number }
+ * Returns: { records: array, total: number, current: number, size: number }
+ * URL: /user/page
+ * Method: GET
  */
 export function getUserPage(params) {
   return api.get('/user/page', { params }).then(res => res.data.data);
@@ -129,12 +129,12 @@ export function getUserPage(params) {
 
 
 /**
- * 获取用户统计数据（管理员功能）
- * 功能描述：获取用户相关的统计数据
- * 入参：无
- * 返回参数：{ totalUsers: number, activeUsers: number, newUsers: number, riskUsers: number, totalGrowth: number, activeGrowth: number, newGrowth: number }
- * url地址：/user/statistics
- * 请求方式：GET
+ * Get user statistics (admin function)
+ * Description: Get user-related statistics data
+ * Parameters: None
+ * Returns: { totalUsers: number, activeUsers: number, newUsers: number, riskUsers: number, totalGrowth: number, activeGrowth: number, newGrowth: number }
+ * URL: /user/statistics
+ * Method: GET
  */
 export function getUserStatistics() {
   return api.get('/user/statistics').then(res => res.data.data);
@@ -142,12 +142,12 @@ export function getUserStatistics() {
 
 
 /**
- * 更新用户状态（管理员功能）
- * 功能描述：管理员更新用户状态（启用/禁用）
- * 入参：{ status: number }
- * 返回参数：更新成功信息
- * url地址：/user/{id}/status
- * 请求方式：PUT
+ * Update user status (admin function)
+ * Description: Admin updates user status (enable/disable)
+ * Parameters: { status: number }
+ * Returns: Update success message
+ * URL: /user/{id}/status
+ * Method: PUT
  */
 export function updateUserStatus(id, params) {
   return api.put(`/user/${id}/status`, null, { params })
@@ -156,12 +156,12 @@ export function updateUserStatus(id, params) {
 
 
 /**
- * 删除用户（管理员功能）
- * 功能描述：管理员删除指定用户
- * 入参：无
- * 返回参数：删除成功信息
- * url地址：/user/{id}
- * 请求方式：DELETE
+ * Delete user (admin function)
+ * Description: Admin deletes specified user
+ * Parameters: None
+ * Returns: Deletion success message
+ * URL: /user/{id}
+ * Method: DELETE
  */
 export function deleteUser(id) {
   return api.delete(`/user/${id}`).then(res => res.data.data);

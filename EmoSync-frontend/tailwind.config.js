@@ -33,13 +33,13 @@ export default {
         }
       },
       fontFamily: {
-        // 默认字体 - Inter (用于正文)
+        // Default font - Inter (for body text)
         sans: ['Inter', 'system-ui', 'sans-serif'],
-        // 标题字体 - Nunito
+        // Heading font - Nunito
         heading: ['Nunito', 'sans-serif'],
-        // 正文字体 - Inter (别名，便于使用)
+        // Body font - Inter (alias for convenience)
         body: ['Inter', 'system-ui', 'sans-serif'],
-        // 组合字体 (用于特殊场景)
+        // Display font (for special cases)
         display: ['Nunito', 'Inter', 'sans-serif'],
       },
       animation: {

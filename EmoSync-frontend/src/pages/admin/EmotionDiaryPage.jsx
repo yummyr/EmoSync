@@ -34,9 +34,7 @@ const EmotionDiaryPage = () => {
     stressLevel: null,
   };
   // Filters
-  const [filters, setFilters] = useState({
-    INIT_FILTERS,
-  });
+  const [filters, setFilters] = useState(INIT_FILTERS);
   // Batch selection
   const [selectedIds, setSelectedIds] = useState([]);
   // Batch delete selected emotion diaries
@@ -125,7 +123,7 @@ const EmotionDiaryPage = () => {
       const params = {
         current: pagination.current,
         size: pagination.size,
-        // 只添加非 null 的参数
+        // Only add non-null parameters
         ...(filters.startDate && { startDate: filters.startDate }),
         ...(filters.endDate && { endDate: filters.endDate }),
         ...(filters.minMoodScore !== null && {
@@ -174,9 +172,7 @@ const EmotionDiaryPage = () => {
   };
 
   const handleReset = () => {
-    setFilters({
-      INIT_FILTERS,
-    });
+    setFilters(INIT_FILTERS);
     setPagination({ current: 1, size: 10 });
   };
 

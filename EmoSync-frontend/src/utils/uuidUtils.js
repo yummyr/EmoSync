@@ -1,19 +1,19 @@
 /**
- * @description UUID工具函数模块
+ * @description UUID utility function module
  * @author system
  */
 
 /**
- * @description 生成UUID工具函数
- * @returns {string} 生成的UUID字符串
+ * @description Generate UUID utility function
+ * @returns {string} Generated UUID string
  */
 export function generateUUID() {
-  // 使用crypto.randomUUID()（现代浏览器支持）
+  // Use crypto.randomUUID() (modern browser support)
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
   }
   
-  // 降级方案：使用Math.random()
+  // Fallback: Use Math.random()
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
     const r = Math.random() * 16 | 0;
     const v = c === 'x' ? r : (r & 0x3 | 0x8);
@@ -22,9 +22,9 @@ export function generateUUID() {
 }
 
 /**
- * @description 验证UUID格式是否正确
- * @param {string} uuid - 待验证的UUID字符串
- * @returns {boolean} 是否为有效的UUID格式
+ * @description Verify if UUID format is correct
+ * @param {string} uuid - UUID string to verify
+ * @returns {boolean} Whether it's a valid UUID format
  */
 export function isValidUUID(uuid) {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -32,17 +32,17 @@ export function isValidUUID(uuid) {
 }
 
 /**
- * @description 生成短UUID（去除连字符）
- * @returns {string} 生成的短UUID字符串
+ * @description Generate short UUID (remove hyphens)
+ * @returns {string} Generated short UUID string
  */
 export function generateShortUUID() {
   return generateUUID().replace(/-/g, '');
 }
 
 /**
- * @description 格式化UUID（添加连字符）
- * @param {string} shortUuid - 不带连字符的UUID
- * @returns {string} 格式化后的UUID
+ * @description Format UUID (add hyphens)
+ * @param {string} shortUuid - UUID without hyphens
+ * @returns {string} Formatted UUID
  */
 export function formatUUID(shortUuid) {
   if (!shortUuid || shortUuid.length !== 32) {

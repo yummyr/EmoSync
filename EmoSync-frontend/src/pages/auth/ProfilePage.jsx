@@ -64,7 +64,7 @@ const ProfilePage = () => {
     });
   };
 
-  // Fix gender change bug
+  // Fix gender change issue
   const handleGenderChange = (genderValue) => {
     setFormData((prev) => ({ ...prev, gender: genderValue }));
   };
@@ -297,7 +297,7 @@ const ProfilePage = () => {
               <p className="text-gray-500 mb-6">
                 You can modify your account password.
               </p>
-              {/* 错误 / 成功提示 */}
+              {/* Error / Success messages */}
               {passwordError && (
                 <div className="mb-4 text-sm text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded">
                   {passwordError}

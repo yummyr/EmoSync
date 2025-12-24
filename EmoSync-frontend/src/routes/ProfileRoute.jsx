@@ -8,26 +8,26 @@ const ProfileRoute = () => {
   const isUser = useSelector(selectIsUser);
   const location = useLocation();
 
-  // 根据用户角色重定向到正确的 profile 路径
+  // Redirect to correct profile path based on user role
   if (isAdmin) {
-    // 如果当前路径不是 /back/profile，重定向到正确的管理员 profile 路径
+    // If current path is not /back/profile, redirect to correct admin profile path
     if (location.pathname !== '/back/profile') {
       return <Navigate to="/back/profile" replace />;
     }
-    // 管理员 profile 由管理员路由处理
+    // Admin profile handled by admin routes
     return <Navigate to="/back" replace />;
   }
 
   if (isUser) {
-    // 如果当前路径不是 /user/profile，重定向到正确的用户 profile 路径
+    // If current path is not /user/profile, redirect to correct user profile path
     if (location.pathname !== '/user/profile') {
       return <Navigate to="/user/profile" replace />;
     }
-    // 用户 profile 由用户路由处理
+    // User profile handled by user routes
     return <Navigate to="/user" replace />;
   }
 
-  // 如果角色未知，重定向到首页
+  // If role is unknown, redirect to home page
   return <Navigate to="/" replace />;
 };
 

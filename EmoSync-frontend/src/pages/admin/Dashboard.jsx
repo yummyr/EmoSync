@@ -55,7 +55,7 @@ const Dashboard = () => {
       );
       console.log("overview.data:", overview.data);
 
-      // 修复：比较字符串和字符串，并添加安全检查
+      // Fix: Compare string with string, and add safety checks
       if (
         overview.code === "200" &&
         overview.data &&

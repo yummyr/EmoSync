@@ -13,7 +13,7 @@ const PrivateRoute = ({ children }) => {
       <Navigate
         to="/auth/login"
         replace
-        state={{ from: location }} // 回跳逻辑
+        state={{ from: location }} // Redirect back logic
       />
     );
   }

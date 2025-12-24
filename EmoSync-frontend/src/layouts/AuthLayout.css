@@ -1,24 +1,24 @@
 /* AuthLayout.css */
 
-/* 左侧背景区域 - 使用渐变背景 (匹配图片中的绿色到蓝色渐变) */
+/* Left background section - using gradient background (matches green to blue gradient in image) */
 .left-section {
-  /* 匹配 Vue 中的 background: linear-gradient(135deg, #4A90E2 0%, #7ED321 100%); */
+  /* Matches Vue background: linear-gradient(135deg, #4A90E2 0%, #7ED321 100%); */
   background: linear-gradient(135deg, #4A90E2 0%, #7ED321 100%);
 }
 
-/* 机器人图标区域 - 玻璃拟态效果和自定义动画 */
+/* Robot icon section - glassmorphism effect and custom animations */
 .robot-icon {
   width: 160px;
   height: 160px;
   border-radius: 50%;
-  /* 玻璃拟态背景和模糊效果 */
+  /* Glassmorphism background and blur effect */
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
   backdrop-filter: blur(10px);
   border: 2px solid rgba(255, 255, 255, 0.2);
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: 
+  box-shadow:
     0 15px 35px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
   position: relative;
@@ -30,7 +30,7 @@
   transform: translateY(-5px);
 }
 
-/* 闪光动画伪元素 */
+/* Shine animation pseudo-element */
 .robot-icon::before {
   content: '';
   position: absolute;
@@ -43,29 +43,29 @@
   animation: shine 4s ease-in-out infinite;
 }
 
-/* 闪光动画关键帧 */
+/* Shine animation keyframes */
 @keyframes shine {
   0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
   50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
   100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
 }
 
-/* 呼吸动画 (应用在文字区域) */
+/* Breathing animation (applied to text section) */
 .breathing-animation {
   animation: breathing 4s ease-in-out infinite;
 }
 
 @keyframes breathing {
-  0%, 100% { 
-    transform: scale(1); 
+  0%, 100% {
+    transform: scale(1);
   }
-  50% { 
-    transform: scale(1.02); 
+  50% {
+    transform: scale(1.02);
   }
 }
 
 
-/* 响应式调整 */
+/* Responsive adjustments */
 @media (max-width: 1023px) {
   .left-content {
     padding: 2rem;

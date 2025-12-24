@@ -1,27 +1,27 @@
 import * as XLSX from 'xlsx'
 
 /**
- * Excel导出工具类
- * 功能：提供统一的Excel导出功能，支持自定义表头和数据格式化
+ * Excel export utility class
+ * Features: Provides unified Excel export functionality with support for custom headers and data formatting
  */
 
 /**
- * 导出数据到Excel文件
- * @param {Array} data - 要导出的数据数组
- * @param {Array} columns - 列配置数组，格式：[{key: 'field', title: '列标题', formatter?: (value) => formattedValue}]
- * @param {string} filename - 文件名（不含扩展名）
- * @param {string} sheetName - 工作表名称
+ * Export data to Excel file
+ * @param {Array} data - Data array to export
+ * @param {Array} columns - Column configuration array, format: [{key: 'field', title: 'Column Title', formatter?: (value) => formattedValue}]
+ * @param {string} filename - Filename (without extension)
+ * @param {string} sheetName - Worksheet name
  */
-export function exportToExcel(data, columns, filename = '导出数据', sheetName = 'Sheet1') {
+export function exportToExcel(data, columns, filename = 'Export Data', sheetName = 'Sheet1') {
   try {
-    // 构建表头
+    // Build headers
     const headers = columns.map(col => col.title)
     
-    // 构建数据行
+    // Build data rows
     const rows = data.map(item => {
       return columns.map(col => {
         let value = item[col.key]
-        // 如果有自定义格式化函数，使用格式化函数处理数据
+        // If custom formatter function exists, use it to process data
         if (col.formatter && typeof col.formatter === 'function') {
           value = col.formatter(value, item)
         }
@@ -29,104 +29,104 @@ export function exportToExcel(data, columns, filename = '导出数据', sheetNam
       })
     })
     
-    // 合并表头和数据
+    // Merge headers and data
     const worksheetData = [headers, ...rows]
     
-    // 创建工作表
+    // Create worksheet
     const worksheet = XLSX.utils.aoa_to_sheet(worksheetData)
-    
-    // 设置列宽
+
+    // Set column widths
     const colWidths = columns.map(col => ({
       wch: col.width || 15
     }))
     worksheet['!cols'] = colWidths
     
-    // 创建工作簿
+    // Create workbook
     const workbook = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(workbook, worksheet, sheetName)
-    
-    // 导出文件
+
+    // Export file
     const fileName = `${filename}_${formatDate(new Date(), 'YYYY-MM-DD_HH-mm-ss')}.xlsx`
     XLSX.writeFile(workbook, fileName)
     
     return {
       success: true,
-      message: '导出成功',
+      message: 'Export successful',
       filename: fileName
     }
   } catch (error) {
-    console.error('Excel导出失败:', error)
+    console.error('Excel export failed:', error)
     return {
       success: false,
-      message: '导出失败：' + error.message
+      message: 'Export failed: ' + error.message
     }
   }
 }
 
 /**
- * 导出用户数据到Excel
- * @param {Array} userData - 用户数据数组
- * @param {string} filename - 文件名
+ * Export user data to Excel
+ * @param {Array} userData - User data array
+ * @param {string} filename - Filename
  */
-export function exportUserData(userData, filename = '用户数据') {
+export function exportUserData(userData, filename = 'User Data') {
   const columns = [
-    { key: 'id', title: '用户ID', width: 10 },
-    { key: 'username', title: '用户名', width: 15 },
-    { key: 'nickname', title: '昵称', width: 15 },
-    { key: 'email', title: '邮箱', width: 25 },
-    { key: 'phone', title: '手机号', width: 15 },
-    { 
-      key: 'gender', 
-      title: '性别', 
+    { key: 'id', title: 'User ID', width: 10 },
+    { key: 'username', title: 'Username', width: 15 },
+    { key: 'nickname', title: 'Nickname', width: 15 },
+    { key: 'email', title: 'Email', width: 25 },
+    { key: 'phone', title: 'Phone', width: 15 },
+    {
+      key: 'gender',
+      title: 'Gender',
       width: 8,
       formatter: (value) => {
-        if (value === 1) return '男'
-        if (value === 0) return '女'
-        return '未知'
+        if (value === 1) return 'Male'
+        if (value === 0) return 'Female'
+        return 'Unknown'
       }
     },
-    { key: 'birthday', title: '生日', width: 12 },
-    { 
-      key: 'userType', 
-      title: '用户类型', 
+    { key: 'birthday', title: 'Birthday', width: 12 },
+    {
+      key: 'userType',
+      title: 'User Type',
       width: 12,
       formatter: (value) => {
-        return value === 2 ? '管理员' : '普通用户'
+        return value === 2 ? 'Admin' : 'User'
       }
     },
-    { 
-      key: 'status', 
-      title: '状态', 
+    {
+      key: 'status',
+      title: 'Status',
       width: 8,
       formatter: (value) => {
-        return value === 1 ? '正常' : '禁用'
+        return value === 1 ? 'Active' : 'Disabled'
       }
     },
-    { 
-      key: 'createdAt', 
-      title: '注册时间', 
+    {
+      key: 'createdAt',
+      title: 'Registration Time',
       width: 20,
       formatter: (value) => {
         return formatDateTime(value)
       }
     },
-    { 
-      key: 'updatedAt', 
-      title: '更新时间', 
+    {
+      key: 'updatedAt',
+      title: 'Update Time',
       width: 20,
       formatter: (value) => {
         return formatDateTime(value)
       }
     }
   ]
-  
-  return exportToExcel(userData, columns, filename, '用户列表')
+
+  return exportToExcel(userData, columns, filename, 'User List')
 }
 
 /**
- * 简单的日期格式化函数
- * @param {Date|string} date - 日期对象或日期字符串
- * @param {string} format - 格式字符串，支持 YYYY-MM-DD_HH-mm-ss
+ * Simple date formatting function
+ * @param {Date|string} date - Date object or date string
+ * @param {string} format - Format string, supports YYYY-MM-DD_HH-mm-ss
  */
 function formatDate(date, format = 'YYYY-MM-DD') {
   const d = new Date(date)
@@ -149,8 +149,8 @@ function formatDate(date, format = 'YYYY-MM-DD') {
 }
 
 /**
- * 日期时间格式化
- * @param {Date|string} date - 日期
+ * Date and time formatting
+ * @param {Date|string} date - Date
  */
 function formatDateTime(date) {
   if (!date) return ''

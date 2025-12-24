@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRobot } from '@fortawesome/free-solid-svg-icons';
-import './AuthLayout.css'; // 导入自定义CSS文件，用于实现复杂的动画和玻璃拟态
+import './AuthLayout.css'; // Import custom CSS file for complex animations and glassmorphism effects
 
-// 假设我们处于 'Login' 状态以匹配第一张图片中的文本
+// Assuming we are in 'Login' state to match the text in the first image
 const mockRouteName = 'Login'; 
 
 const getWelcomeText = (routeName) => {
@@ -36,7 +36,7 @@ const AuthLayout = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 auth-layout">
-      {/* 主内容区域 */}
+      {/* Main content area */}
       <div className="h-screen auth-content">
         <div className="flex h-full auth-container">
           {/* LEFT SECTION */}

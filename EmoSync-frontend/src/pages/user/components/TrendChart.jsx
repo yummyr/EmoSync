@@ -17,7 +17,7 @@ export default function TrendChart({ data = [] }) {
     const container = containerRef.current;
     const ctx = canvas.getContext("2d");
 
-    // 设置 canvas 尺寸
+    // Set canvas dimensions
     const width = container.clientWidth;
     const height = 200;
     canvas.width = width;
@@ -29,7 +29,7 @@ export default function TrendChart({ data = [] }) {
     const chartWidth = width - padding * 2;
     const chartHeight = height - padding * 2;
 
-    // ---------- Y 轴范围（0~10） ----------
+    // ---------- Y axis range (0~10) ----------
     const maxScore = 10;
 
     const getX = (index) => {
@@ -43,7 +43,7 @@ export default function TrendChart({ data = [] }) {
       return padding + chartHeight - (score / maxScore) * chartHeight;
     };
 
-    // ---------- 绘制趋势线 ----------
+    // ---------- Draw trend line ----------
     if (data.length > 1) {
       ctx.strokeStyle = "#7ED321";
       ctx.lineWidth = 3;
@@ -60,7 +60,7 @@ export default function TrendChart({ data = [] }) {
       ctx.stroke();
     }
 
-    // ---------- 绘制数据点 ----------
+    // ---------- Draw data points ----------
     data.forEach((point, index) => {
       const x = getX(index);
       const y = getY(point.moodScore);
@@ -71,7 +71,7 @@ export default function TrendChart({ data = [] }) {
       ctx.fill();
     });
 
-    // ---------- X 轴日期 ----------
+    // ---------- X axis dates ----------
     ctx.fillStyle = "#64748b"; // slate-500
     ctx.font = "12px sans-serif";
     ctx.textAlign = "center";
