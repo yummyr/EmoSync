@@ -18,26 +18,19 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 
 /**
- * Spring Security 企业级配置类
- * <p>
- * 🎯 核心职责：
- * 1. 统一认证授权管理 - Spring Security统一处理所有安全相关功能
- * 2. JWT过滤器集成 - 自定义JWT认证过滤器集成到Spring Security过滤器链
- * 3. 无状态会话管理 - 适合微服务和分布式架构
- * 4. 方法级安全支持 - 支持@PreAuthorize等注解
- * 5. 一处配置全局生效 - 消除重复配置，统一维护
- * <p>
- * 🚀 架构优化：
- * - 解决循环依赖问题：通过延迟注入和职责分离
- * - 提高代码可维护性：清晰的依赖关系
- * - 符合Spring最佳实践：避免复杂的Bean依赖关系
- *
- * @author system
- * @date 2025-11-27
+ * 1. Unified authentication and authorization management - Spring Security handles all security-related functions uniformly
+ * 2. JWT filter integration - Custom JWT authentication filter integrated into Spring Security filter chain
+ * 3. Stateless session management - Suitable for microservices and distributed architectures
+ * 4. Method-level security support - Supports annotations like @PreAuthorize
+ * 5. Single configuration applies globally - Eliminates duplicate configuration, unified maintenance
+ * Architecture optimization:
+ * - Resolve circular dependency issues: Through lazy injection and separation of concerns
+ * - Improve code maintainability: Clear dependency relationships
+ * - Follow Spring best practices: Avoid complex Bean dependencies
  */
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity  // 启用方法级安全，支持@PreAuthorize等注解
+@EnableMethodSecurity
 public class SecurityConfig {
     private final JwtTokenUtils jwtTokenUtils;
     private final UserService userService;
@@ -49,52 +42,52 @@ public class SecurityConfig {
         this.userRepository = userRepository;
     }
     /**
-     * 定义公开访问路径常量
-     * 这些路径不需要JWT验证，可以直接访问
+     * Define public access path constants
+     * These paths do not require JWT authentication and can be accessed directly
      */
     private static final String[] PUBLIC_PATHS = {
-            // 系统基础路径
+            // System basic paths
             "/",
             "/health",
             "/favicon.ico",
 
-            // API文档相关
+            // API documentation related
             "/doc.html",
             "/webjars/**",
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-resources/**",
 
-            // 认证相关接口（必须公开）
-            "/api/user/auth",        // 匿名用户认证（注册/登录）
-            "/api/user/login",       // 用户登录
-            "/api/user/register",    // 用户注册
-            "/api/user/forget",      // 忘记密码
-            "/api/user/add",         // 用户添加
-            "/api/file/**",          // 临时公开
+            // Authentication related endpoints (must be public)
+            "/api/user/auth",        // Anonymous user authentication (registration/login)
+            "/api/user/login",       // User login
+            "/api/user/register",    // User registration
+            "/api/user/forget",      // Forgot password
+            "/api/user/add",         // User add
+            "/api/file/**",          // Temporarily public
             "/api/**",
-            // 公开信息接口
-            "/api/user/{id}",        // 用户信息查询（公开）
+            // Public information endpoints
+            "/api/user/{id}",        // User information query (public)
 
-            // 邮件服务接口
-            "/api/**",         // 邮件发送和验证
+            // Email service endpoints
+            "/api/**",         // Email sending and verification
 
-            // 静态资源（与实际目录结构一致）
-            "/static/**",           // 项目静态资源统一路径
-            "/files/**",            // 文件上传目录访问
-            "/*.html",              // 根路径下的HTML文件
-            "/file-test.html"       // 文件测试页面
+            // Static resources (consistent with actual directory structure)
+            "/static/**",           // Unified path for project static resources
+            "/files/**",            // File upload directory access
+            "/*.html",              // HTML files under root path
+            "/file-test.html"       // File test page
     };
 
     /**
-     * 密码编码器Bean
+     * Password encoder Bean
      * <p>
-     * 🎯 职责分离：
-     * - 独立定义，避免与其他Bean形成循环依赖
-     * - 使用BCrypt加密算法，安全性高
-     * - 全局共享，其他服务可以直接注入使用
+     * 🎯 Separation of concerns:
+     * - Independently defined to avoid circular dependencies with other Beans
+     * - Uses BCrypt encryption algorithm with high security
+     * - Globally shared, other services can directly inject and use
      *
-     * @return PasswordEncoder BCrypt密码编码器
+     * @return PasswordEncoder BCrypt password encoder
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -102,14 +95,14 @@ public class SecurityConfig {
     }
 
     /**
-     * JWT认证过滤器Bean
+     * JWT authentication filter Bean
      * <p>
-     * 🎯 解决循环依赖：
-     * - 通过@Bean方式创建，而不是@Resource注入
-     * - Spring容器会自动处理依赖关系
-     * - 避免SecurityConfig直接依赖JwtAuthenticationFilter
+     * 🎯 Resolve circular dependency:
+     * - Created via @Bean method instead of @Resource injection
+     * - Spring container automatically handles dependency relationships
+     * - Avoids SecurityConfig directly depending on JwtAuthenticationFilter
      *
-     * @return JwtAuthenticationFilter JWT认证过滤器实例
+     * @return JwtAuthenticationFilter JWT authentication filter instance
      */
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter(
@@ -122,26 +115,26 @@ public class SecurityConfig {
 
 
     /**
-     * 配置Spring Security过滤器链
+     * Configure Spring Security filter chain
      * <p>
-     * 核心功能：
-     * 1. 禁用CSRF - 适合API服务
-     * 2. 无状态会话 - 适合JWT认证
-     * 3. 路径权限配置 - 公开路径vs受保护路径
-     * 4. JWT过滤器集成 - 自定义认证逻辑
+     * Core features:
+     * 1. Disable CSRF - Suitable for API services
+     * 2. Stateless session - Suitable for JWT authentication
+     * 3. Path permission configuration - Public paths vs protected paths
+     * 4. JWT filter integration - Custom authentication logic
      * <p>
-     * 安全策略：
-     * - 默认所有请求需要认证
-     * - 公开路径允许匿名访问
-     * - JWT过滤器在用户名密码认证之前执行
+     * Security strategy:
+     * - By default all requests require authentication
+     * - Public paths allow anonymous access
+     * - JWT filter executes before username/password authentication
      *
-     * @param http HttpSecurity配置对象
-     * @return SecurityFilterChain 安全过滤器链
-     * @throws Exception 配置异常
+     * @param http HttpSecurity configuration object
+     * @return SecurityFilterChain Security filter chain
+     * @throws Exception Configuration exception
      */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        // 创建本地CORS配置源
+        // Create local CORS configuration source
         org.springframework.web.cors.UrlBasedCorsConfigurationSource corsSource = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
         org.springframework.web.cors.CorsConfiguration corsConfig = new org.springframework.web.cors.CorsConfiguration();
         corsConfig.setAllowCredentials(true);
@@ -153,29 +146,29 @@ public class SecurityConfig {
         corsSource.registerCorsConfiguration("/**", corsConfig);
 
         http
-                // 启用CORS配置
+                // Enable CORS configuration
                 .cors(cors -> cors.configurationSource(corsSource))
 
-                // 禁用CSRF保护（API服务通常不需要）
+                // Disable CSRF protection (usually not needed for API services)
                 .csrf(csrf -> csrf.disable())
 
-                // 配置会话管理为无状态（适合JWT）
+                // Configure session management as stateless (suitable for JWT)
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // 配置请求授权规则
+                // Configure request authorization rules
                 .authorizeHttpRequests(auth -> auth
-                        // 必须放行SSE 端点
+                        // Must allow SSE endpoints
                         .requestMatchers("/api/psychological-chat/stream").permitAll()
-                        // 会话开始接口也需要放行
+                        // Session start endpoint also needs to be allowed
                         .requestMatchers("/api/psychological-chat/session/start").permitAll()
-                        // 公开路径，允许匿名访问
+                        // Public paths, allow anonymous access
                         .requestMatchers(PUBLIC_PATHS).permitAll()
-                        // 其他所有请求都需要认证
+                        // All other requests require authentication
                         .anyRequest().authenticated()
                 )
 
-                // 添加JWT认证过滤器
+                // Add JWT authentication filter
                 .addFilterBefore((Filter) jwtAuthenticationFilter(jwtTokenUtils, userService, userRepository),
                         (Class<? extends Filter>) UsernamePasswordAuthenticationFilter.class);
         return http.build();

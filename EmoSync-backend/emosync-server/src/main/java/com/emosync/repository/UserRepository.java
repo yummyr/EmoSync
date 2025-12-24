@@ -60,15 +60,15 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     boolean existsByPhone(String phone);
 
     /**
-     * 统计在指定时间范围内创建的用户数量
+     * Count users created within specified time range
      */
     @Query("SELECT COUNT(u) FROM User u WHERE u.createdAt >= :start AND u.createdAt <= :end")
     Long countByCreatedAtBetween(@Param("start")LocalDateTime start, @Param("end")LocalDateTime end);
 
     /**
-     * 查找在指定时间范围内活跃的用户ID（根据createdAt判断）
-     * 注意：这个方法返回的是在指定时间范围内创建的用户ID
-     * 如果你需要根据用户活动判断活跃用户，需要在业务逻辑中处理
+     * Find active user IDs within specified time range (based on createdAt)
+     * Note: This method returns user IDs created within the specified time range
+     * If you need active users based on user activity, handle in business logic
      */
     @Query("SELECT DISTINCT u.id FROM User u WHERE u.createdAt >= :start AND u.createdAt <= :end")
     List<Long> findActiveUserIdsBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);

@@ -28,7 +28,6 @@ import java.util.Map;
 
 /**
  * Emotion Diary Controller
- * @author Yuan
  */
 @Tag(name = "Emotion Diary Management", description = "CRUD operations and statistical analysis for emotion diaries")
 @Slf4j
@@ -370,57 +369,13 @@ public class EmotionDiaryController {
     // ========== Admin APIs ==========
 
     /**
-     * Admin paginated query all users' emotion diaries
-     */
-    // @Operation(summary = "Admin paginated query emotion diaries", description = "Admin view all users' emotion diary records")
-    // @GetMapping("/admin/page")
-    // public Result<PageResult<EmotionDiaryResponseDTO>> getAdminDiaryPage(
-    //         @Parameter(description = "Page number") @RequestParam(defaultValue = "1") Integer current,
-    //         @Parameter(description = "Page size") @RequestParam(defaultValue = "10") Integer size,
-    //         @Parameter(description = "User ID") @RequestParam(required = false) Long userId,
-    //         @Parameter(description = "Username") @RequestParam(required = false) String username,
-    //         @Parameter(description = "Start date") @RequestParam(required = false) String startDate,
-    //         @Parameter(description = "End date") @RequestParam(required = false) String endDate,
-    //         @Parameter(description = "Minimum mood score") @RequestParam(required = false) Integer minMoodScore,
-    //         @Parameter(description = "Maximum mood score") @RequestParam(required = false) Integer maxMoodScore,
-    //         @Parameter(description = "Dominant emotion") @RequestParam(required = false) String dominantEmotion) {
-    //
-    //     log.info("Admin received paginated query emotion diary request, page: {}, size: {}", current, size);
-    //
-    //     try {
-    //         EmotionDiaryQueryDTO queryDTO = new EmotionDiaryQueryDTO();
-    //         queryDTO.setCurrent(current);
-    //         queryDTO.setSize(size);
-    //         queryDTO.setUserId(userId);
-    //         queryDTO.setUsername(username);
-    //
-    //         // Set query conditions
-    //         if (startDate != null) {
-    //             queryDTO.setStartDate(LocalDate.parse(startDate));
-    //         }
-    //         if (endDate != null) {
-    //             queryDTO.setEndDate(LocalDate.parse(endDate));
-    //         }
-    //         queryDTO.setMinMoodScore(minMoodScore);
-    //         queryDTO.setMaxMoodScore(maxMoodScore);
-    //         queryDTO.setDominantEmotion(dominantEmotion);
-    //
-    //         PageResult<EmotionDiaryResponseDTO> page = emotionDiaryService.selectAdminPage(queryDTO);
-    //         return Result.success(page);
-    //     } catch (Exception e) {
-    //         log.error("Admin paginated query emotion diary failed: {}", e.getMessage(), e);
-    //         return Result.error("Query failed: " + e.getMessage());
-    //     }
-    // }
-
-    /**
      * Admin get emotion diary statistics
      */
     @Operation(summary = "Admin get emotion statistics", description = "Get global emotion diary statistical analysis data")
     @GetMapping("/admin/statistics")
     public Result<EmotionDiaryStatisticsDTO> getAdminStatistics(
             @Parameter(description = "Statistics days") @RequestParam(defaultValue = "30") Integer days,
-            @Parameter(description = "用户ID") @RequestParam(required = false) Long userId) {
+            @Parameter(description = "User ID") @RequestParam(required = false) Long userId) {
         log.info("Admin received get emotion statistics request, statistics days: {}, user ID: {}", days, userId);
 
         try {

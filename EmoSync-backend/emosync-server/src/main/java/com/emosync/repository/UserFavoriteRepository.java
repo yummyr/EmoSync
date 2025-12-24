@@ -1,6 +1,9 @@
 package com.emosync.repository;
 
 import com.emosync.entity.UserFavorite;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -26,4 +29,18 @@ public interface UserFavoriteRepository extends JpaRepository<UserFavorite, Long
                 GROUP BY f.knowledgeArticle.id
             """)
     List<Object[]> countByArticleIdsGrouped(List<String> articleIds);
+
+    Optional<UserFavorite> findByUser_IdAndKnowledgeArticle_Id(Long userId, String articleId);
+
+    Page<UserFavorite> findAll(Specification<UserFavorite> spec, Pageable pageable);
+
+    Long countByUser_Id(Long userId);
+
+    @Query("""
+        select f.knowledgeArticle.id, count(f)
+        from UserFavorite f
+        where f.knowledgeArticle.id in :articleIds
+        group by f.knowledgeArticle.id
+    """)
+    List<Object[]> countFavoritesGroupedByArticleIds(@Param("articleIds") List<String> articleIds);
 }

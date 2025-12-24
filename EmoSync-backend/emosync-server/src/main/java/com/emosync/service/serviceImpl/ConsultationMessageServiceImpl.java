@@ -25,7 +25,7 @@ public class ConsultationMessageServiceImpl implements ConsultationMessageServic
     private final ConsultationSessionRepository consultationSessionRepository;
     @Override
     public ConsultationMessage saveUserMessage(Long sessionId, String content, String emotionTag) {
-        // 避免 content = null 插入失败
+        // Avoid content = null insertion failure
         if (content == null) {
             content = "";
         }
@@ -155,7 +155,7 @@ public class ConsultationMessageServiceImpl implements ConsultationMessageServic
             dto.setSessionId(entity.getSession().getId());
         }
 
-        // 描述字段（可以自己根据业务改）
+        // Description fields (can be customized according to business needs)
         dto.setSenderTypeDesc(entity.getSenderType() == 1 ? "User" : "AI Assistant");
         dto.setMessageTypeDesc(entity.getMessageType() == 1 ? "Text" : "Unknown");
 

@@ -13,7 +13,7 @@ import java.util.List;
 
 @Repository
 public interface KnowledgeCategoryRepository extends JpaRepository<KnowledgeCategory, Long> {
-    /** 检查分类名称重复（排除自身） */
+    /** Check for duplicate category names (excluding self) */
     boolean existsByCategoryName(String categoryName);
 
     boolean existsByCategoryNameAndIdNot(String categoryName, Long id);

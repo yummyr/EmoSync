@@ -13,16 +13,15 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * 情绪日记转换类
- * @author system
+ * Emotion diary conversion class
  */
 public class EmotionDiaryConvert {
 
     /**
-     * 创建命令DTO转换为EmotionDiary实体
-     * @param createDTO 创建命令DTO
-     * @param userId 用户ID
-     * @return EmotionDiary实体
+     * Convert create command DTO to EmotionDiary entity
+     * @param createDTO Create command DTO
+     * @param userId User ID
+     * @return EmotionDiary entity
      */
     public static EmotionDiary createCommandToEntity(EmotionDiaryCreateDTO createDTO, Long userId) {
         EmotionDiary diary = new EmotionDiary();
@@ -43,9 +42,9 @@ public class EmotionDiaryConvert {
     }
 
     /**
-     * 更新命令DTO转换为EmotionDiary实体（用于更新操作）
-     * @param updateDTO 更新命令DTO
-     * @return EmotionDiary实体
+     * Convert update command DTO to EmotionDiary entity (for update operations)
+     * @param updateDTO Update command DTO
+     * @return EmotionDiary entity
      */
     public static EmotionDiary updateCommandToEntity(EmotionDiaryUpdateDTO updateDTO) {
         EmotionDiary diary = new EmotionDiary();
@@ -61,10 +60,10 @@ public class EmotionDiaryConvert {
     }
 
     /**
-     * EmotionDiary实体转换为响应DTO
-     * @param diary EmotionDiary实体
-     * @param user 关联的用户信息（可选）
-     * @return 情绪日记响应DTO
+     * Convert EmotionDiary entity to response DTO
+     * @param diary EmotionDiary entity
+     * @param user Associated user information (optional)
+     * @return Emotion diary response DTO
      */
     public static EmotionDiaryResponseDTO entityToResponse(EmotionDiary diary, User user) {
         EmotionDiaryResponseDTO responseDTO = new EmotionDiaryResponseDTO();
@@ -79,7 +78,7 @@ public class EmotionDiaryConvert {
         responseDTO.setDominantEmotion(diary.getDominantEmotion());
         responseDTO.setEmotionTriggers(diary.getEmotionTriggers());
         responseDTO.setDiaryContent(diary.getDiaryContent());
-        // 设置日记内容预览
+        // Set diary content preview
         if (diary.getDiaryContent() != null) {
             String preview = diary.getDiaryContent().length() > 100 
                 ? diary.getDiaryContent().substring(0, 100) + "..." 
@@ -95,13 +94,13 @@ public class EmotionDiaryConvert {
         responseDTO.setHasAiEmotionAnalysis(
                 diary.getAiEmotionAnalysis() != null && !diary.getAiEmotionAnalysis().trim().isEmpty()
         );
-        
-        // 设置AI分析状态
+
+        // Set AI analysis status
         if (diary.getAiEmotionAnalysis() != null && !diary.getAiEmotionAnalysis().trim().isEmpty()) {
             responseDTO.setAiAnalysisStatus("COMPLETED");
         } else if (diary.getAiAnalysisUpdatedAt() != null) {
-            // 如果有更新时间但没有分析结果，检查是否是分析失败
-            // 如果更新时间超过10分钟且没有结果，认为是分析失败
+            // If there is update time but no analysis result, check if analysis failed
+            // If update time is more than 10 minutes ago and no result, consider analysis failed
             LocalDateTime now = LocalDateTime.now();
             long minutesSinceUpdate = java.time.Duration.between(diary.getAiAnalysisUpdatedAt(), now).toMinutes();
             if (minutesSinceUpdate > 10) {
@@ -113,7 +112,7 @@ public class EmotionDiaryConvert {
             responseDTO.setAiAnalysisStatus("PENDING");
         }
 
-        // 设置用户信息（如果提供）
+        // Set user information (if provided)
         if (user != null) {
             responseDTO.setUsername(user.getUsername());
             responseDTO.setNickname(user.getNickname());
@@ -124,18 +123,18 @@ public class EmotionDiaryConvert {
     }
 
     /**
-     * EmotionDiary实体转换为响应DTO（不包含用户信息）
-     * @param diary EmotionDiary实体
-     * @return 情绪日记响应DTO
+     * Convert EmotionDiary entity to response DTO (without user information)
+     * @param diary EmotionDiary entity
+     * @return Emotion diary response DTO
      */
     public static EmotionDiaryResponseDTO entityToResponse(EmotionDiary diary) {
         return entityToResponse(diary, null);
     }
 
     /**
-     * 批量转换EmotionDiary实体列表为响应DTO列表
-     * @param diaries EmotionDiary实体列表
-     * @return 情绪日记响应DTO列表
+     * Batch convert EmotionDiary entity list to response DTO list
+     * @param diaries EmotionDiary entity list
+     * @return Emotion diary response DTO list
      */
     public static List<EmotionDiaryResponseDTO> entityListToResponseList(List<EmotionDiary> diaries) {
         return diaries.stream()
@@ -144,12 +143,12 @@ public class EmotionDiaryConvert {
     }
 
     /**
-     * 批量转换EmotionDiary实体列表为响应DTO列表（包含用户信息映射）
-     * @param diaries EmotionDiary实体列表
-     * @param userMap 用户信息映射（userId -> User）
-     * @return 情绪日记响应DTO列表
+     * Batch convert EmotionDiary entity list to response DTO list (with user information mapping)
+     * @param diaries EmotionDiary entity list
+     * @param userMap User information mapping (userId -> User)
+     * @return Emotion diary response DTO list
      */
-    public static List<EmotionDiaryResponseDTO> entityListToResponseList(List<EmotionDiary> diaries, 
+    public static List<EmotionDiaryResponseDTO> entityListToResponseList(List<EmotionDiary> diaries,
                                                                        Map<Long, User> userMap) {
         return diaries.stream()
                 .map(diary -> entityToResponse(diary, userMap.get(diary.getUser().getId())))
@@ -157,14 +156,14 @@ public class EmotionDiaryConvert {
     }
 
     /**
-     * 构建情绪趋势数据
-     * @param dateLabel 日期标签
-     * @param moodScore 情绪评分
-     * @param dominantEmotion 主要情绪
-     * @return 情绪趋势数据
+     * Build emotion trend data
+     * @param dateLabel Date label
+     * @param moodScore Mood score
+     * @param dominantEmotion Dominant emotion
+     * @return Emotion trend data
      */
-    public static EmotionDiaryStatisticsDTO.MoodTrendData buildMoodTrendData(String dateLabel, 
-                                                                              Integer moodScore, 
+    public static EmotionDiaryStatisticsDTO.MoodTrendData buildMoodTrendData(String dateLabel,
+                                                                              Integer moodScore,
                                                                               String dominantEmotion) {
         EmotionDiaryStatisticsDTO.MoodTrendData trendData = new EmotionDiaryStatisticsDTO.MoodTrendData();
         trendData.setDateLabel(dateLabel);

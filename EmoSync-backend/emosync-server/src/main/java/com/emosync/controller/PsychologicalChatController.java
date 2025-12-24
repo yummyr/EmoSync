@@ -34,8 +34,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 流式心理疏导智能对话控制器
- * 提供基于Spring AI的流式心理疏导对话服务
+ * Streaming Psychological Support Chat Controller
+ * Provides Spring AI-based streaming psychological support chat service
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -81,17 +81,6 @@ public class PsychologicalChatController {
         UserDetailsImpl userDetails = getCurrentUserInfo();
         return userDetails != null && userDetails.isAdmin();
     }
-    // /**
-    //  * Convert object to SSE data format (JSON string)
-    //  */
-    // private String toSseData(Object data) {
-    //     try {
-    //         return objectMapper.writeValueAsString(data);
-    //     } catch (JsonProcessingException e) {
-    //         log.error("Failed to convert SSE data", e);
-    //         return "{\"code\":500,\"message\":\"Data formatting failed\"}";
-    //     }
-    // }
 
     /**
      * Start a new psychological support session
@@ -276,15 +265,15 @@ public class PsychologicalChatController {
     @Operation(summary = "Get Sessions Page", description = "Get paginated list of consultation sessions")
     @GetMapping("/sessions")
     public Result<PageResult<ConsultationSessionResponseDTO>> getSessionsPage(
-            @Parameter(description = "当前页") @RequestParam(defaultValue = "1") Integer currentPage,
-            @Parameter(description = "每页条数") @RequestParam(defaultValue = "10") Integer size,
-            @Parameter(description = "用户ID") @RequestParam(required = false) Long userId,
-            @Parameter(description = "情绪标签") @RequestParam(required = false) String emotionTag,
-            @Parameter(description = "开始时间起") @RequestParam(required = false) String startDate,
-            @Parameter(description = "开始时间止") @RequestParam(required = false) String endDate,
-            @Parameter(description = "关键词搜索") @RequestParam(required = false) String keyword) {
+            @Parameter(description = "Current page") @RequestParam(defaultValue = "1") Integer currentPage,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "10") Integer size,
+            @Parameter(description = "User ID") @RequestParam(required = false) Long userId,
+            @Parameter(description = "Emotion tag") @RequestParam(required = false) String emotionTag,
+            @Parameter(description = "Start date") @RequestParam(required = false) String startDate,
+            @Parameter(description = "End date") @RequestParam(required = false) String endDate,
+            @Parameter(description = "Keyword search") @RequestParam(required = false) String keyword) {
 
-        // 构造查询DTO
+        // Construct query DTO
         ConsultationSessionQueryDTO queryDTO = new ConsultationSessionQueryDTO();
         queryDTO.setCurrentPage(currentPage);
         queryDTO.setSize(size);

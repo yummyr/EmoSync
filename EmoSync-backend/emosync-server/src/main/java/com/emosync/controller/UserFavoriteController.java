@@ -143,6 +143,7 @@ public class UserFavoriteController {
 
         log.info("Paginated query user favorite articles: userId={}, page={}, size={}", currentUserId, currentPage, size);
         PageResult<ArticleSimpleResponseDTO> response = userFavoriteService.getUserFavoritePage(queryDTO);
+        log.info("Favorites page result:{}",response);
         return Result.success(response);
     }
 

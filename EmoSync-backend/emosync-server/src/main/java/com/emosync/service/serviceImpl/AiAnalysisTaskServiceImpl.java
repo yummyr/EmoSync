@@ -48,7 +48,7 @@ public class AiAnalysisTaskServiceImpl implements AiAnalysisTaskService {
     @Transactional
     public Long createTask(Long diaryId, Long userId, AiTaskType taskType, Integer priority) {
 
-        log.info("创建AI分析任务，日记ID: {}, 用户ID: {}, 任务类型: {}", diaryId, userId, taskType.getCode());
+        log.info("Creating AI analysis task, diary ID: {}, user ID: {}, task type: {}", diaryId, userId, taskType.getCode());
 
         AiAnalysisTask task = new AiAnalysisTask();
         task.setDiary(emotionDiaryRepository.findById(diaryId).orElseThrow(null));
@@ -62,14 +62,14 @@ public class AiAnalysisTaskServiceImpl implements AiAnalysisTaskService {
         task.setUpdatedAt(LocalDateTime.now());
 
         aiAnalysisTaskRepository.save(task);
-        log.info("AI分析任务创建成功，任务ID: {}", task.getId());
+        log.info("AI analysis task created successfully, task ID: {}", task.getId());
         return task.getId();
 
     }
 
 
     /**
-     * 更新任务状态为处理中
+     * Update task status to processing
      */
     @Override
     @Transactional
@@ -83,7 +83,7 @@ public class AiAnalysisTaskServiceImpl implements AiAnalysisTaskService {
     }
 
     /**
-     * 标记任务完成
+     * Mark task as completed
      */
     @Override
     @Transactional
@@ -103,7 +103,7 @@ public class AiAnalysisTaskServiceImpl implements AiAnalysisTaskService {
         task.setErrorMessage(errorMessage);
         task.setRetryCount(task.getRetryCount() + 1);
         aiAnalysisTaskRepository.save(task);
-        log.warn("任务标记为失败，任务ID: {}, 错误: {}", taskId, errorMessage);
+        log.warn("Task marked as failed, task ID: {}, error: {}", taskId, errorMessage);
     }
 
     @Override
@@ -116,49 +116,49 @@ public class AiAnalysisTaskServiceImpl implements AiAnalysisTaskService {
                     Sort.by(Sort.Direction.DESC, "createdAt")
             );
 
-            // Specification 动态条件
+            // Specification dynamic conditions
             Specification<AiAnalysisTask> spec = (root, query, cb) -> {
                 List<Predicate> predicates = new ArrayList<>();
 
-                // 使用 Join 访问关联的 User 实体
+                // Use Join to access associated User entity
                 if (queryDTO.getUserId() != null) {
                     Join<AiAnalysisTask, User> userJoin = root.join("user", JoinType.LEFT);
                     predicates.add(cb.equal(userJoin.get("id"), queryDTO.getUserId()));
                 }
-                // 状态
+                // Status
                 if (StringUtils.hasText(queryDTO.getStatus())) {
                     predicates.add(cb.equal(root.get("status"), queryDTO.getStatus()));
                 }
 
-                // 任务类型
+                // Task type
                 if (StringUtils.hasText(queryDTO.getTaskType())) {
                     predicates.add(cb.equal(root.get("taskType"), queryDTO.getTaskType()));
                 }
 
 
-                // 优先级
+                // Priority
                 if (queryDTO.getPriority() != null) {
                     predicates.add(cb.equal(root.get("priority"), queryDTO.getPriority()));
                 }
 
-                // 开始时间
+                // Start time
                 if (StringUtils.hasText(queryDTO.getStartTime())) {
                     LocalDateTime start = LocalDateTime.parse(queryDTO.getStartTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                     predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), start));
                 }
 
-                // 结束时间
+                // End time
                 if (StringUtils.hasText(queryDTO.getEndTime())) {
                     LocalDateTime end = LocalDateTime.parse(queryDTO.getEndTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                     predicates.add(cb.lessThanOrEqualTo(root.get("createdAt"), end));
                 }
 
-                // 仅失败
+                // Failed only
                 if (Boolean.TRUE.equals(queryDTO.getFailedOnly())) {
                     predicates.add(cb.equal(root.get("status"), AiTaskStatus.FAILED.getCode()));
                 }
 
-                // 可重试 (status = FAILED AND retry < maxRetry)
+                // Retryable (status = FAILED AND retry < maxRetry)
                 if (Boolean.TRUE.equals(queryDTO.getRetryableOnly())) {
                     predicates.add(cb.equal(root.get("status"), AiTaskStatus.FAILED.getCode()));
                     predicates.add(
@@ -169,45 +169,45 @@ public class AiAnalysisTaskServiceImpl implements AiAnalysisTaskService {
                 return cb.and(predicates.toArray(new Predicate[0]));
             };
 
-            // 查询 Page
+            // Query Page
             Page<AiAnalysisTask> page = aiAnalysisTaskRepository.findAll(spec, pageable);
 
-            // 转换 DTO
+            // Convert DTO
             List<AiAnalysisTaskResponseDTO> dtoList = page.getContent()
                     .stream()
                     .map(task -> convertToDTO(task))
                     .toList();
 
-            // 返回 PageResult
+            // Return PageResult
             return new PageResult<>(page.getTotalElements(), dtoList);
 
         } catch (Exception e) {
-            log.error("查询 AI 分析任务分页失败", e);
-            throw new ServiceException("查询任务失败，请稍后重试");
+            log.error("Failed to query AI analysis task pagination", e);
+            throw new ServiceException("Task query failed, please try again later");
         }
     }
 
     @Override
     @Transactional
     public void retryTask(Long taskId) {
-        log.info("重试AI分析任务，任务ID: {}", taskId);
+        log.info("Retrying AI analysis task, task ID: {}", taskId);
         AiAnalysisTask task = aiAnalysisTaskRepository.findById(taskId).orElseThrow(
                 () -> new BusinessException("No task found to mark as failed"));
         if (!task.canRetry()) {
-            throw new BusinessException("任务不可重试：" +
-                    (task.getRetryCount() >= task.getMaxRetryCount() ? "已达最大重试次数" : "任务状态不允许重试"));
+            throw new BusinessException("Task cannot be retried: " +
+                    (task.getRetryCount() >= task.getMaxRetryCount() ? "Maximum retry count reached" : "Task status does not allow retry"));
         }
 
         task.setStatus(AiTaskStatus.PENDING.getCode());
         aiAnalysisTaskRepository.save(task);
-        log.info("任务重试状态重置完成，任务ID: {}", taskId);
+        log.info("Task retry status reset completed, task ID: {}", taskId);
     }
 
     @Override
     @Transactional
     public Map<String, Object> batchRetryTasks(List<Long> taskIds) {
 
-        log.info("批量重试AI分析任务，任务数量: {}", taskIds.size());
+        log.info("Batch retrying AI analysis tasks, task count: {}", taskIds.size());
 
         Map<String, Object> result = new HashMap<>();
         int successCount = 0;
@@ -221,30 +221,30 @@ public class AiAnalysisTaskServiceImpl implements AiAnalysisTaskService {
             } catch (Exception e) {
                 failCount++;
                 failReasons.add("Task id " + id + e.getMessage());
-                log.warn("批量重试任务失败，任务ID: {}, 错误: {}", id, e.getMessage());
+                log.warn("Batch retry task failed, task ID: {}, error: {}", id, e.getMessage());
             }
         }
         result.put("totalCount", taskIds.size());
         result.put("successCount", successCount);
         result.put("failCount", failCount);
         result.put("failReasons", failReasons);
-        log.info("批量重试任务完成，总数: {}, 成功: {}, 失败: {}", taskIds.size(), successCount, failCount);
+        log.info("Batch retry task completed, total: {}, success: {}, failed: {}", taskIds.size(), successCount, failCount);
         return result;
     }
 
     /**
-     * 获取队列统计信息
+     * Get queue statistics
      */
     @Override
     public Map<String, Object> getQueueStatistics() {
-        log.info("获取AI分析队列统计信息");
+        log.info("Getting AI analysis queue statistics");
 
         Map<String, Object> stats = new HashMap<>();
 
-        // 获取所有任务
+        // Get all tasks
         List<AiAnalysisTask> allTasks = aiAnalysisTaskRepository.findAll();
 
-        // 按状态统计
+        // Count by status
         Map<String, Long> statusStats = allTasks.stream()
                 .collect(Collectors.groupingBy(AiAnalysisTask::getStatus, Collectors.counting()));
 
@@ -254,13 +254,13 @@ public class AiAnalysisTaskServiceImpl implements AiAnalysisTaskService {
         stats.put("completedTasks", statusStats.getOrDefault(AiTaskStatus.COMPLETED.getCode(), 0L));
         stats.put("failedTasks", statusStats.getOrDefault(AiTaskStatus.FAILED.getCode(), 0L));
 
-        // 可重试任务
+        // Retryable tasks
         long retryable = allTasks.stream()
                 .filter(AiAnalysisTask::canRetry)
                 .count();
         stats.put("retryableTasks", retryable);
 
-        // 按任务类型统计
+        // Count by task type
         Map<String, Long> typeStats = allTasks.stream()
                 .collect(Collectors.groupingBy(AiAnalysisTask::getTaskType, Collectors.counting()));
         stats.put("taskTypeStats", typeStats);

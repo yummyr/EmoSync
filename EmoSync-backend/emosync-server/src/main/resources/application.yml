@@ -1,4 +1,4 @@
-# 服务器配置
+# Server Configuration
 server:
   port: 8080
   servlet:
@@ -7,7 +7,7 @@ server:
 spring:
   profiles:
     active: dev
-  # 数据源配置
+  # Data Source Configuration
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/EmoSync_db?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true
@@ -20,7 +20,7 @@ spring:
       database: 0
   jpa:
     hibernate:
-      ddl-auto: update  # 开发环境可用update，生产环境用validate或none
+      ddl-auto: update  # Use update for development, use validate or none for production
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
@@ -29,8 +29,8 @@ spring:
           batch_size: 20
         order_inserts: true
         order_updates: true
-    show-sql: false  # 开发环境可开启，生产环境关闭
-  # 安全配置
+    show-sql: false  # Can enable in development, disable in production
+  # Security Configuration
   security:
     user:
       name: admin
@@ -48,50 +48,50 @@ spring:
         tool-calling:
           enabled: true
     openai:
-      # OpenAI API Key (或 DeepSeek API Key)
+      # OpenAI API Key (or DeepSeek API Key)
       api-key: ${OPENAI_API_KEY}
-      # 基础 URL (OpenAI 或 DeepSeek)
+      # Base URL (OpenAI or DeepSeek)
       base-url: ${OPENAI_BASE_URL}
-      # 如果用 DeepSeek: https://api.deepseek.com
+      # If using DeepSeek: https://api.deepseek.com
 
       chat:
         enabled: true
         options:
-          # 模型名称
+          # Model name
           model: ${OPENAI_MODEL}
-          # 如果用 DeepSeek: deepseek-chat
+          # If using DeepSeek: deepseek-chat
 
-          # 温度
+          # Temperature
           temperature: 0.7
 
-          # 最大 tokens
+          # Maximum tokens
           max-tokens: 2000
 
-          # 启用流式
+          # Enable streaming
           stream: true
           tool-calling:
             enabled: true
         completions-path: /v1/chat/completions
-  # Web配置
+  # Web Configuration
   mvc:
-    static-path-pattern: /**  # 允许根路径访问静态资源
+    static-path-pattern: /**  # Allow root path access to static resources
   web:
     resources:
-      static-locations: classpath:/static/, file:./files/  # 添加files目录
+      static-locations: classpath:/static/, file:./files/  # Add files directory
 
-  # 文件上传配置
+  # File Upload Configuration
   servlet:
     multipart:
       enabled: true
       max-file-size: 10MB
       max-request-size: 10MB
 
-  # JSON配置
+  # JSON Configuration
   jackson:
     default-property-inclusion: non_empty
 
 
-# SpringDoc配置
+# SpringDoc Configuration
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
@@ -106,12 +106,12 @@ springdoc:
   packages-to-scan: com.emosync
 
 
-# Knife4j配置
+# Knife4j Configuration
 knife4j:
   enable: true
   setting:
-    language: en  # 简洁的设置
-    enable-version: false  # 可选：隐藏版本号
+    language: en  # Simple settings
+    enable-version: false  # Optional: Hide version number
     enable-swagger-models: true
   documents:
     - group: "API Documentation"
@@ -123,19 +123,19 @@ knife4j:
     password: admin
 
 
-# JWT配置
+# JWT Configuration
 jwt:
   secret: MySuperLongAndSecureSecretKey12345678901234567890
-  expiration: 86400000  # 24小时（毫秒）
-  refresh-expiration: 604800000  # 7天（毫秒）
-  header: Authorization  # token头部名称
-  token-prefix: "Bearer "  # token前缀
+  expiration: 86400000  # 24 hours (milliseconds)
+  refresh-expiration: 604800000  # 7 days (milliseconds)
+  header: Authorization  # Token header name
+  token-prefix: "Bearer "  # Token prefix
 
-# 用户配置
+# User Configuration
 user:
   defaultPassword: 123456
 
-# 文件管理配置
+# File Management Configuration
 file:
   upload:
     path: ./files

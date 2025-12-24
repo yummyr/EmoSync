@@ -8,8 +8,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
- * 文件清理定时任务
- * @author Yuan
+ * Scheduled task for file cleanup
  */
 @Slf4j
 @Component
@@ -21,42 +20,42 @@ public class FileCleanupScheduler {
     private FileService sysFileInfoService;
 
     /**
-     * 清理过期临时文件
-     * 每天凌晨3点执行
+     * Clean up expired temporary files
+     * Executes daily at 3:00 AM
      */
     @Scheduled(cron = "0 0 3 * * ?")
     public void cleanupExpiredTempFiles() {
         try {
-            log.info("开始执行定时清理过期临时文件任务");
-            
+            log.info("Starting scheduled cleanup task for expired temporary files");
+
             int cleanupCount = sysFileInfoService.cleanupExpiredTempFiles();
-            
-            log.info("定时清理过期临时文件任务完成，清理数量: {}", cleanupCount);
-            
+
+            log.info("Scheduled cleanup task for expired temporary files completed, cleanup count: {}", cleanupCount);
+
         } catch (Exception e) {
-            log.error("定时清理过期临时文件任务执行失败", e);
+            log.error("Scheduled cleanup task for expired temporary files failed", e);
         }
     }
 
     /**
-     * 文件存储监控
-     * 每天上午8点执行
+     * File storage monitoring
+     * Executes daily at 8:00 AM
      */
     @Scheduled(cron = "0 0 8 * * ?")
     public void monitorFileStorage() {
         try {
-            log.info("开始执行文件存储监控任务");
-            
-            // TODO: 实现文件存储监控逻辑
-            // 1. 统计文件总数
-            // 2. 统计存储空间使用情况
-            // 3. 检查孤立文件
-            // 4. 生成监控报告
-            
-            log.info("文件存储监控任务完成");
-            
+            log.info("Starting file storage monitoring task");
+
+            // TODO: Implement file storage monitoring logic
+            // 1. Count total files
+            // 2. Check storage space usage
+            // 3. Check for orphaned files
+            // 4. Generate monitoring report
+
+            log.info("File storage monitoring task completed");
+
         } catch (Exception e) {
-            log.error("文件存储监控任务执行失败", e);
+            log.error("File storage monitoring task failed", e);
         }
     }
 } 

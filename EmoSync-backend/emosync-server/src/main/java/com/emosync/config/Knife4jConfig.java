@@ -6,45 +6,45 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Knife4j API文档配置类
+ * Knife4j API Documentation Configuration Class
 
- * 用于配置Knife4j的API文档展示及相关资源访问
- * Knife4j是一个基于Swagger的API文档增强工具
+ * Used to configure Knife4j API documentation display and related resource access
+ * Knife4j is an API documentation enhancement tool based on Swagger
  */
 @Configuration
 public class Knife4jConfig {
 
     /**
-     * 配置OpenAPI对象
-     * 用于生成API文档的核心配置
-     * 包含API文档的基本信息、安全配置等
+     * Configure OpenAPI object
+     * Core configuration used to generate API documentation
+     * Includes basic information, security configuration, etc.
      *
-     * @return OpenAPI 返回配置好的OpenAPI对象
+     * @return OpenAPI Returns the configured OpenAPI object
      */
     @Bean
     public OpenAPI openAPI() {
         return new OpenAPI()
-                // 配置接口文档基本信息
+                // Configure API documentation basic information
                 .info(this.getApiInfo());
     }
 
     /**
-     * 获取API文档的基本信息配置
-     * 配置API文档的标题、描述、版本等元数据信息
-     * 支持以下配置项：
-     * - 文档标题
-     * - 文档描述
-     * - 作者信息（当前已注释）
-     * - 许可证信息（当前已注释）
-     * - 服务条款（当前已注释）
-     * - 版本信息
+     * Get basic information configuration for API documentation
+     * Configure metadata such as title, description, version of API documentation
+     * Supports the following configuration items:
+     * - Document title
+     * - Document description
+     * - Author information (currently commented out)
+     * - License information (currently commented out)
+     * - Terms of service (currently commented out)
+     * - Version information
      *
-     * @return Info 返回API文档基本信息对象
+     * @return Info Returns the API documentation basic information object
      */
     private Info getApiInfo() {
         return new Info()
-                .title(" API文档")
-                .description("提供API接口")
+                .title("EmoSync API Documentation")
+                .description("Provides API interfaces")
                 .version("1.0.0");
     }
 }

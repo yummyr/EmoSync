@@ -28,7 +28,7 @@ public class UserRegisterCommandDTO {
     @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "Username can only contain letters, numbers and underscores")
     private String username;
 
-    @Schema(description = "Email", example = "test@drone.com")
+    @Schema(description = "Email", example = "test@emoSync.com")
     @NotBlank(message = "Email cannot be empty")
     @Email(message = "Email format is invalid")
     @Size(max = 100, message = "Email length cannot exceed 100 characters")

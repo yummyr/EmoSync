@@ -6,7 +6,7 @@ import com.emosync.enumClass.EmotionTypeEnum;
 public class PromptManage {
 
     /**
-     * Emotion analysis system prompt (English version)
+     * Emotion analysis system prompt
      * Strictly requires AI to return clean JSON without markdown.
      */
     public static final String EMOTION_ANALYSIS_SYSTEM_PROMPT =
@@ -86,7 +86,7 @@ public class PromptManage {
 
 
     /**
-     * Crisis Detection Prompt (English)
+     * Crisis Detection Prompt
      */
     public static final String CRISIS_DETECTION_SYSTEM_PROMPT =
             "You are an AI specialized in detecting psychological crisis signals.\n\n"
@@ -107,7 +107,7 @@ public class PromptManage {
 
 
     /**
-     * Real-time risk assessment prompt (English)
+     * Real-time risk assessment prompt
      */
     public static final String REAL_TIME_RISK_ASSESSMENT_PROMPT =
             "You are an expert in real-time psychological risk evaluation.\n\n"

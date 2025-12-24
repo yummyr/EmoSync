@@ -10,14 +10,14 @@
     <artifactId>EmoSync-backend</artifactId>
     <version>1.0-SNAPSHOT</version>
 
-    <!-- 子模块声明 -->
+    <!-- Submodule declaration -->
     <modules>
         <module>emosync-common</module>
         <module>emosync-pojo</module>
         <module>emosync-server</module>
     </modules>
 
-    <!-- 统一管理版本 -->
+    <!-- Unified version management -->
     <properties>
         <java.version>17</java.version>
         <spring.boot.version>3.2.3</spring.boot.version>
@@ -29,7 +29,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <!-- 仓库配置 -->
+    <!-- Repository configuration -->
     <repositories>
         <repository>
             <id>spring-milestones</id>
@@ -41,11 +41,11 @@
         </repository>
     </repositories>
 
-    <!-- 依赖管理（子模块共享） -->
+    <!-- Dependency management (shared by submodules) -->
     <dependencyManagement>
         <dependencies>
 
-            <!-- Spring Boot 依赖 -->
+            <!-- Spring Boot dependencies -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
@@ -70,7 +70,7 @@
                 <scope>import</scope>
             </dependency>
 
-            <!-- 内部模块依赖管理 -->
+            <!-- Internal module dependency management -->
             <dependency>
                 <groupId>com.emosync</groupId>
                 <artifactId>emosync-pojo</artifactId>

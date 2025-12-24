@@ -16,25 +16,25 @@ import java.util.List;
 public interface ConsultationSessionRepository extends JpaRepository<ConsultationSession, Long> {
 
     /**
-     * 查询指定时间范围内的所有会话
+     * Query all sessions within specified time range
      */
     @Query("SELECT cs FROM ConsultationSession cs WHERE cs.startedAt >= :start AND cs.startedAt <= :end ORDER BY cs.startedAt ASC")
     List<ConsultationSession> findByStartedAtBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
     /**
-     * 查询在指定时间范围内有会话的不重复用户ID
+     * Query distinct user IDs with sessions within specified time range
      */
     @Query("SELECT DISTINCT cs.user.id FROM ConsultationSession cs WHERE cs.startedAt >= :start AND cs.startedAt <= :end")
     List<Long> findDistinctUserIdsByStartedAtBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
     /**
-     * 统计指定时间范围内的会话数量
+     * Count sessions within specified time range
      */
     @Query("SELECT COUNT(cs) FROM ConsultationSession cs WHERE cs.startedAt >= :start AND cs.startedAt <= :end")
     long countByStartedAtBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
     /**
-     * 计算指定时间范围内的平均会话时长（分钟）
+     * Calculate average session duration (in minutes) within specified time range
      */
     @Query(value = "SELECT AVG(TIMESTAMPDIFF(MINUTE, started_at, NOW())) " +
             "FROM consultation_session " +
@@ -44,7 +44,7 @@ public interface ConsultationSessionRepository extends JpaRepository<Consultatio
 
 
     /**
-     * 查询最近的会话
+     * Query recent sessions
      */
     @Query("SELECT cs FROM ConsultationSession cs ORDER BY cs.startedAt DESC")
     List<ConsultationSession> findRecentSessions(@Param("limit") int limit);

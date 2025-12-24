@@ -13,8 +13,6 @@ import java.time.LocalDateTime;
 /**
  * User Conversion Class
  * Handles conversion between User entities and DTOs
- *
- * @author Yuan
  */
 
 public class UserConvert {

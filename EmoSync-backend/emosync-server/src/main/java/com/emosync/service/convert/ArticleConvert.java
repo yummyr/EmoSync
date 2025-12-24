@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 /**
  * Knowledge article conversion utility class
- * @author system
  */
 public class ArticleConvert {
 

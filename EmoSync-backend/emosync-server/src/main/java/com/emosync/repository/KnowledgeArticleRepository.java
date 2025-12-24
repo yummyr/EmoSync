@@ -23,10 +23,10 @@ public interface KnowledgeArticleRepository extends JpaRepository<KnowledgeArtic
 
     long countByStatus(Integer status);
 
-    /** 统计某分类下是否存在文章（用于删除校验） */
+    /** Count if articles exist under category (for delete validation) */
     Long countByCategory_Id(Long categoryId);
 
-    /** 统计分类下的文章数量（分页展示用） */
+    /** Count articles under category (for pagination display) */
     Long countByCategory_IdAndStatus(Long categoryId, Integer status);
 
 

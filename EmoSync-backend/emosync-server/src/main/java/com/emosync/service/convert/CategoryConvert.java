@@ -11,15 +11,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 知识分类转换类
- * @author system
+ * Knowledge category conversion class
  */
 public class CategoryConvert {
 
     /**
-     * 创建命令DTO转换为实体
-     * @param createDTO 创建命令DTO
-     * @return 分类实体
+     * Convert create command DTO to entity
+     * @param createDTO Create command DTO
+     * @return Category entity
      */
     public static KnowledgeCategory createCommandToEntity(CategoryCreateDTO createDTO) {
         return KnowledgeCategory.builder()
@@ -31,9 +30,9 @@ public class CategoryConvert {
     }
 
     /**
-     * 更新命令DTO转换为实体
-     * @param updateDTO 更新命令DTO
-     * @return 分类实体
+     * Convert update command DTO to entity
+     * @param updateDTO Update command DTO
+     * @return Category entity
      */
     public static KnowledgeCategory updateCommandToEntity(CategoryUpdateDTO updateDTO) {
         KnowledgeCategory category = new KnowledgeCategory();
@@ -46,9 +45,9 @@ public class CategoryConvert {
     }
 
     /**
-     * 实体转换为响应DTO
-     * @param category 分类实体
-     * @return 分类响应DTO
+     * Convert entity to response DTO
+     * @param category Category entity
+     * @return Category response DTO
      */
     public static CategoryResponseDTO entityToResponse(KnowledgeCategory category) {
         return CategoryResponseDTO.builder()
@@ -64,12 +63,12 @@ public class CategoryConvert {
     }
 
     /**
-     * 实体转换为响应DTO（包含统计信息）
-     * @param category 分类实体
-     * @param articleCount 文章数量
-     * @return 分类响应DTO
+     * Convert entity to response DTO (with statistics)
+     * @param category Category entity
+     * @param articleCount Article count
+     * @return Category response DTO
      */
-    public static CategoryResponseDTO entityToResponseWithStats(KnowledgeCategory category, 
+    public static CategoryResponseDTO entityToResponseWithStats(KnowledgeCategory category,
                                                                Integer articleCount) {
         CategoryResponseDTO response = entityToResponse(category);
         response.setArticleCount(articleCount);
@@ -77,9 +76,9 @@ public class CategoryConvert {
     }
 
     /**
-     * 实体列表转换为响应DTO列表
-     * @param categories 分类实体列表
-     * @return 分类响应DTO列表
+     * Convert entity list to response DTO list
+     * @param categories Category entity list
+     * @return Category response DTO list
      */
     public static List<CategoryResponseDTO> entityListToResponseList(List<KnowledgeCategory> categories) {
         return categories.stream()
@@ -88,18 +87,18 @@ public class CategoryConvert {
     }
 
     /**
-     * 获取状态显示文本
-     * @param status 状态代码
-     * @return 状态显示文本
+     * Get status display text
+     * @param status Status code
+     * @return Status display text
      */
     private static String getStatusText(Integer status) {
         if (status == null) {
-            return "未知";
+            return "Unknown";
         }
         try {
             return CategoryStatus.fromCode(status).getDescription();
         } catch (IllegalArgumentException e) {
-            return "未知";
+            return "Unknown";
         }
     }
 }

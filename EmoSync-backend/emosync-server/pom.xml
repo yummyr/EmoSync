@@ -16,19 +16,19 @@
 
     <dependencies>
 
-        <!-- 依赖 pojo 模块 -->
+        <!-- Depend on pojo module -->
         <dependency>
             <groupId>com.emosync</groupId>
             <artifactId>emosync-pojo</artifactId>
         </dependency>
 
-        <!-- 依赖 common 模块 -->
+        <!-- Depend on common module -->
         <dependency>
             <groupId>com.emosync</groupId>
             <artifactId>emosync-common</artifactId>
         </dependency>
 
-        <!-- Spring Boot 核心 -->
+        <!-- Spring Boot Core -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -63,7 +63,7 @@
             <artifactId>java-jwt</artifactId>
             <version>4.4.0</version>
         </dependency>
-        <!-- Spring AI（如 deepseek / openai / ollama） -->
+        <!-- Spring AI (e.g., deepseek / openai / ollama) -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-openai</artifactId>
@@ -82,14 +82,14 @@
             <artifactId>reactor-core</artifactId>
         </dependency>
 
-        <!-- 开发工具 -->
+        <!-- Development tools -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <optional>true</optional>
         </dependency>
 
-        <!-- JSON 序列化 -->
+        <!-- JSON serialization -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
@@ -101,7 +101,7 @@
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>2.2.0</version>
         </dependency>
-        <!-- 测试 -->
+        <!-- Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

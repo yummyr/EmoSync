@@ -11,8 +11,6 @@ import org.springframework.stereotype.Component;
  *
  * Converts JPA entities into API response DTOs.
  * Handles nested relations such as User and Session objects.
- *
- * @author system
  */
 @Component
 public class ConsultationConvert {
