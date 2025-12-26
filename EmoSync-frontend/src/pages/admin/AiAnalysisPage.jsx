@@ -42,6 +42,7 @@ const AiAnalysisPage = () => {
   const [username, setUsername] = useState("");
   const [failedOnly, setFailedOnly] = useState(false);
   const [retryableOnly, setRetryableOnly] = useState(false);
+  const [userId, setUserId] = useState(null);
 
   // Date range (two datetime-local inputs)
   const [dateRange, setDateRange] = useState({
@@ -79,7 +80,6 @@ const AiAnalysisPage = () => {
     return value;
   };
 
-  
   const formatDuration = (ms) => {
     if (!ms) return "-";
     if (ms < 1000) return `${ms}ms`;
@@ -129,19 +129,22 @@ const AiAnalysisPage = () => {
       case "AUTO":
         return {
           label: description || "Auto",
-          className: "bg-gradient-to-r from-blue-200 via-indigo-200 to-blue-400 text-blue-800 border border-slate-200",
+          className:
+            "bg-gradient-to-r from-blue-200 via-indigo-200 to-blue-400 text-blue-800 border border-slate-200",
           icon: faRobot,
         };
       case "MANUAL":
         return {
           label: description || "Manual",
-          className: "bg-gradient-to-r from-indigo-200 via-indigo-400 to-indigo-600 text-indigo-800 border border-indigo-200",
+          className:
+            "bg-gradient-to-r from-indigo-200 via-indigo-400 to-indigo-600 text-indigo-800 border border-indigo-200",
           icon: faHandPointer,
         };
       case "ADMIN":
         return {
           label: description || "Admin",
-          className: "bg-gradient-to-r from-orange-200 via-pink-200 to-pink-400 text-amber-800 border border-amber-200",
+          className:
+            "bg-gradient-to-r from-orange-200 via-pink-200 to-pink-400 text-amber-800 border border-amber-200",
           icon: faUserShield,
         };
       case "BATCH":
@@ -197,8 +200,8 @@ const AiAnalysisPage = () => {
 
   const fetchQueueStatistics = useCallback(async () => {
     try {
-      const res = await api.get("/ai-analysis-task/statistics", { params: {} });
-      const stats= res.data.data || {};
+      const res = await api.get("/ai-analysis-task/statistics");
+      const stats = res.data.data || {};
       console.log("Fetched queue statistics:", stats);
       setQueueStats((prev) => ({
         ...prev,
@@ -225,6 +228,7 @@ const AiAnalysisPage = () => {
       }
       console.log("priority :", priority);
       if (username.trim()) params.username = username.trim();
+      if (userId) params.userId = Number(userId);
       if (dateRange.start)
         params.startTime = toBackendDateTime(dateRange.start);
       if (dateRange.end) params.endTime = toBackendDateTime(dateRange.end);
@@ -251,7 +255,6 @@ const AiAnalysisPage = () => {
     failedOnly,
     retryableOnly,
   ]);
-
 
   useEffect(() => {
     // On mount + whenever dependencies change, fetch immediately
@@ -308,6 +311,7 @@ const AiAnalysisPage = () => {
     setTaskType("");
     setPriority("");
     setUsername("");
+    setUserId(null);
     setFailedOnly(false);
     setRetryableOnly(false);
     setDateRange({ start: "", end: "" });
@@ -648,7 +652,7 @@ const AiAnalysisPage = () => {
           {/* Username Search */}
           <div className="flex flex-col gap-1">
             <label className="text-xs font-medium text-slate-600">
-              User Search
+              User Name Search
             </label>
             <div className="relative w-56">
               <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 pointer-events-none">
@@ -659,6 +663,23 @@ const AiAnalysisPage = () => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Enter username..."
+                className="w-full border border-slate-200 rounded-md pl-9 pr-3 py-2 text-sm bg-slate-50 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:bg-white"
+              />
+            </div>
+          </div>
+
+          {/* User ID Search */}
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-slate-600">User ID Search</label>
+            <div className="relative w-56">
+              <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 pointer-events-none">
+                <FontAwesomeIcon icon={faSearch} />
+              </span>
+              <input
+                type="number"
+                value={userId ?? ""}
+                onChange={(e) => setUserId(e.target.value)}
+                placeholder="Enter User ID..."
                 className="w-full border border-slate-200 rounded-md pl-9 pr-3 py-2 text-sm bg-slate-50 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:bg-white"
               />
             </div>
@@ -778,16 +799,26 @@ const AiAnalysisPage = () => {
                     className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                   />
                 </th>
-                <th className="px-4 py-3 text-center   min-w-[100px]">Task ID</th>
-                <th className="px-4 py-3 text-center min-w-[120px]">Diary Info</th>
+                <th className="px-4 py-3 text-center   min-w-[100px]">
+                  Task ID
+                </th>
+                <th className="px-4 py-3 text-center min-w-[120px]">
+                  Diary Info
+                </th>
                 <th className="px-4 py-3 text-center min-w-[120px]">Status</th>
                 <th className="px-4 py-3 text-center min-w-[120px]">Type</th>
-                <th className="px-4 py-3 text-center min-w-[120px]">Priority</th>
-                <th className="px-4 py-3 text-center min-w-[120px]">Retry Info</th>
+                <th className="px-4 py-3 text-center min-w-[120px]">
+                  Priority
+                </th>
+                <th className="px-4 py-3 text-center min-w-[120px]">
+                  Retry Info
+                </th>
                 <th className="px-4 py-3 text-left min-w-[200px]">
                   Error Message
                 </th>
-                <th className="px-4 py-3 text-left w-56 min-w-[220px]">Time Info</th>
+                <th className="px-4 py-3 text-left w-56 min-w-[220px]">
+                  Time Info
+                </th>
                 <th className="px-4 py-3 text-center min-w-[120px]">Actions</th>
               </tr>
             </thead>
@@ -857,7 +888,7 @@ const AiAnalysisPage = () => {
                           <p className="diary-id font-semibold text-slate-800">
                             Diary ID: {row.diaryId ?? "-"}
                           </p>
-                         
+
                           <p className="user-info text-slate-500 mt-0.5 flex items-center gap-1">
                             <FontAwesomeIcon icon={faUser} />
                             <span>
@@ -959,7 +990,6 @@ const AiAnalysisPage = () => {
                           <button
                             type="button"
                             onClick={() => handleRetryTask(row)}
-                           
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-amber-500 text-white hover:bg-amber-600"
                           >
                             <FontAwesomeIcon icon={faRedo} />
