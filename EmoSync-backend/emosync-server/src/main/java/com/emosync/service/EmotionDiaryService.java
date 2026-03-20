@@ -8,7 +8,7 @@ import com.emosync.DTO.response.EmotionDiaryStatisticsDTO;
 import com.emosync.Result.PageResult;
 import com.emosync.enumClass.AiTaskType;
 import org.springframework.stereotype.Service;
-import com.emosync.AiService.AiStructuredOutput;
+import com.emosync.ai.AiStructuredOutput;
 
 import java.time.LocalDate;
 

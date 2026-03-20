@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import com.emosync.AiService.PsychologicalSupportService;
+import com.emosync.service.serviceImpl.PsychologicalSupportService;
 import com.emosync.DTO.command.ConsultationSessionCreateDTO;
 import com.emosync.DTO.query.ConsultationSessionQueryDTO;
 import com.emosync.DTO.response.ConsultationMessageResponseDTO;
@@ -24,7 +24,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
-import com.emosync.AiService.AiStructuredOutput;
+import com.emosync.ai.AiStructuredOutput;
 
 import java.time.Duration;
 import java.time.Instant;

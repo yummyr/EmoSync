@@ -1,4 +1,4 @@
-package com.emosync.AiService;
+package com.emosync.ai;
 
 import com.emosync.entity.*;
 import com.emosync.repository.*;

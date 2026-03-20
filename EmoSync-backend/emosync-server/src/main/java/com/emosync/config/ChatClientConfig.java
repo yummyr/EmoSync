@@ -1,6 +1,6 @@
 package com.emosync.config;
 
-import com.emosync.AiService.Tools;
+import com.emosync.ai.Tools;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;

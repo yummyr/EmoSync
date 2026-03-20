@@ -20,7 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import com.emosync.AiService.AiStructuredOutput;
+import com.emosync.ai.AiStructuredOutput;
 
 import java.time.LocalDate;
 import java.util.List;

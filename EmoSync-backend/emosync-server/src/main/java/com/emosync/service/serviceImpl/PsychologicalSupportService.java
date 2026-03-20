@@ -1,7 +1,9 @@
-package com.emosync.AiService;
+package com.emosync.service.serviceImpl;
 
 import com.emosync.DTO.command.ConsultationSessionCreateDTO;
 import com.emosync.DTO.response.ConsultationMessageResponseDTO;
+import com.emosync.ai.AiStructuredOutput;
+import com.emosync.ai.PromptManager;
 import com.emosync.entity.ConsultationSession;
 import com.emosync.service.ConsultationMessageService;
 import com.emosync.service.ConsultationSessionService;
@@ -165,7 +167,7 @@ public class PsychologicalSupportService {
 
                 // Add system prompt
                 allMessages.add(new SystemMessage(
-                        PromptManage.PSYCHOLOGICAL_SUPPORT_SYSTEM_PROMPT
+                        PromptManager.PSYCHOLOGICAL_SUPPORT_SYSTEM_PROMPT
                 ));
 
                 // Add historical messages
@@ -370,7 +372,7 @@ public class PsychologicalSupportService {
 
         try {
             List<Message> messages = new ArrayList<>();
-            messages.add(new SystemMessage(PromptManage.EMOTION_ANALYSIS_SYSTEM_PROMPT));
+            messages.add(new SystemMessage(PromptManager.EMOTION_ANALYSIS_SYSTEM_PROMPT));
             messages.add(new UserMessage(
                     "Please quickly analyze the emotional state of the following content:\n" + content
             ));

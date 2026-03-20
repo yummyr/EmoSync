@@ -1,4 +1,4 @@
-package com.emosync.AiService;
+package com.emosync.ai;
 
 import java.util.List;
 

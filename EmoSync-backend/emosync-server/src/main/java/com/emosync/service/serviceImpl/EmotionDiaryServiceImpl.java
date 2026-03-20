@@ -1,7 +1,7 @@
 package com.emosync.service.serviceImpl;
 
 
-import com.emosync.AiService.AiStructuredOutput;
+import com.emosync.ai.AiStructuredOutput;
 import com.emosync.DTO.command.EmotionDiaryCreateDTO;
 import com.emosync.DTO.command.EmotionDiaryUpdateDTO;
 import com.emosync.DTO.query.EmotionDiaryQueryDTO;
@@ -15,7 +15,6 @@ import com.emosync.repository.EmotionDiaryRepository;
 import com.emosync.security.UserDetailsImpl;
 import com.emosync.service.AiAnalysisTaskService;
 import com.emosync.service.EmotionDiaryService;
-import com.emosync.AiService.PsychologicalSupportService;
 import com.emosync.service.convert.EmotionDiaryConvert;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

@@ -1,9 +1,9 @@
-package com.emosync.AiService;
+package com.emosync.ai;
 
 
 import com.emosync.enumClass.EmotionTypeEnum;
 
-public class PromptManage {
+public class PromptManager {
 
     /**
      * Emotion analysis system prompt
