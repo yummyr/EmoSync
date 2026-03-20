@@ -68,8 +68,8 @@ public class PsychologicalSupportService {
     /**
      * Start a new psychological support session.
      */
-    public StructOutPut.StreamChatSession startChatSession(Long userId,
-                                                           ConsultationSessionCreateDTO createDTO) {
+    public AiStructuredOutput.StreamChatSession startChatSession(Long userId,
+                                                                 ConsultationSessionCreateDTO createDTO) {
         log.info("Starting new psychological support session, userId={}", userId);
 
         try {
@@ -89,8 +89,8 @@ public class PsychologicalSupportService {
             String conversationId = generateConversationId(sessionId);
 
             // 4. Build response session object
-            StructOutPut.StreamChatSession session =
-                    new StructOutPut.StreamChatSession(
+            AiStructuredOutput.StreamChatSession session =
+                    new AiStructuredOutput.StreamChatSession(
                             sessionId,
                             userId,
                             createDTO.getInitialMessage(),
@@ -158,7 +158,7 @@ public class PsychologicalSupportService {
                 );
 
                 // 5. ✅ Get historical messages from ChatMemory
-                List<Message> historyMessages = chatMemory.get(conversationId, 10);
+                List<Message> historyMessages = chatMemory.get(conversationId);
 
                 // 6. ✅ Build complete message list
                 List<Message> allMessages = new ArrayList<>();
@@ -182,9 +182,9 @@ public class PsychologicalSupportService {
                 // 8. ✅ Create Prompt object
                 Prompt prompt = new Prompt(allMessages,
                         OpenAiChatOptions.builder()
-                                .withModel(model)  // or your configured model
-                                .withTemperature(PROMPT_TEMPERATURE)
-                                .withMaxTokens(MAX_TOKENS)
+                                .model(model)  // or your configured model
+                                .temperature(PROMPT_TEMPERATURE)
+                                .maxTokens(MAX_TOKENS)
                                 .build()
                 );
 
@@ -198,8 +198,8 @@ public class PsychologicalSupportService {
                                     chatResponse.getResult().getOutput() != null) {
                                 String content = chatResponse.getResult()
                                         .getOutput()
-                                        .getContent();
-                                if (content != null) {
+                                        .getText();
+                                if (content != null && !content.isEmpty()) {
                                     return Flux.just(content);
                                 }
 
@@ -345,8 +345,8 @@ public class PsychologicalSupportService {
     /**
      * Default emotion analysis result
      */
-    public StructOutPut.EmotionAnalysisResult getDefaultEmotionAnalysis() {
-        return new StructOutPut.EmotionAnalysisResult(
+    public AiStructuredOutput.EmotionAnalysisResult getDefaultEmotionAnalysis() {
+        return new AiStructuredOutput.EmotionAnalysisResult(
                 "Neutral",
                 50,
                 false,
@@ -365,7 +365,7 @@ public class PsychologicalSupportService {
     /**
      * Quick emotion analysis using LLM
      */
-    public StructOutPut.EmotionAnalysisResult analyzeUserEmotion(String content) {
+    public AiStructuredOutput.EmotionAnalysisResult analyzeUserEmotion(String content) {
         log.info("Starting quick emotion analysis");
 
         try {
@@ -378,13 +378,13 @@ public class PsychologicalSupportService {
             Prompt prompt = new Prompt(messages);
 
             ChatResponse response = openAiChatModel.call(prompt);
-            String resultJson = response.getResult().getOutput().getContent();
+            String resultJson = response.getResult().getOutput().getText();
             String cleanedJson = cleanJsonString(resultJson);
             log.debug("Cleaned emotion JSON: {}", cleanedJson);
 
             // Parse JSON response to EmotionAnalysisResult
-            StructOutPut.EmotionAnalysisResult result =
-                    objectMapper.readValue(cleanedJson, StructOutPut.EmotionAnalysisResult.class);
+            AiStructuredOutput.EmotionAnalysisResult result =
+                    objectMapper.readValue(cleanedJson, AiStructuredOutput.EmotionAnalysisResult.class);
 
             log.info("Emotion analysis done: emotion={}, riskLevel={}",
                     result.primaryEmotion(), result.riskLevel());
@@ -402,7 +402,7 @@ public class PsychologicalSupportService {
         try {
             log.info("Running async emotion analysis, sessionId={}", dbSessionId);
 
-            StructOutPut.EmotionAnalysisResult emotionAnalysis =
+            AiStructuredOutput.EmotionAnalysisResult emotionAnalysis =
                     analyzeUserEmotion(userMessage);
 
             // Build JSON using Jackson

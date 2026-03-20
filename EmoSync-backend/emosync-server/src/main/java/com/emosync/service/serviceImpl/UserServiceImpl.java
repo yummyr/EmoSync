@@ -79,7 +79,7 @@ public class UserServiceImpl implements UserService {
 
     /** Register */
     @Override
-    public UserDetailResponseDTO register(UserRegisterCommandDTO dto) {
+    public UserDetailResponseDTO register(UserRegisterCommandDTO dto, String avatarUrl) {
         // Check if username exists
         if (userRepository.existsByUsername(dto.getUsername())) {
             throw new BusinessException("Username already exists");
@@ -93,6 +93,12 @@ public class UserServiceImpl implements UserService {
         // Use UserConvert to create user entity
         String encodedPassword = passwordEncoder.encode(dto.getPassword());
         User user = UserConvert.registerCommandToEntity(dto, encodedPassword);
+
+        // Set avatar URL if provided
+        if (avatarUrl != null && !avatarUrl.isEmpty()) {
+            user.setAvatar(avatarUrl);
+            log.info("Avatar URL set for user: {}", avatarUrl);
+        }
 
         userRepository.save(user);
         log.info("User registration successful: userId={}, username={}", user.getId(), user.getUsername());

@@ -8,7 +8,7 @@ import com.emosync.DTO.response.EmotionDiaryStatisticsDTO;
 import com.emosync.Result.PageResult;
 import com.emosync.enumClass.AiTaskType;
 import org.springframework.stereotype.Service;
-import com.emosync.AiService.StructOutPut;
+import com.emosync.AiService.AiStructuredOutput;
 
 import java.time.LocalDate;
 
@@ -31,7 +31,7 @@ public interface EmotionDiaryService {
 
     EmotionDiaryStatisticsDTO getStatistics(Long userId, Integer days);
 
-    StructOutPut.EmotionAnalysisResult getAiEmotionAnalysis(Long diaryId);
+    AiStructuredOutput.EmotionAnalysisResult getAiEmotionAnalysis(Long diaryId);
 
     CompletableFuture<Void> performAiEmotionAnalysisAsync(Long diaryId, String diaryContent, AiTaskType taskType, Integer priority);
 

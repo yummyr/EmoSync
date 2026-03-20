@@ -13,7 +13,7 @@ public interface UserService {
 
     UserLoginResponseDTO login(UserLoginCommandDTO dto);
 
-    UserDetailResponseDTO register(UserRegisterCommandDTO dto);
+    UserDetailResponseDTO register(UserRegisterCommandDTO dto, String avatarUrl);
 
     UserDetailResponseDTO getUserById(Long id);
 

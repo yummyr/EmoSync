@@ -66,15 +66,9 @@
         <!-- Spring AI (e.g., deepseek / openai / ollama) -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-openai</artifactId>
+            <artifactId>spring-ai-starter-model-openai</artifactId>
         </dependency>
 
-
-        <!-- Spring AI Memory (ChatMemory) -->
-        <dependency>
-            <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-core</artifactId>
-        </dependency>
 
         <!-- Reactor Core -->
         <dependency>
@@ -112,6 +106,11 @@
             <artifactId>lombok</artifactId>
             <version>1.18.28</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-model</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
         </dependency>
 
     </dependencies>

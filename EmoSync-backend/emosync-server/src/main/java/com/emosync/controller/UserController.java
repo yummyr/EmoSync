@@ -8,6 +8,7 @@ import com.emosync.Result.Result;
 import com.emosync.Result.PageResult;
 import com.emosync.security.UserDetailsImpl;
 import com.emosync.service.UserService;
+import com.emosync.service.SimpleFileService;
 
 import com.emosync.util.JwtTokenUtils;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,6 +45,7 @@ public class UserController {
 
     private final UserService userService;
     private final JwtTokenUtils jwtTokenUtils;
+    private final SimpleFileService simpleFileService;
 
 
     /** Get current authenticated UserDetailsImpl */
@@ -102,10 +105,27 @@ public class UserController {
 
     /** User Registration */
     @Operation(summary = "User Registration")
-    @PostMapping("/add")
-    public Result<UserDetailResponseDTO> register(@Valid @RequestBody UserRegisterCommandDTO registerDTO) {
+    @PostMapping(value = "/add", consumes = "multipart/form-data")
+    public Result<UserDetailResponseDTO> register(
+            @RequestPart("registerData") @Valid UserRegisterCommandDTO registerDTO,
+            @RequestPart(value = "avatar", required = false) MultipartFile avatarFile) {
         log.info("Register request: {}", registerDTO.getUsername());
-        UserDetailResponseDTO response = userService.register(registerDTO);
+
+        // If avatar file is provided, upload it to Cloudinary first
+        String avatarUrl = null;
+        if (avatarFile != null && !avatarFile.isEmpty()) {
+            log.info("Avatar file provided: {}", avatarFile.getOriginalFilename());
+            Result<String> uploadResult = simpleFileService.uploadImage(avatarFile);
+            if (uploadResult.isSuccess()) {
+                avatarUrl = uploadResult.getData();
+                log.info("Avatar uploaded successfully: {}", avatarUrl);
+            } else {
+                log.warn("Avatar upload failed: {}", uploadResult.getMessage());
+                return Result.error("Avatar upload failed: " + uploadResult.getMessage());
+            }
+        }
+
+        UserDetailResponseDTO response = userService.register(registerDTO, avatarUrl);
         return Result.success("Registration successful", response);
     }
 

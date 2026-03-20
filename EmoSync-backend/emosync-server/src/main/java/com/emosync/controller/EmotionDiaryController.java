@@ -20,7 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import com.emosync.AiService.StructOutPut;
+import com.emosync.AiService.AiStructuredOutput;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -300,7 +300,7 @@ public class EmotionDiaryController {
      */
     @Operation(summary = "Get AI emotion analysis result", description = "Get AI emotion analysis result for specified diary")
     @GetMapping("/{id}/ai-analysis")
-    public Result<StructOutPut.EmotionAnalysisResult> getAiEmotionAnalysis(
+    public Result<AiStructuredOutput.EmotionAnalysisResult> getAiEmotionAnalysis(
             @Parameter(description = "Diary ID") @PathVariable Long id) {
         log.info("Received get AI emotion analysis request, diary ID: {}", id);
 
@@ -318,7 +318,7 @@ public class EmotionDiaryController {
             }
 
             // Get AI analysis result
-            StructOutPut.EmotionAnalysisResult analysisResult = emotionDiaryService.getAiEmotionAnalysis(id);
+            AiStructuredOutput.EmotionAnalysisResult analysisResult = emotionDiaryService.getAiEmotionAnalysis(id);
             if (analysisResult == null) {
                 return Result.error("AI emotion analysis result not yet generated, please try again later");
             }

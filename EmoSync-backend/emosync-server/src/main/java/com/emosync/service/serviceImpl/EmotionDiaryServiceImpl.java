@@ -1,7 +1,7 @@
 package com.emosync.service.serviceImpl;
 
 
-import com.emosync.AiService.StructOutPut;
+import com.emosync.AiService.AiStructuredOutput;
 import com.emosync.DTO.command.EmotionDiaryCreateDTO;
 import com.emosync.DTO.command.EmotionDiaryUpdateDTO;
 import com.emosync.DTO.query.EmotionDiaryQueryDTO;
@@ -207,7 +207,7 @@ public class EmotionDiaryServiceImpl implements EmotionDiaryService {
     }
 
     @Override
-    public StructOutPut.EmotionAnalysisResult getAiEmotionAnalysis(Long diaryId) {
+    public AiStructuredOutput.EmotionAnalysisResult getAiEmotionAnalysis(Long diaryId) {
         EmotionDiary diary = emotionDiaryRepository.findById(diaryId)
                 .orElseThrow(() -> new BusinessException("Diary not found"));
 
@@ -218,7 +218,7 @@ public class EmotionDiaryServiceImpl implements EmotionDiaryService {
         }
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.readValue(aiAnalysisJson, StructOutPut.EmotionAnalysisResult.class);
+            return objectMapper.readValue(aiAnalysisJson, AiStructuredOutput.EmotionAnalysisResult.class);
         } catch (Exception e) {
             log.error("Failed to parse AI emotion analysis result, diary ID: {}, JSON: {}, error: {}", diaryId, aiAnalysisJson, e.getMessage());
             throw new BusinessException("Failed to parse AI analysis result");
@@ -275,7 +275,7 @@ public class EmotionDiaryServiceImpl implements EmotionDiaryService {
                 analysisContent.append("Diary Content: ").append(diaryContent);
 
                 // Call AI analysis service
-                StructOutPut.EmotionAnalysisResult analysisResult =
+                AiStructuredOutput.EmotionAnalysisResult analysisResult =
                         psychologicalSupportService.analyzeUserEmotion(analysisContent.toString());
 
                 if (analysisResult != null) {

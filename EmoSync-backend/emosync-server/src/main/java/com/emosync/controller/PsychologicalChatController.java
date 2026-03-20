@@ -16,7 +16,6 @@ import com.emosync.DTO.response.ConsultationMessageResponseDTO;
 import com.emosync.DTO.response.ConsultationSessionResponseDTO;
 import com.emosync.Result.Result;
 import com.emosync.entity.ConsultationSession;
-import com.emosync.enumClass.UserType;
 import com.emosync.service.ConsultationMessageService;
 import com.emosync.service.ConsultationSessionService;
 import org.springframework.http.MediaType;
@@ -25,7 +24,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
-import com.emosync.AiService.StructOutPut;
+import com.emosync.AiService.AiStructuredOutput;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -96,7 +95,7 @@ public class PsychologicalChatController {
                 return Result.error("User not logged in");
             }
 
-            StructOutPut.StreamChatSession session =
+            AiStructuredOutput.StreamChatSession session =
                     psychologicalSupportService.startChatSession(userId, createDTO);
 
             log.info("Psychological support session created successfully, sessionId: {}",
@@ -219,7 +218,7 @@ public class PsychologicalChatController {
      */
     @Operation(summary = "Get Session Emotion", description = "Get the latest emotion analysis for a session")
     @GetMapping("/session/{sessionId}/emotion")
-    public Result<StructOutPut.EmotionAnalysisResult> getSessionEmotion(
+    public Result<AiStructuredOutput.EmotionAnalysisResult> getSessionEmotion(
             @PathVariable String sessionId) {
         log.info("Getting session emotion, sessionId: {}", sessionId);
 
@@ -243,7 +242,7 @@ public class PsychologicalChatController {
                 return Result.error("Unauthorized access to this session");
             }
 
-            StructOutPut.EmotionAnalysisResult emotionResult =
+            AiStructuredOutput.EmotionAnalysisResult emotionResult =
                     parseEmotionAnalysis(session.getLastEmotionAnalysis());
 
             log.info("Successfully retrieved session emotion: {}, riskLevel: {}",
@@ -487,7 +486,7 @@ public class PsychologicalChatController {
     /**
      * Parse emotion analysis JSON to EmotionAnalysisResult
      */
-    private StructOutPut.EmotionAnalysisResult parseEmotionAnalysis(String jsonString) {
+    private AiStructuredOutput.EmotionAnalysisResult parseEmotionAnalysis(String jsonString) {
         if (jsonString == null || jsonString.trim().isEmpty()) {
             return psychologicalSupportService.getDefaultEmotionAnalysis();
         }
@@ -495,7 +494,7 @@ public class PsychologicalChatController {
         try {
             Map<String, Object> emotionMap = objectMapper.readValue(jsonString, Map.class);
 
-            return new StructOutPut.EmotionAnalysisResult(
+            return new AiStructuredOutput.EmotionAnalysisResult(
                     (String) emotionMap.getOrDefault("primaryEmotion", "Neutral"),
                     ((Number) emotionMap.getOrDefault("emotionScore", 50)).intValue(),
                     (Boolean) emotionMap.getOrDefault("isNegative", false),
