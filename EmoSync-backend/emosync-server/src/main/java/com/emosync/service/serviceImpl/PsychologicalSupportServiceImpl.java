@@ -7,6 +7,7 @@ import com.emosync.ai.PromptManager;
 import com.emosync.entity.ConsultationSession;
 import com.emosync.service.ConsultationMessageService;
 import com.emosync.service.ConsultationSessionService;
+import com.emosync.service.PsychologicalSupportService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +36,7 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class PsychologicalSupportService {
+public class PsychologicalSupportServiceImpl implements PsychologicalSupportService {
     private int MAX_TOKENS = 2000;
     private double PROMPT_TEMPERATURE = 0.7;
 
@@ -311,14 +312,14 @@ public class PsychologicalSupportService {
     /**
      * Generate conversation id for ChatMemory
      */
-    private String generateConversationId(String sessionId) {
+    public String generateConversationId(String sessionId) {
         return "conversation_" + sessionId;
     }
 
     /**
      * Save user message if not duplicate
      */
-    private void saveUserMessageIfNeeded(Long dbSessionId, String userMessage) {
+    public void saveUserMessageIfNeeded(Long dbSessionId, String userMessage) {
         try {
             Integer messageCount =
                     consultationMessageService.getMessageCountBySessionId(dbSessionId);
@@ -400,7 +401,7 @@ public class PsychologicalSupportService {
     /**
      * Run emotion analysis asynchronously
      */
-    private void runAsyncEmotionAnalysis(Long dbSessionId, String userMessage) {
+    public void runAsyncEmotionAnalysis(Long dbSessionId, String userMessage) {
         try {
             log.info("Running async emotion analysis, sessionId={}", dbSessionId);
 
@@ -450,7 +451,7 @@ public class PsychologicalSupportService {
     }
 
     // Clean markdown code blocks, backticks, etc., keep pure JSON
-    private String cleanJsonString(String text) {
+    public String cleanJsonString(String text) {
         if (text == null) return "";
 
         return text

@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import com.emosync.service.serviceImpl.PsychologicalSupportService;
+import com.emosync.service.serviceImpl.PsychologicalSupportServiceImpl;
 import com.emosync.DTO.command.ConsultationSessionCreateDTO;
 import com.emosync.DTO.query.ConsultationSessionQueryDTO;
 import com.emosync.DTO.response.ConsultationMessageResponseDTO;
@@ -44,7 +44,7 @@ import java.util.Map;
 public class PsychologicalChatController {
 
 
-    private final PsychologicalSupportService psychologicalSupportService;
+    private final PsychologicalSupportServiceImpl psychologicalSupportService;
 
 
     private final ConsultationSessionService consultationSessionService;

@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EmotionDiaryServiceImpl implements EmotionDiaryService {
     private final EmotionDiaryRepository emotionDiaryRepository;
-    private final PsychologicalSupportService psychologicalSupportService;
+    private final PsychologicalSupportServiceImpl psychologicalSupportService;
     private final AiAnalysisTaskService aiAnalysisTaskService;
 
     /**
